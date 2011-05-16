@@ -72,14 +72,14 @@ public class LoadData {
 			// System.exit(-1);
 		}
 		
+		setProperties();
+		
 		if (args.length > 0) filename = args[0];
 		if (args.length > 1) dbHost = args[1];
 		if (args.length > 2) dbName = args[2];
 		if (args.length > 3) imageDirectoryPath = args[3];
 		if (args.length > 4) debug = "debug".equals(args[4]);
 
-		setProperties();
-		
 		System.out.println("excel file is: " + filename);
 		System.out.println("log file is : " + logFile);
 		System.out.println("db host is: " + dbHost);
