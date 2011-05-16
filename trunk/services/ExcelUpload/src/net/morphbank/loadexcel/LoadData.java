@@ -27,11 +27,14 @@ package net.morphbank.loadexcel;
 /////////////////////////////////////////////////////////////////
 
 import java.io.BufferedWriter;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.sql.Statement;
+import java.util.Properties;
 import java.util.Vector;
 
 public class LoadData {
@@ -43,6 +46,11 @@ public class LoadData {
 	private static SheetReader sheetReader;
 	private static CheckNameTable checkNames;
 	private static ExternalLinks externalLinks;
+	private static String dbHost = "morphbank11.sc.fsu.edu";
+	private static String dbName = "MB32test";
+	private static String dbUserId = "";
+	private static String dbPassword = "";
+	private static String imageDirectoryPath;
 
 	public static void main(String args[]) {
 
@@ -51,28 +59,27 @@ public class LoadData {
 		Charset charSet = Charset.defaultCharset();
 		System.out.println("default charset: " + charSet.displayName());
 		String filename = "";
-		String imageDirectoryPath;
+		
 //		String dbHost = "dev.morphbank.net";
-		String dbHost = "morphbank11.sc.fsu.edu";
-		String dbName = "MB32test";
-		String dbUserId = "";
-		String dbPassword = "";
 		// filename = "C:/dev/java31/lib/Morphbank_MS2_p1Deb.xls";
 		// filename = "C:/dev/java2008/testutf8a.xls";
 //		filename = "/usr/local/dev/morphbank/upload/mb3a_current.xls";
 		filename = "/usr/local/dev/morphbank/upload/mb3a_Lambkin.xls";
-		imageDirectoryPath = "../Camellia/";
+//		imageDirectoryPath = "../Camellia/";
 		if (args.length == 0) {
 			System.out.println("usage: java net.morphbank.loadexcel.LoadData.java filename"
 					+ " [dbhost] [dbname] [imagepath] [debug]");
 			// System.exit(-1);
 		}
+		
 		if (args.length > 0) filename = args[0];
 		if (args.length > 1) dbHost = args[1];
 		if (args.length > 2) dbName = args[2];
 		if (args.length > 3) imageDirectoryPath = args[3];
 		if (args.length > 4) debug = "debug".equals(args[4]);
 
+		setProperties();
+		
 		System.out.println("excel file is: " + filename);
 		System.out.println("log file is : " + logFile);
 		System.out.println("db host is: " + dbHost);
@@ -208,4 +215,21 @@ public class LoadData {
 	public static ExternalLinks getExternalLinks() {
 		return externalLinks;
 	}
+	
+	public static void setProperties() {
+		Properties prop = new Properties();
+		try {
+			prop.load(new FileInputStream("loadData.properties"));
+			dbHost = prop.getProperty("dbhost");
+			dbName = prop.getProperty("dbname");
+			dbUserId = prop.getProperty("login");
+			dbPassword = prop.getProperty("password");
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+	}
+	
 }
