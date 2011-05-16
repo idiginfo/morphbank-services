@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/WebClientTools"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/WebTools"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/XmlTools"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/ServletTools"/>
+	<classpathentry kind="lib" path="/usr/share/extlib/jxl.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/FlickrjAPI"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/MorphbankCore"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/MorphbankRdfCore"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
