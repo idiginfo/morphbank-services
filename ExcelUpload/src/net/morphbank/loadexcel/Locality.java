@@ -73,8 +73,10 @@ public class Locality {
 //			updater.addNumericMatchColumn(8, row, "maximumElevation");
 //			updater.addNumericMatchColumn(9, row, "minimumDepth");
 //			updater.addNumericMatchColumn(10, row, "maximumDepth");
-			updater.addDescrMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "Continent Ocean"), row, "continentOcean", "ContinentOcean");
-			updater.addDescrMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "Country"), row, "country", "Country");
+			//updater.addDescrMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "Continent Ocean"), row, "continentOcean", "ContinentOcean");
+			updater.addStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "Continent"), row, "continent");
+			updater.addStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "Water Body"), row, "ocean");
+			updater.addStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "Country"), row, "country");
 			updater.addStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "Locality Description"), row, "locality");
 			updater.addLatLongMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "Latitude"), row, "latitude");
 			updater.addLatLongMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "Longitude"), row, "longitude");
@@ -128,9 +130,9 @@ public class Locality {
 		}
 	}
 
-	public static int getLocality(String localityRef) {
+	public static Integer getLocality(String localityRef) {
 		Integer viewId = localityIds.get(localityRef);
-		if (viewId == null) return 0;
+		if (viewId == null) return null;
 		return viewId;
 	}
 }
