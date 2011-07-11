@@ -18,6 +18,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
+import java.net.URL;
+import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 
@@ -107,34 +109,43 @@ public class RestService extends javax.servlet.http.HttpServlet implements javax
 		MorphbankConfig.SYSTEM_LOGGER.info("<!-- filepath: " + MorphbankConfig.getFilepath()
 				+ " -->");
 		boolean isMultipart = ServletFileUpload.isMultipartContent(request);
+		
 		FileItemFactory factory = new DiskFileItemFactory();
 		ServletFileUpload upload = new ServletFileUpload(factory);
-		// response.setContentType("text/html");
+//		response.setContentType("text/html");
 
-		try {
-			// Process the uploaded items
-			List<?> /* FileItem */items = upload.parseRequest(request);
-			Iterator<?> iter = items.iterator();
-			while (iter.hasNext()) {
-				FileItem item = (FileItem) iter.next();
+		String parameter = request.getParameter("uploadxml");
+		if(parameter != null) {
+			String fileLocation = request.getRequestURL().toString().replaceFirst(request.getRequestURI(), request.getContextPath() + "/" + parameter);
+			URL fileURL = new URL(fileLocation);
+			processRequest(fileURL.openStream(), out, request.getParameter("fileName"));
+		}
+		else {
+			try {
+				// Process the uploaded items
+				List<?> /* FileItem */items = upload.parseRequest(request);
+				Iterator<?> iter = items.iterator();
+				while (iter.hasNext()) {
+					FileItem item = (FileItem) iter.next();
 
-				if (item.isFormField()) {
-					// processFormField(item);
-				} else {
-					// processUploadedFile(item);
-					String paramName = item.getFieldName();
-					String fileName = item.getName();
-					InputStream stream = item.getInputStream();
-					// Reader reader = new InputStreamReader(stream);
-					// if ("uploadFile".equals(paramName)) {
-					MorphbankConfig.SYSTEM_LOGGER.info("Processing file " + fileName);
-					processRequest(stream, out, fileName);
-					MorphbankConfig.SYSTEM_LOGGER.info("Processing complete");
-					// }
+					if (item.isFormField()) {
+						// processFormField(item);
+					} else {
+						// processUploadedFile(item);
+						String paramName = item.getFieldName();
+						String fileName = item.getName();
+						InputStream stream = item.getInputStream();
+						// Reader reader = new InputStreamReader(stream);
+						// if ("uploadFile".equals(paramName)) {
+						MorphbankConfig.SYSTEM_LOGGER.info("Processing file " + fileName);
+						processRequest(stream, out, fileName);
+						MorphbankConfig.SYSTEM_LOGGER.info("Processing complete");
+						// }
+					}
 				}
+			} catch (FileUploadException e) {
+				e.printStackTrace();
 			}
-		} catch (FileUploadException e) {
-			e.printStackTrace();
 		}
 	}
 
