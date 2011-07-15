@@ -38,4 +38,6 @@ public interface FieldMapper {
 	
 	public int getCurrentLineNumber();
 
+	public String getValueFormula(String fieldName);
+
 }

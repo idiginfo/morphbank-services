@@ -15,6 +15,7 @@ import java.io.File;
 
 import jxl.Cell;
 import jxl.Sheet;
+import jxl.StringFormulaCell;
 import jxl.Workbook;
 
 public class XlsFieldMapper implements FieldMapper {
@@ -80,7 +81,22 @@ public class XlsFieldMapper implements FieldMapper {
 		fieldName = fieldName.toLowerCase();
 		for (int i = 0; i < headers.length; i++) {
 			if (fieldName.equals(headers[i])) {
-				String test = getValue(i);
+				return getValue(i);
+			}
+		}
+		return "";
+	}
+	
+	@Override
+	public String getValueFormula(String fieldName) {
+		fieldName = fieldName.toLowerCase();
+		for (int i = 0; i < headers.length; i++) {
+			if (fieldName.equals(headers[i])) {
+				String test = views.getCell(i, currentLine).getType().toString();
+				if (views.getCell(i, currentLine).getType().toString().equalsIgnoreCase("String Formula")) {
+					StringFormulaCell formulaCell = (StringFormulaCell) views.getCell(i, currentLine);
+					return formulaCell.getContents();
+				}
 				return getValue(i);
 			}
 		}
@@ -122,4 +138,6 @@ public class XlsFieldMapper implements FieldMapper {
 	public Sheet getLinks() {
 		return links;
 	}
+
+
 }

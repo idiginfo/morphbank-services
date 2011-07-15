@@ -86,7 +86,7 @@ public class TextFieldMapper implements FieldMapper {
 				return strip(values[i]);
 			}
 		}
-		return null;
+		return "";
 	}
 
 	private void getFieldNames(String line) {
@@ -161,6 +161,11 @@ public class TextFieldMapper implements FieldMapper {
 	
 	@Override
 	public Cell getValueDate(String fieldName) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	@Override
+	public String getValueFormula(String fieldName) {
 		// TODO Auto-generated method stub
 		return null;
 	}
