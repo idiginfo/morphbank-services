@@ -381,8 +381,10 @@ public class MapSpecimen extends MapObjectBase {
 
 			specimen.setTaxon(Taxon.getTaxon(0));
 			// TODO add note in status field of response
-			responseObject.addStatus("No determination found for " + determinationId.getFirstExternal()
-					+ ", assigned Life");
+			if (responseObject != null) {
+				responseObject.addStatus("No determination found for " + determinationId.getFirstExternal()
+						+ ", assigned Life");
+			}
 			xmlMapper.reportSuccess(xmlObject, (IdObject) xmlObject.getTaxon()); 
 		}
 		// TODO calculate number of images
