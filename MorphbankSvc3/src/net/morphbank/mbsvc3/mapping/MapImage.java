@@ -169,6 +169,9 @@ public class MapImage extends MapObjectBase {
 		xmlObject.setWidth(image.getImageWidth());
 		xmlObject.setCreativeCommons(image.getCreativeCommons());
 		xmlObject.setPhotographer(image.getPhotographer());
+		if (image != null && image.getEol() == 1) {
+			xmlObject.setEol("yes");
+		}
 		return true;
 	}
 
