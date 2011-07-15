@@ -51,12 +51,11 @@ public class MapSheetImage {
 		xmlImage.setOriginalFileName(originalFileName);
 		xmlImage.addUserProperty("imageUrl", image.getValue("imageURL"));
 		xmlImage.setImageType(getImageType(originalFileName));
-		xmlImage.setCreativeCommons(image.getValue("Creative Commons"));
+		xmlImage.setCreativeCommons(image.getValueFormula("Creative Commons"));
 		xmlImage.setPhotographer(image.getValue("Photographer"));
 		xmlImage.setCopyrightText(image.getValue("Copyright"));
-		String test = image.getValue("For Eol");
-		if (image.getValue("For Eol").equalsIgnoreCase("yes")) {
-			xmlImage.setEol(image.getValue("For Eol")); 
+		if (image.getValue("Encyclopedia of Life").equalsIgnoreCase("yes")) {
+			xmlImage.setEol(image.getValue("Encyclopedia of Life")); 
 		}
 		              
 		// TODO add user properties and ext links as necessary

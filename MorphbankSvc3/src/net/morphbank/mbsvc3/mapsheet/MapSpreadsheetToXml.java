@@ -117,8 +117,10 @@ public class MapSpreadsheetToXml {
 			if (origFileName.length() > 0) {
 				if (fieldMapper.getValue(VIEW_MORPHBANK_ID_FIELD).equalsIgnoreCase("")){
 					XmlBaseObject xmlView = createXmlView(spreadSheetLineNumber);
-					xmlView.setOwner(this.contributor);
-					insert.getXmlObjectList().add(xmlView);
+					if (xmlView != null) {
+						xmlView.setOwner(this.contributor);
+						insert.getXmlObjectList().add(xmlView);
+					}
 				}
 				//switched image and specimen order
 				XmlBaseObject xmlImage = createXmlImage(spreadSheetLineNumber);
@@ -216,6 +218,7 @@ public class MapSpreadsheetToXml {
 		MapSheetView imageMapper = new MapSheetView(fieldMapper);
 		xmlView = new XmlBaseObject("View");
 		imageMapper.setXmlViewFields(xmlView);
+		if (xmlView.getName().equalsIgnoreCase("//////")) return null;
 		// xmlView.addDescription(xmlView.getDescription() +
 		// " From spreadsheet line " + lineNumber);
 		addLocalId(xmlView);
