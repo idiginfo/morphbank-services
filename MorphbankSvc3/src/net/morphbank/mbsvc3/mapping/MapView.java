@@ -176,7 +176,6 @@ public class MapView extends MapObjectBase {
 				// set the standard image after the image is created!
 				standardImage = (Image) related;
 			}
-			
 		}
 		if (view != null && view.getImages() != null) {
 			Iterator<Image> images = view.getImages().iterator();
