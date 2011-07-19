@@ -80,15 +80,18 @@ public class View {
 //			updater.addNamedMatchColumn(7, row, "sex", "Sex");
 //			updater.addNamedMatchColumn(8, row, "form", "Form");
 //			updater.addStringColumn("viewName", viewName);
-			updater.addStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "Specimen Part"), row, "specimenPart");
-			updater.addStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "View Angle"), row, "viewAngle");
-			updater.addStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "Imaging Technique"), row, "imagingTechnique");
-			updater.addStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "Imaging Preparation Technique"), row, "imagingPreparationTechnique");
-			updater.addStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "Developmental Stage"), row, "developmentalStage");
-			updater.addNamedMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "Sex"), row, "sex", "Sex");
-			updater.addNamedMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "Form"), row, "form", "Form");
+			updater.addViewStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "Specimen Part"), row, "specimenPart");
+			updater.addViewStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "View Angle"), row, "viewAngle");
+			updater.addViewStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "Imaging Technique"), row, "imagingTechnique");
+			updater.addViewStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "Imaging Preparation Technique"), row, "imagingPreparationTechnique");
+			updater.addViewStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "Developmental Stage"), row, "developmentalStage");
+			updater.addViewNamedMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "Sex"), row, "sex", "Sex");
+			updater.addViewNamedMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "Form"), row, "form", "Form");
 			updater.addStringColumn("viewName", viewName);
-			String matchQuery = updater.getMatchQuery();
+			String matchQuery = "";
+			if (!updater.isMatchQueryNull()) {
+				matchQuery = updater.getMatchQuery();
+			}
 			if (matchQuery.length() > 0) {
 
 				String taxonName = sheetReader.getValue(MYTYPE, "View Applicable to Taxon", row);
@@ -146,7 +149,7 @@ public class View {
 		int id = 0;
 		if (updater.getMatchQuery().length() == 0) return 0;
 		String checkViewSql = "SELECT id,viewTSN FROM View WHERE " + updater.getMatchQuery();
-		// System.out.println("Check view: " + checkViewSql);
+		System.out.println("Check view: " + checkViewSql);
 		try {
 			result = statement.executeQuery(checkViewSql);
 			if (result.next()) {// record exists,read new row from the excel
