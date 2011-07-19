@@ -29,6 +29,7 @@ public class Updater {
 	// private StringBuffer columns = new StringBuffer();
 	// private StringBuffer values = new StringBuffer();
 	private StringBuffer matchQuery = new StringBuffer();
+	private boolean isMatchQueryNull = true;
 	private SheetReader sheetReader = null;
 	private Statement statement;
 	private Connection connection;
@@ -100,6 +101,30 @@ public class Updater {
 		}
 		return false;
 	}
+	
+	/*
+	 * Duplicate method from the one above to fix a
+	 * conflict when some fields of the view are empty
+	 * (matchquery would only check the non empty fields
+	 * therefore returning more than one result
+	 */
+	public boolean addViewNamedMatchColumn(int col, int row, String colName, String tableName) {
+		String entry = sheetReader.getEntry(type, col, row);
+		if (entry.length() > 0) { // && FormValid(entry,i)==true){
+			// System.out.println(colName + " valid");
+			List<String> names = LoadData.getCheckNames().getKeyFromTable(tableName, entry);
+			if (names.size() == 1) {
+				isMatchQueryNull &= false;
+				return addStringMatchColumn(colName, names.get(0));
+			}
+			// not found or not unique
+		}
+		else {
+			isMatchQueryNull &= true;
+			return addStringMatchColumn(colName, null);
+		}
+		return false;
+	}
 
 	public boolean addDescrMatchColumn(int col, int row, String colName, String tableName) {
 		String entry = sheetReader.getEntry(type, col, row);
@@ -152,8 +177,13 @@ public class Updater {
 		if (matchQuery.length() > 0) {
 			matchQuery.append(" and ");
 		}
-		matchQuery.append(columnName).append("=").append("'")
-				.append(columnValue.replace("'", "''")).append("'");
+		if (columnValue == null) {
+			matchQuery.append(columnName).append(" is ").append("null ");
+		}
+		else {
+			matchQuery.append(columnName).append("=").append("'")
+			.append(columnValue.replace("'", "''")).append("'");
+		}
 		return true;
 	}
 
@@ -176,6 +206,25 @@ public class Updater {
 			return addStringMatchColumn(colName, entry);
 		}
 		return false;
+	}
+	
+	/*
+	 * Duplicate method from the one above to fix a
+	 * conflict when some fields of the view are empty
+	 * (matchquery would only check the non empty fields
+	 * therefore returning more than one result
+	 */
+	public boolean addViewStringMatchColumn(int col, int row, String colName) {
+		String entry = sheetReader.getEntry(type, col, row);
+		if (entry != null && entry.length() > 0) {
+			isMatchQueryNull &= false;
+			return addStringMatchColumn(colName, entry);
+		}
+		else {
+			isMatchQueryNull &= true;
+			return addStringMatchColumn(colName, null);
+		}
+//		return false;
 	}
 
 	public boolean addStringMatchColumn(String colName, String colValue) {
@@ -218,5 +267,9 @@ public class Updater {
 	public void addDateColumn(String columnName, Date columnValue) {
 		columns.add(columnName);
 		values.add(columnValue);
+	}
+	
+	public boolean isMatchQueryNull() {
+		return isMatchQueryNull;
 	}
 }
