@@ -26,6 +26,7 @@ package net.morphbank.loadexcel;
 //modified : September 29 2006                                 /
 ////////////////////////////////////////////////////////////////
 
+import java.awt.font.NumericShaper;
 import java.io.File;
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -40,8 +41,11 @@ import java.util.TimeZone;
 import jxl.Cell;
 import jxl.CellType;
 import jxl.DateCell;
+import jxl.NumberFormulaCell;
 import jxl.Sheet;
+import jxl.StringFormulaCell;
 import jxl.Workbook;
+import jxl.biff.formula.FormulaException;
 
 // start of public class SheetReader                               
 public class SheetReader {
@@ -103,11 +107,16 @@ public class SheetReader {
 		Sheet sheet = getSheet(sheetName);
 		if (sheet == null) return "";
 		Cell cell = sheet.getCell(col, row);
+		String cellTest = cell.getType().toString();
 		if (cell.getType().toString().equalsIgnoreCase("Date")) 
 		{
 			DateCell datecell = (DateCell) cell;
 			SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
 			return format.format(datecell.getDate());
+		}
+		if (cell.getType().toString().equalsIgnoreCase("String Formula")) {
+			StringFormulaCell formulaCell = (StringFormulaCell) cell;
+			return formulaCell.getContents().trim();
 		}
 		return sheet.getCell(col, row).getContents().trim();
 	}
