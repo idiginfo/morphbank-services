@@ -119,10 +119,14 @@ public class Specimen {
 			updater.addStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "Collection Number"), row, "collectionNumber");
 			updater.addStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "Collector(s) Name"), row, "collectorName");
 			updater.addStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "Date Collected"), row, "dateCollected");
+			updater.addStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "Earliest Date Collected"), row, "earliestDateCollected");
+			updater.addStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "Latest Date Collected"), row, "latestDateCollected");
 //			String localityDesc = sheetReader.getValue(MYTYPE, 23, row);
 			String localityDesc = sheetReader.getValue(MYTYPE, "Locality", row);
-			int localityId = Locality.getLocality(localityDesc);
-			updater.addNumericColumn("localityId", Integer.toString(localityId), row);
+			Integer localityId = Locality.getLocality(localityDesc);
+			if (localityId != null) {
+				updater.addNumericColumn("localityId", Integer.toString(localityId), row);
+			}
 //			updater.addStringMatchColumn(22, row, "notes");
 			updater.addStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "Notes"), row, "notes");
 

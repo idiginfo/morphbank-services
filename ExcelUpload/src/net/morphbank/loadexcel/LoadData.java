@@ -46,10 +46,10 @@ public class LoadData {
 	private static SheetReader sheetReader;
 	private static CheckNameTable checkNames;
 	private static ExternalLinks externalLinks;
-	private static String dbHost = "morphbank11.sc.fsu.edu";
-	private static String dbName = "MB32test";
-	private static String dbUserId = "";
-	private static String dbPassword = "";
+	private static String dbHost;
+	private static String dbName;
+	private static String dbUserId;
+	private static String dbPassword;
 	private static String imageDirectoryPath;
 
 	public static void main(String args[]) {
@@ -64,7 +64,7 @@ public class LoadData {
 		// filename = "C:/dev/java31/lib/Morphbank_MS2_p1Deb.xls";
 		// filename = "C:/dev/java2008/testutf8a.xls";
 //		filename = "/usr/local/dev/morphbank/upload/mb3a_current.xls";
-		filename = "/usr/local/dev/morphbank/upload/mb3a_Lambkin.xls";
+		filename = "/home/gjimenez/Downloads/mb3a_japan_prous.xls";
 //		imageDirectoryPath = "../Camellia/";
 		if (args.length == 0) {
 			System.out.println("usage: java net.morphbank.loadexcel.LoadData.java filename"
@@ -80,6 +80,7 @@ public class LoadData {
 		if (args.length > 3) imageDirectoryPath = args[3];
 		if (args.length > 4) debug = "debug".equals(args[4]);
 
+		
 		System.out.println("excel file is: " + filename);
 		System.out.println("log file is : " + logFile);
 		System.out.println("db host is: " + dbHost);
@@ -88,6 +89,8 @@ public class LoadData {
 		// System.out.println("Before conection");
 		GetConnection newconnect = new GetConnection();
 
+		
+		
 		conn = newconnect.openConnection(dbHost,dbName, dbUserId, dbPassword);
 		try {
 			statement = conn.createStatement();
