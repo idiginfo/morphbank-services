@@ -101,14 +101,14 @@ public class Updater {
 		}
 		return false;
 	}
-	
+
 	/*
 	 * Duplicate method from the one above to fix a
 	 * conflict when some fields of the view are empty
 	 * (matchquery would only check the non empty fields
 	 * therefore returning more than one result
 	 */
-	public boolean addViewNamedMatchColumn(int col, int row, String colName, String tableName) {
+	public boolean addViewLocalityNamedMatchColumn(int col, int row, String colName, String tableName) {
 		String entry = sheetReader.getEntry(type, col, row);
 		if (entry.length() > 0) { // && FormValid(entry,i)==true){
 			// System.out.println(colName + " valid");
@@ -131,7 +131,7 @@ public class Updater {
 		if (entry.length() > 0) {
 			try {
 				String coSql = "SELECT name FROM " + tableName + " WHERE description='"
-						+ entry.toUpperCase() + "'";
+				+ entry.toUpperCase() + "'";
 				// System.out.println(tableName + " query: " + coSql);
 				ResultSet result = statement.executeQuery(coSql);
 				result.next();
@@ -160,7 +160,12 @@ public class Updater {
 	}
 
 	public boolean addNumericColumn(String columnName, String columnValue, int row) {
-		if (columnValue == null || columnValue.length() == 0) return false;
+		if (columnValue == null) {
+			values.add(null);
+			columns.add(columnName);
+			return true;
+		}
+		if (columnValue.length() == 0) return false;
 		try {
 			Double colValue = Double.valueOf(columnValue);
 			values.add(colValue);
@@ -189,11 +194,19 @@ public class Updater {
 
 	public boolean addNumericMatchQuery(String columnName, String columnValue) {
 		try {
-			Double.valueOf(columnValue);
-			if (matchQuery.length() > 0) {
-				matchQuery.append(" and ");
+			if (columnValue != null) {
+				Double.valueOf(columnValue);
+				if (matchQuery.length() > 0) {
+					matchQuery.append(" and ");
+				}
+				matchQuery.append(columnName).append("=").append(columnValue);
 			}
-			matchQuery.append(columnName).append("=").append(columnValue);
+			else {
+				if (matchQuery.length() > 0) {
+					matchQuery.append(" and ");
+				}
+				matchQuery.append(columnName).append("is").append(" null ");
+			}
 			return true;
 		} catch (Exception e) {
 			return false;
@@ -207,14 +220,14 @@ public class Updater {
 		}
 		return false;
 	}
-	
+
 	/*
 	 * Duplicate method from the one above to fix a
 	 * conflict when some fields of the view are empty
 	 * (matchquery would only check the non empty fields
 	 * therefore returning more than one result
 	 */
-	public boolean addViewStringMatchColumn(int col, int row, String colName) {
+	public boolean addViewLocalityStringMatchColumn(int col, int row, String colName) {
 		String entry = sheetReader.getEntry(type, col, row);
 		if (entry != null && entry.length() > 0) {
 			isMatchQueryNull &= false;
@@ -224,7 +237,7 @@ public class Updater {
 			isMatchQueryNull &= true;
 			return addStringMatchColumn(colName, null);
 		}
-//		return false;
+		//		return false;
 	}
 
 	public boolean addStringMatchColumn(String colName, String colValue) {
@@ -242,6 +255,30 @@ public class Updater {
 	}
 
 	public boolean addLatLongMatchColumn(int col, int row, String colName) {
+		String entry = sheetReader.getEntry(type, col, row);
+		if (entry == null) {
+			isMatchQueryNull &= true;
+			return addNumericMatchColumn(colName, null, row);
+		}
+		if (entry.endsWith("N") || entry.endsWith("E")) {
+			entry = entry.substring(0, entry.length() - 1);
+		} else if (entry.endsWith("S") || entry.endsWith("W")) {
+			entry = "-" + entry.substring(0, entry.length() - 1);
+		}
+		if (entry.length() > 0) {
+			isMatchQueryNull &= false;
+			return addNumericMatchColumn(colName, entry, row);
+		}
+		return false;
+	}
+
+	/*
+	 * Duplicate method from the one above to fix a
+	 * conflict when some fields of the Locality are empty
+	 * (matchquery would only check the non empty fields
+	 * therefore returning more than one result
+	 */
+	public boolean addLocalityLatLongMatchColumn(int col, int row, String colName) {
 		String entry = sheetReader.getEntry(type, col, row);
 		if (entry.endsWith("N") || entry.endsWith("E")) {
 			entry = entry.substring(0, entry.length() - 1);
@@ -268,7 +305,7 @@ public class Updater {
 		columns.add(columnName);
 		values.add(columnValue);
 	}
-	
+
 	public boolean isMatchQueryNull() {
 		return isMatchQueryNull;
 	}

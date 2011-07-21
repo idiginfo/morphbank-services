@@ -80,13 +80,13 @@ public class View {
 //			updater.addNamedMatchColumn(7, row, "sex", "Sex");
 //			updater.addNamedMatchColumn(8, row, "form", "Form");
 //			updater.addStringColumn("viewName", viewName);
-			updater.addViewStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "Specimen Part"), row, "specimenPart");
-			updater.addViewStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "View Angle"), row, "viewAngle");
-			updater.addViewStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "Imaging Technique"), row, "imagingTechnique");
-			updater.addViewStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "Imaging Preparation Technique"), row, "imagingPreparationTechnique");
-			updater.addViewStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "Developmental Stage"), row, "developmentalStage");
-			updater.addViewNamedMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "Sex"), row, "sex", "Sex");
-			updater.addViewNamedMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "Form"), row, "form", "Form");
+			updater.addViewLocalityStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "Specimen Part"), row, "specimenPart");
+			updater.addViewLocalityStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "View Angle"), row, "viewAngle");
+			updater.addViewLocalityStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "Imaging Technique"), row, "imagingTechnique");
+			updater.addViewLocalityStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "Imaging Preparation Technique"), row, "imagingPreparationTechnique");
+			updater.addViewLocalityStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "Developmental Stage"), row, "developmentalStage");
+			updater.addViewLocalityNamedMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "Sex"), row, "sex", "Sex");
+			updater.addViewLocalityNamedMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "Form"), row, "form", "Form");
 			updater.addStringColumn("viewName", viewName);
 			String matchQuery = "";
 			if (!updater.isMatchQueryNull()) {
