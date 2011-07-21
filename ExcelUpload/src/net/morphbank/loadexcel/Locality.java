@@ -82,25 +82,28 @@ public class Locality {
 			if(sheetReader.getColumnNumberByName(MYTYPE, "Water Body") != null) {
 				updater.addStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "Water Body"), row, "ocean");
 			}
-			updater.addStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "Country"), row, "country");
-			updater.addStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "Locality Description"), row, "locality");
-			updater.addLatLongMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "Latitude"), row, "latitude");
-			updater.addLatLongMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "Longitude"), row, "longitude");
+			updater.addViewLocalityStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "Country"), row, "country");
+			updater.addViewLocalityStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "Locality Description"), row, "locality");
+			updater.addLocalityLatLongMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "Latitude"), row, "latitude");
+			updater.addLocalityLatLongMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "Longitude"), row, "longitude");
 			updater.addNumericMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "Coordinate Precision"), row, "coordinatePrecision");
 			updater.addNumericMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "Minimum Elevation"), row, "minimumElevation");
 			updater.addNumericMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "Maximum Elevation"), row, "maximumElevation");
 			updater.addNumericMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "Minimum Depth"), row, "minimumDepth");
 			updater.addNumericMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "Maximum Depth"), row, "maximumDepth");
 			if (sheetReader.getColumnNumberByName(MYTYPE, "State or Province") != null) {
-				updater.addStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "State or Province"), row, "state");
+				updater.addViewLocalityStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "State or Province"), row, "state");
 			}
 			if (sheetReader.getColumnNumberByName(MYTYPE, "State or Province") != null) {
-				updater.addStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "County"), row, "county");
+				updater.addViewLocalityStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "County"), row, "county");
 			}
-			
+			String matchQuery = "";
+			if (!updater.isMatchQueryNull()) {
+				matchQuery = updater.getMatchQuery();
+			}
 
 			// look for matching
-			String matchQuery = updater.getMatchQuery();
+			matchQuery = updater.getMatchQuery();
 			if (matchQuery.length() > 0) {
 				try {
 					String query = "select id from Locality where " + matchQuery;
