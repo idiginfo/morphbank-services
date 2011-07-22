@@ -26,6 +26,7 @@ package net.morphbank.loadexcel;
 import java.io.*;
 import java.sql.*;
 import java.sql.Date;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 import javax.swing.*;
@@ -64,7 +65,8 @@ public class TaxonData {
 	private String pages = null;
 	private String nameSource = null;
 	private String comments = null;
-	private Date dateToPublish = null;
+//	private Date dateToPublish = null;
+	private String dateToPublish = "";
 	private String parentName = null;
 
 	private PreparedStatement getTaxaStmt = null;
@@ -323,7 +325,8 @@ public class TaxonData {
 			insertStmt.setInt(j++, sheetReader.GetGroupId());
 			insertStmt.setInt(j++, sheetReader.GetUserId());
 			// IN iDateToPublish DATETIME,
-			insertStmt.setDate(j++, dateToPublish);
+//			insertStmt.setDate(j++, dateToPublish);
+			insertStmt.setString(j++, dateToPublish);
 			// IN iUnacceptReason VARCHAR(50),
 			insertStmt.setNull(j++, java.sql.Types.VARCHAR);
 			// IN iParentTsn BIGINT,
@@ -422,7 +425,10 @@ public class TaxonData {
 
 	private void setStatus() {
 		java.util.Date now = new java.util.Date();
-		if (dateToPublish.before(new Date(now.getTime()))) {
+		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+		java.util.Date dateToPublishFormatted = Date.valueOf(format.format(dateToPublish));
+//		releaseDate = Date.valueOf(format.format(datecell.getDate()));
+		if (dateToPublishFormatted.before(new Date(now.getTime()))) {
 			status = "public";
 		}
 	}

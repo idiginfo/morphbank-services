@@ -64,7 +64,8 @@ public class SheetReader {
 	private ResultSet result;
 	private Statement statement;
 	private ResultSetMetaData metadata;
-	private java.sql.Date releaseDate = null;
+//	private java.sql.Date releaseDate = null;
+	private String releaseDate;
 
 	protected String[] headersView = null;
 	protected String[] headersImage= null;
@@ -241,7 +242,8 @@ public class SheetReader {
 		return sheet.getRows();
 	}
 
-	public Date getReleaseDate() {
+	public String getReleaseDate() {
+//	public Date getReleaseDate() {
 		return releaseDate;
 	}
 
@@ -250,24 +252,26 @@ public class SheetReader {
 	 * 
 	 * @return
 	 */
-	public Date setReleaseDate() {
+	public String setReleaseDate() {
+//	public Date setReleaseDate() {
 		if (imageCollectionSheet.getCell(0, 6).getContents().equals("Release date (yyyy-mm-dd):")
 				&& !imageCollectionSheet.getCell(1, 6).equals("")) {
-			DateCell datecell = (DateCell) imageCollectionSheet.getCell(1, 6);
-			SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-			String releaseDateStr = imageCollectionSheet.getCell(1, 6).getContents().trim().replaceAll(" ", "-").substring(0,10);
-			releaseDate = Date.valueOf(format.format(datecell.getDate()));
+//			DateCell datecell = (DateCell) imageCollectionSheet.getCell(1, 6);
+//			SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+//			String releaseDateStr = imageCollectionSheet.getCell(1, 6).getContents().trim().replaceAll(" ", "-").substring(0,10);
+//			releaseDate = Date.valueOf(format.format(datecell.getDate()));
+			releaseDate = imageCollectionSheet.getCell(1, 6).getContents();
 		} else {
-			statement = LoadData.getStatement();
-			String temp = "SELECT NOW()";
-			try {
-				result = statement.executeQuery(temp);
-				result.next();
-				releaseDate = result.getDate(1);
-			} catch (SQLException sql) {
-				sql.printStackTrace();
-				System.exit(1);
-			}
+//			statement = LoadData.getStatement();
+//			String temp = "SELECT NOW()";
+//			try {
+//				result = statement.executeQuery(temp);
+//				result.next();
+//				releaseDate = result.getDate(1);
+//			} catch (SQLException sql) {
+//				sql.printStackTrace();
+//				System.exit(1);
+//			}
 		}
 		return releaseDate;
 	}

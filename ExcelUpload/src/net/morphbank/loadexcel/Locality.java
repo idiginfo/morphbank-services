@@ -58,21 +58,21 @@ public class Locality {
 		ResultSet result;
 		rows = sheetReader.GetRows(MYTYPE);
 		for (int row = 1; row < rows; row++) {
-//			String localityRef = sheetReader.getEntry(MYTYPE, 11, row);
+			//			String localityRef = sheetReader.getEntry(MYTYPE, 11, row);
 			String localityRef = sheetReader.getValue(MYTYPE, "Locality Name [Auto generated--Do not change!]", row);
 			updater = new Updater(sheetReader, MYTYPE);
 
 			// get and process field values
-//			updater.addDescrMatchColumn(1, row, "continentOcean", "ContinentOcean");
-//			updater.addDescrMatchColumn(2, row, "country", "Country");
-//			updater.addStringMatchColumn(3, row, "locality");
-//			updater.addLatLongMatchColumn(4, row, "latitude");
-//			updater.addLatLongMatchColumn(5, row, "longitude");
-//			updater.addNumericMatchColumn(6, row, "coordinatePrecision");
-//			updater.addNumericMatchColumn(7, row, "minimumElevation");
-//			updater.addNumericMatchColumn(8, row, "maximumElevation");
-//			updater.addNumericMatchColumn(9, row, "minimumDepth");
-//			updater.addNumericMatchColumn(10, row, "maximumDepth");
+			//			updater.addDescrMatchColumn(1, row, "continentOcean", "ContinentOcean");
+			//			updater.addDescrMatchColumn(2, row, "country", "Country");
+			//			updater.addStringMatchColumn(3, row, "locality");
+			//			updater.addLatLongMatchColumn(4, row, "latitude");
+			//			updater.addLatLongMatchColumn(5, row, "longitude");
+			//			updater.addNumericMatchColumn(6, row, "coordinatePrecision");
+			//			updater.addNumericMatchColumn(7, row, "minimumElevation");
+			//			updater.addNumericMatchColumn(8, row, "maximumElevation");
+			//			updater.addNumericMatchColumn(9, row, "minimumDepth");
+			//			updater.addNumericMatchColumn(10, row, "maximumDepth");
 			if(sheetReader.getColumnNumberByName(MYTYPE, "Continent Ocean") != null) {
 				updater.addStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "Continent Ocean"), row, "continentOcean");
 			}
@@ -100,40 +100,41 @@ public class Locality {
 			String matchQuery = "";
 			if (!updater.isMatchQueryNull()) {
 				matchQuery = updater.getMatchQuery();
-			}
 
-			// look for matching
-			matchQuery = updater.getMatchQuery();
-			if (matchQuery.length() > 0) {
-				try {
-					String query = "select id from Locality where " + matchQuery;
-					// System.out.println("Match query " + query);
-					result = statement.executeQuery(query);
-					if (result.next()) {// found a match
-						localityId = result.getInt(1);
-						System.out.println("Locality ref '" + localityRef + "' row " + row
-								+ " matches id " + localityId);
-					} else {// no match
-						String insertQuery = "{call CreateObject( 'Locality', ?, ?, ?, now(), ?, '')}";
-						insertStmt = LoadData.getConnection().prepareCall(insertQuery);
-						int i = 1;
-						insertStmt.setInt(i++, sheetReader.GetUserId());
-						insertStmt.setInt(i++, sheetReader.GetGroupId());
-						insertStmt.setInt(i++, sheetReader.GetSubmitterId());
-						// insertStmt.setString(i++, "2010-09-10");
-						insertStmt.setString(i++, "New locality from upload");
 
-						ResultSet res = insertStmt.executeQuery();
-						res.next();
-						localityId = res.getInt(1);
-						System.out.println("Locality ref '" + localityRef + "' row " + row
-								+ " added with id " + localityId);
-						int numupdated = updater.update(localityId);
+				// look for matching
+				//matchQuery = updater.getMatchQuery();
+				if (matchQuery.length() > 0) {
+					try {
+						String query = "select id from Locality where " + matchQuery;
+						// System.out.println("Match query " + query);
+						result = statement.executeQuery(query);
+						if (result.next()) {// found a match
+							localityId = result.getInt(1);
+							System.out.println("Locality ref '" + localityRef + "' row " + row
+									+ " matches id " + localityId);
+						} else {// no match
+							String insertQuery = "{call CreateObject( 'Locality', ?, ?, ?, now(), ?, '')}";
+							insertStmt = LoadData.getConnection().prepareCall(insertQuery);
+							int i = 1;
+							insertStmt.setInt(i++, sheetReader.GetUserId());
+							insertStmt.setInt(i++, sheetReader.GetGroupId());
+							insertStmt.setInt(i++, sheetReader.GetSubmitterId());
+							// insertStmt.setString(i++, "2010-09-10");
+							insertStmt.setString(i++, "New locality from upload");
+
+							ResultSet res = insertStmt.executeQuery();
+							res.next();
+							localityId = res.getInt(1);
+							System.out.println("Locality ref '" + localityRef + "' row " + row
+									+ " added with id " + localityId);
+							int numupdated = updater.update(localityId);
+						}
+						localityIds.put(localityRef, localityId);
+					} catch (SQLException sql) {
+						sql.printStackTrace();
+						System.exit(1);
 					}
-					localityIds.put(localityRef, localityId);
-				} catch (SQLException sql) {
-					sql.printStackTrace();
-					System.exit(1);
 				}
 			}
 		}

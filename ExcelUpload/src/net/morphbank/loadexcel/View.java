@@ -72,14 +72,14 @@ public class View {
 			int index = viewRef.indexOf('-');
 			viewName = viewRef.substring(index + 2);
 
-//			updater.addStringMatchColumn(2, row, "specimenPart");
-//			updater.addStringMatchColumn(3, row, "viewAngle");
-//			updater.addStringMatchColumn(4, row, "imagingTechnique");
-//			updater.addStringMatchColumn(5, row, "imagingPreparationTechnique");
-//			updater.addStringMatchColumn(6, row, "developmentalStage");
-//			updater.addNamedMatchColumn(7, row, "sex", "Sex");
-//			updater.addNamedMatchColumn(8, row, "form", "Form");
-//			updater.addStringColumn("viewName", viewName);
+			//			updater.addStringMatchColumn(2, row, "specimenPart");
+			//			updater.addStringMatchColumn(3, row, "viewAngle");
+			//			updater.addStringMatchColumn(4, row, "imagingTechnique");
+			//			updater.addStringMatchColumn(5, row, "imagingPreparationTechnique");
+			//			updater.addStringMatchColumn(6, row, "developmentalStage");
+			//			updater.addNamedMatchColumn(7, row, "sex", "Sex");
+			//			updater.addNamedMatchColumn(8, row, "form", "Form");
+			//			updater.addStringColumn("viewName", viewName);
 			updater.addViewLocalityStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "Specimen Part"), row, "specimenPart");
 			updater.addViewLocalityStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "View Angle"), row, "viewAngle");
 			updater.addViewLocalityStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "Imaging Technique"), row, "imagingTechnique");
@@ -91,51 +91,53 @@ public class View {
 			String matchQuery = "";
 			if (!updater.isMatchQueryNull()) {
 				matchQuery = updater.getMatchQuery();
-			}
-			if (matchQuery.length() > 0) {
 
-				String taxonName = sheetReader.getValue(MYTYPE, "View Applicable to Taxon", row);
-				
-				// System.out.println("Before getTsnFromName Row " + row +
-				// " name: " + taxonName);
-				Taxon taxon = new Taxon(taxonName);
-				viewTsn = taxon.getTsn();
-				if (viewTsn != 0) {
-					updater.addNumericMatchColumn("viewTSN", Integer.toString(viewTsn), row);
+				if (matchQuery.length() > 0) {
+
+					String taxonName = sheetReader.getValue(MYTYPE, "View Applicable to Taxon", row);
+
+					// System.out.println("Before getTsnFromName Row " + row +
+					// " name: " + taxonName);
+					Taxon taxon = new Taxon(taxonName);
+					viewTsn = taxon.getTsn();
+					if (viewTsn != 0) {
+						updater.addNumericMatchColumn("viewTSN", Integer.toString(viewTsn), row);
+					}
+					if (sheetReader.getEntry(MYTYPE, 1, row).equals(
+					"My ViewName[ Auto generated, do not change this field!]")) {
+						continue;
+					}
+					viewId = getExistingViewId(row);
+					if (viewId != 0) {
+						System.out.println("View " + row + " ref '" + viewRef + "' matches " + viewId);
+						viewIds.put(viewRef, viewId);
+						continue;
+					}
+					// System.out.println("ViewName is: " + viewName);
+					String description = "New view object was added using Excel file";
+					try {
+						String insertQuery = "{call CreateObject( 'View', ?, ?, ?, ?, ?, '')}";
+						insertStmt = LoadData.getConnection().prepareCall(insertQuery);
+						int i = 1;
+						insertStmt.setInt(i++, sheetReader.GetUserId());
+						insertStmt.setInt(i++, sheetReader.GetGroupId());
+						insertStmt.setInt(i++, sheetReader.GetSubmitterId());
+//						insertStmt.setDate(i++, sheetReader.getReleaseDate());
+						insertStmt.setString(i++, sheetReader.getReleaseDate());
+						insertStmt.setString(i++, "New view from upload");
+						ResultSet res = insertStmt.executeQuery();
+						res.next();
+						viewId = res.getInt(1);
+						updater.update(viewId);
+						System.out.println("View ref '" + viewRef + "" + "' row " + row
+								+ " added with id " + viewId);
+						LoadData.getExternalLinks().addSheetLinks(viewId);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
 				}
-				if (sheetReader.getEntry(MYTYPE, 1, row).equals(
-						"My ViewName[ Auto generated, do not change this field!]")) {
-					continue;
-				}
-				viewId = getExistingViewId(row);
-				if (viewId != 0) {
-					System.out.println("View " + row + " ref '" + viewRef + "' matches " + viewId);
-					viewIds.put(viewRef, viewId);
-					continue;
-				}
-				// System.out.println("ViewName is: " + viewName);
-				String description = "New view object was added using Excel file";
-				try {
-					String insertQuery = "{call CreateObject( 'View', ?, ?, ?, ?, ?, '')}";
-					insertStmt = LoadData.getConnection().prepareCall(insertQuery);
-					int i = 1;
-					insertStmt.setInt(i++, sheetReader.GetUserId());
-					insertStmt.setInt(i++, sheetReader.GetGroupId());
-					insertStmt.setInt(i++, sheetReader.GetSubmitterId());
-					insertStmt.setDate(i++, sheetReader.getReleaseDate());
-					insertStmt.setString(i++, "New view from upload");
-					ResultSet res = insertStmt.executeQuery();
-					res.next();
-					viewId = res.getInt(1);
-					updater.update(viewId);
-					System.out.println("View ref '" + viewRef + "" + "' row " + row
-							+ " added with id " + viewId);
-					LoadData.getExternalLinks().addSheetLinks(viewId);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+				viewIds.put(viewRef, viewId);
 			}
-			viewIds.put(viewRef, viewId);
 		}
 	}
 
@@ -184,7 +186,7 @@ public class View {
 		int imageRows = sheetReader.GetRows("Image");
 		int specimenRows = sheetReader.GetRows("Specimen");
 		int viewTsn = 0;
-//		String viewName = sheetReader.getEntry(MYTYPE, 1, row);
+		//		String viewName = sheetReader.getEntry(MYTYPE, 1, row);
 		String viewName = sheetReader.getValue(MYTYPE, "My View Name", row);
 		// System.out.println("view name is " + viewName);
 		String specDesc = "";
@@ -193,21 +195,21 @@ public class View {
 
 		// Looking for a cooresponding Image to a provided ViewName
 		for (int imageRow = 1; imageRow < imageRows; imageRow++) {
-//			imageViewName = sheetReader.getEntry("Image", 2, imageRow);
+			//			imageViewName = sheetReader.getEntry("Image", 2, imageRow);
 			imageViewName = sheetReader.getValue("Image", "My View Name", imageRow);
 			if ((imageViewName.length() == 0) || (!viewName.equals(imageViewName))) {
 				continue;
 			}
-//			specDesc = sheetReader.getEntry("Image", 1, imageRow);
+			//			specDesc = sheetReader.getEntry("Image", 1, imageRow);
 			specDesc = sheetReader.getValue("Image", "Specimen Description", imageRow);
 			if (specDesc.length() == 0) {
 				LoadData.log("No specimen description for image " + (imageRow + 1));
 				return true;// no specimen for view!
 			}
-//			String entry = sheetReader.getEntry(MYTYPE, 9, 0);
+			//			String entry = sheetReader.getEntry(MYTYPE, 9, 0);
 			String entry = sheetReader.getValue(MYTYPE, "View Applicable to Taxon", 0);
 			if (entry.equals("View Applicable to Taxon")) {
-//				String taxon = sheetReader.getEntry(MYTYPE, 9, row);
+				//				String taxon = sheetReader.getEntry(MYTYPE, 9, row);
 				String taxon = sheetReader.getValue(MYTYPE, "View Applicable to Taxon", row);
 				// System.out.println("Taxon is " + taxon);
 				temp = "SELECT tsn FROM Tree WHERE scientificName=\"" + taxon + "\"";
@@ -245,12 +247,12 @@ public class View {
 		int specimenRank = 0;
 		int viewRank = 0;
 		for (int specimenRow = 1; specimenRow < specimenRows; specimenRow++) {
-//			String specDesc = sheetReader.getEntry("Specimen", 23, specimenRow);
+			//			String specDesc = sheetReader.getEntry("Specimen", 23, specimenRow);
 			String specDesc = sheetReader.getValue("Specimen", "Specimen Description [Autogenerated -- do not change!]", specimenRow);
 			if (!specimenDescription.equals(specDesc)) continue;
 
 			// System.out.println("I found a match");
-//			String name = sheetReader.getEntry("Specimen", 1, specimenRow);
+			//			String name = sheetReader.getEntry("Specimen", 1, specimenRow);
 			String name = sheetReader.getValue("Specimen", "Scientific Name", specimenRow);
 			Taxon taxon = new Taxon(name);
 			int tsn = taxon.getTsn();
@@ -305,7 +307,7 @@ public class View {
 		// if kingdom the same put the lower value for rank(higher in the
 		// hierarchy)
 		temp = "SELECT tsn, kingdom_id, rank_id, parent_tsn FROM Tree where unit_name1='"
-				+ viewApplTaxon + "' OR tsn=" + dbViewTsn;
+			+ viewApplTaxon + "' OR tsn=" + dbViewTsn;
 		// System.out.println(temp);
 		try {
 			result = statement.executeQuery(temp);
@@ -332,14 +334,14 @@ public class View {
 					if (rank_sheet == rank_db) {
 						if (parent_sheet.equals(parent_db)) {
 							temp = "UPDATE View set viewTSN=" + parent_sheet + " WHERE id="
-									+ viewId;
+							+ viewId;
 							statement.executeUpdate(temp);
 							return true;
 						}
 						String new_View_tsn = FindLowestParent(parent_sheet, parent_db);
 						if (!new_View_tsn.equals("")) {
 							temp = "Update View set viewTSN=" + new_View_tsn + " WHERE id="
-									+ viewId;
+							+ viewId;
 							statement.executeUpdate(temp);
 							return true;
 						}

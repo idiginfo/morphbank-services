@@ -183,7 +183,7 @@ public class Updater {
 			matchQuery.append(" and ");
 		}
 		if (columnValue == null) {
-			matchQuery.append(columnName).append(" is ").append("null ");
+			matchQuery.append(columnName).append(" is ").append(" null ");
 		}
 		else {
 			matchQuery.append(columnName).append("=").append("'")
@@ -205,7 +205,7 @@ public class Updater {
 				if (matchQuery.length() > 0) {
 					matchQuery.append(" and ");
 				}
-				matchQuery.append(columnName).append("is").append(" null ");
+				matchQuery.append(columnName).append(" is ").append(" null ");
 			}
 			return true;
 		} catch (Exception e) {
@@ -249,12 +249,16 @@ public class Updater {
 	public boolean addNumericMatchColumn(int col, int row, String colName) {
 		String entry = sheetReader.getEntry(type, col, row);
 		if (entry.length() > 0) {
+			isMatchQueryNull &= false;
 			return addNumericMatchColumn(colName, entry, row);
 		}
-		return false;
+		else {
+			isMatchQueryNull &= true;
+			return addNumericMatchColumn(colName, null, row);
+		}
 	}
 
-	public boolean addLatLongMatchColumn(int col, int row, String colName) {
+	public boolean addLocalityLatLongMatchColumn(int col, int row, String colName) {
 		String entry = sheetReader.getEntry(type, col, row);
 		if (entry == null) {
 			isMatchQueryNull &= true;
@@ -278,7 +282,7 @@ public class Updater {
 	 * (matchquery would only check the non empty fields
 	 * therefore returning more than one result
 	 */
-	public boolean addLocalityLatLongMatchColumn(int col, int row, String colName) {
+	public boolean addLatLongMatchColumn(int col, int row, String colName) {
 		String entry = sheetReader.getEntry(type, col, row);
 		if (entry.endsWith("N") || entry.endsWith("E")) {
 			entry = entry.substring(0, entry.length() - 1);
@@ -286,6 +290,7 @@ public class Updater {
 			entry = "-" + entry.substring(0, entry.length() - 1);
 		}
 		if (entry.length() > 0) {
+			isMatchQueryNull &= false;
 			return addNumericMatchColumn(colName, entry, row);
 		}
 		return false;
@@ -301,7 +306,8 @@ public class Updater {
 		return matchQuery.toString();
 	}
 
-	public void addDateColumn(String columnName, Date columnValue) {
+//	public void addDateColumn(String columnName, Date columnValue) {
+	public void addDateColumn(String columnName, String columnValue) {
 		columns.add(columnName);
 		values.add(columnValue);
 	}
