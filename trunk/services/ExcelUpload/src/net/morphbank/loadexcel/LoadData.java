@@ -65,6 +65,7 @@ public class LoadData {
 		// filename = "C:/dev/java2008/testutf8a.xls";
 //		filename = "/usr/local/dev/morphbank/upload/mb3a_current.xls";
 		filename = "/home/gjimenez/Downloads/mb3a_japan_prous.xls";
+//		filename = "/home/gjimenez/Downloads/mb3a_MattBuffington_forQC.xls";
 //		imageDirectoryPath = "../Camellia/";
 		if (args.length == 0) {
 			System.out.println("usage: java net.morphbank.loadexcel.LoadData.java filename"
@@ -128,15 +129,15 @@ public class LoadData {
 				conn.setAutoCommit(false);
 			}
 
-			System.out.println("Uploading Taxon Data ...");
-			TaxonData taxon = new TaxonData(sheetReader);
-			taxon.processTaxa();
-			System.out.println("Done.");
+//			System.out.println("Uploading Taxon Data ...");
+//			TaxonData taxon = new TaxonData(sheetReader);
+//			taxon.processTaxa();
+//			System.out.println("Done.");
 
-			System.out.println("Uploading Supporting Data ...");
-			QuerySupport support = new QuerySupport(sheetReader);
-			support.loadQuerySupportData();
-			System.out.println("Done.");
+//			System.out.println("Uploading Supporting Data ...");
+//			QuerySupport support = new QuerySupport(sheetReader);
+//			support.loadQuerySupportData();
+//			System.out.println("Done.");
 
 			System.out.println("Uploading Locality ...");
 			Locality locality = new Locality(sheetReader);

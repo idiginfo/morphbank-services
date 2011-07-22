@@ -49,7 +49,8 @@ public class Image {
 	private int specimenId = 0;
 	private int userId = 0;
 	private int groupId = 0;
-	private Date dateToPublish = null;
+//	private Date dateToPublish = null;
+	private String dateToPublish = "";
 	private String originalFileName = "";
 	CallableStatement insertStmt = null;
 	Updater updater = null;
@@ -113,7 +114,8 @@ public class Image {
 			insertStmt.setInt(i++, userId);
 			insertStmt.setInt(i++, groupId);
 			insertStmt.setInt(i++, sheetReader.GetSubmitterId());
-			insertStmt.setDate(i++, dateToPublish);
+//			insertStmt.setDate(i++, dateToPublish);
+			insertStmt.setString(i++, dateToPublish);
 			insertStmt.setString(i++, "New image from upload");
 
 			ResultSet res = insertStmt.executeQuery();

@@ -143,7 +143,8 @@ public class Specimen {
 					insertStmt.setInt(i++, sheetReader.GetUserId());
 					insertStmt.setInt(i++, sheetReader.GetGroupId());
 					insertStmt.setInt(i++, sheetReader.GetSubmitterId());
-					insertStmt.setDate(i++, sheetReader.getReleaseDate());
+//					insertStmt.setDate(i++, sheetReader.getReleaseDate());
+					insertStmt.setString(i++, sheetReader.getReleaseDate());
 					insertStmt.setString(i++, "New specimen from upload");
 
 					ResultSet res = insertStmt.executeQuery();
