@@ -49,6 +49,14 @@ public class MapSheetSpecimen {
 				.getValue("Institution Code")));
 		xmlSpecimen.addDarwinTag(objectFactory.createCatalogNumber(specimen
 				.getValue("Catalog Number")));
+		xmlSpecimen.addDarwinTag(objectFactory.createOtherCatalogNumbers(specimen
+				.getValue("Previous Catalog Number")));
+		xmlSpecimen.addDarwinTag(objectFactory.createRelatedCatalogedItems(specimen
+				.getValue("Related Catalog Item")));
+		xmlSpecimen.addDarwinTag(objectFactory.createRelationshipType(specimen
+				.getValue("Relationship Type")));
+		xmlSpecimen.addDarwinTag(objectFactory.createCollectorNumber(specimen
+				.getValue("Collection Number")));
 		xmlSpecimen.addDarwinTag(objectFactory.createBasisOfRecord(specimen
 				.getValue("Basis of Record")));
 		xmlSpecimen.addDarwinTag(objectFactory.createSex(specimen.getValue("Sex")));
