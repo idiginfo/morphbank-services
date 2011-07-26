@@ -198,6 +198,9 @@ public class ObjectFactory {
 			"GeoreferenceVerificationStatus");
 	public final static QName _FieldNumber_QNAME = new QName(
 			"http://rs.tdwg.org/dwc/curatorial/", "FieldNumber");
+	public final static QName _RelationshipType = new QName(
+			"http://digir.net/schema/conceptual/darwin/2003/1.0/", "RelationshipType"); //TODO is the URI correct here?
+	
 
 	/**
 	 * Create a new ObjectFactory that can be used to create new instances of
@@ -1076,6 +1079,11 @@ public class ObjectFactory {
 	public JAXBElement<String> createFieldNumber(String value) {
 		return new JAXBElement<String>(_FieldNumber_QNAME, String.class, null,
 				value);
+	}
+
+	@XmlElementDecl(namespace = "http://digir.net/schema/conceptual/darwin/2003/1.0/", name = "RelationshipType", substitutionHeadNamespace = "http://rs.tdwg.org/dwc/dwelement", substitutionHeadName = "dwElement")
+	public JAXBElement<String> createRelationshipType(String value) {
+		return new JAXBElement<String>(_RelationshipType, String.class, value);
 	}
 
 }
