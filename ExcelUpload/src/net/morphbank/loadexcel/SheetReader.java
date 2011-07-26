@@ -148,32 +148,32 @@ public class SheetReader {
 		numFields = viewSheet.getColumns();
 		headersView = new String[numFields];
 		for (int i = 0; i < numFields; i++) {
-			headersView[i] = viewSheet.getCell(i, 0).getContents().toLowerCase();
+			headersView[i] = viewSheet.getCell(i, 0).getContents().toLowerCase().trim();
 		}
 		numFields = imageSheet.getColumns();
 		headersImage = new String[numFields];
 		for (int i = 0; i < numFields; i++) {
-			headersImage[i] = imageSheet.getCell(i, 0).getContents().toLowerCase();
+			headersImage[i] = imageSheet.getCell(i, 0).getContents().toLowerCase().trim();
 		}
 		numFields = specimenSheet.getColumns();
 		headersSpecimen = new String[numFields];
 		for (int i = 0; i < numFields; i++) {
-			headersSpecimen[i] = specimenSheet.getCell(i, 0).getContents().toLowerCase();
+			headersSpecimen[i] = specimenSheet.getCell(i, 0).getContents().toLowerCase().trim();
 		}
 		numFields = localitySheet.getColumns();
 		headersLocality = new String[numFields];
 		for (int i = 0; i < numFields; i++) {
-			headersLocality[i] = localitySheet.getCell(i, 0).getContents().toLowerCase();
+			headersLocality[i] = localitySheet.getCell(i, 0).getContents().toLowerCase().trim();
 		}
 		numFields = taxonSheet.getColumns();
 		headersTaxon = new String[numFields];
 		for (int i = 0; i < numFields; i++) {
-			headersTaxon[i] = taxonSheet.getCell(i, 0).getContents().toLowerCase();
+			headersTaxon[i] = taxonSheet.getCell(i, 0).getContents().toLowerCase().trim();
 		}
 		numFields = extLinkSheet.getColumns();
 		headersExtLink = new String[numFields];
 		for (int i = 0; i < numFields; i++) {
-			headersExtLink[i] = extLinkSheet.getCell(i, 0).getContents().toLowerCase();
+			headersExtLink[i] = extLinkSheet.getCell(i, 0).getContents().toLowerCase().trim();
 		}
 	}
 	

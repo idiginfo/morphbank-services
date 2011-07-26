@@ -26,12 +26,10 @@ package net.morphbank.loadexcel;
 ////////////////////////////////////////////////////
 
 import java.sql.CallableStatement;
-import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashMap;
-import java.util.Vector;
 
 public class Image {
 	final static String MYTYPE = "Image";

@@ -98,6 +98,11 @@ public class LoadData {
 
 			// reading from the excel sheet
 			sheetReader = new SheetReader(filename, newconnect);
+			ValidateXls isvalid = new ValidateXls(sheetReader);
+			if (!isvalid.checkEverything()) {
+				System.err.println("Error(s) in SpreadSheet. Program interrupted.");
+				System.exit(0);
+			}
 			checkNames = new CheckNameTable();
 			externalLinks = new ExternalLinks();
 
@@ -129,15 +134,15 @@ public class LoadData {
 				conn.setAutoCommit(false);
 			}
 
-//			System.out.println("Uploading Taxon Data ...");
-//			TaxonData taxon = new TaxonData(sheetReader);
-//			taxon.processTaxa();
-//			System.out.println("Done.");
+			System.out.println("Uploading Taxon Data ...");
+			TaxonData taxon = new TaxonData(sheetReader);
+			taxon.processTaxa();
+			System.out.println("Done.");
 
-//			System.out.println("Uploading Supporting Data ...");
-//			QuerySupport support = new QuerySupport(sheetReader);
-//			support.loadQuerySupportData();
-//			System.out.println("Done.");
+			System.out.println("Uploading Supporting Data ...");
+			QuerySupport support = new QuerySupport(sheetReader);
+			support.loadQuerySupportData();
+			System.out.println("Done.");
 
 			System.out.println("Uploading Locality ...");
 			Locality locality = new Locality(sheetReader);
