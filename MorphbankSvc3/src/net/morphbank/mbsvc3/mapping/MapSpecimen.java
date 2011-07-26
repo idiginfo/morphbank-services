@@ -138,6 +138,10 @@ public class MapSpecimen extends MapObjectBase {
 					if (XmlUtils.notEmptyString(value)) {
 						specimen.setCatalogNumber(value);
 					}
+				} else if (tagName.equals("RelatedCatalogedItems")) {
+					if (XmlUtils.notEmptyString(value)) {
+						specimen.setRelatedCatalogItem(value);
+					}
 				} else if (tagName.equals("OtherCatalogNumbers")) {
 					if (XmlUtils.notEmptyString(value)) {
 						specimen.setPreviousCatalogNumber(value);
@@ -145,6 +149,10 @@ public class MapSpecimen extends MapObjectBase {
 				} else if (tagName.equals("RelatedCatalogItems")) {
 					if (XmlUtils.notEmptyString(value)) {
 						specimen.setRelatedCatalogItem(value);
+					}
+				} else if (tagName.equals("RelationshipType")) {
+					if (XmlUtils.notEmptyString(value)) {
+						specimen.setRelationshipType(value);
 					}
 				} else if (tagName.equals("CollectionNumber") || tagName.equals("CollectorNumber")) {
 					if (XmlUtils.notEmptyString(value)) {
@@ -170,6 +178,10 @@ public class MapSpecimen extends MapObjectBase {
 				} else if (tagName.equals("Collector")) {
 					if (XmlUtils.notEmptyString(value)) {
 						specimen.setCollectorName(value);
+					}
+				} else if (tagName.equals("FieldNotes")) {
+					if (XmlUtils.notEmptyString(value)) {
+						specimen.setNotes(value);
 					}
 				} else if (MapLocality.isLocalityTag(tagName)) {
 					// defer to locality
