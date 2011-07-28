@@ -73,9 +73,9 @@ public class Taxon implements IdObject, Serializable {
 			Query sciNameQuery = MorphbankConfig.getEntityManager()
 					.createQuery(sciNameQueryString);
 			sciNameQuery.setParameter("sciName", scientificName);
-			sciNameQuery.setMaxResults(1);
+			sciNameQuery.setMaxResults(2);
 			List taxa = sciNameQuery.getResultList();
-			if (taxa.size() > 0) {
+			if (taxa.size() == 1) {
 				return (Taxon) taxa.get(0);
 			}
 		} catch (Exception e) {

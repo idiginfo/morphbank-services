@@ -144,6 +144,11 @@ public class MapTaxon extends MapObjectBase {
 				taxon = Taxon.getTaxon(fields[0].trim(), fields[1].trim());// TODO add kingdom
 				if (taxon != null) {
 					return taxon;
+				}else {
+					taxon = Taxon.getTaxon(fields[0].trim());
+					if (taxon != null) {
+						return taxon;
+					}
 				}
 			}
 			if (extId.startsWith(XmlUtils.SCI_NAME_PREFIX)) {
