@@ -84,7 +84,7 @@ public class MapSheetSpecimen {
 		xmlSpecimen.addDarwinTag(objectFactory.createWaterBody(specimen.getValue("Water Body")));
 		xmlSpecimen.addDarwinTag(objectFactory.createCountry(specimen.getValue("Country")));
 		xmlSpecimen.addDarwinTag(objectFactory.createStateProvince(specimen
-				.getValue("State Province")));
+				.getValue("State or Province")));
 		xmlSpecimen.addDarwinTag(objectFactory.createCounty(specimen.getValue("County")));
 		xmlSpecimen.addDarwinTag(objectFactory.createLocality(specimen.getValue("Locality")));
 		xmlSpecimen.addDarwinTag(objectFactory.createInformationWithheld(specimen
