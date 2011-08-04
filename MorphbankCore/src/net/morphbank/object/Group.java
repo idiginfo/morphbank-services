@@ -3,11 +3,14 @@
  */
 package net.morphbank.object;
 
+import java.util.Set;
+
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Query;
 import javax.persistence.Table;
@@ -31,7 +34,11 @@ public class Group extends BaseObject {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "groupManagerId")
 	private User groupManager;
-
+	@ManyToMany(fetch = FetchType.LAZY)
+	@JoinColumn(name = "groups")
+	Set<User> users;
+	
+	
 	public Group() {
 		super();
 	}
@@ -89,5 +96,9 @@ public class Group extends BaseObject {
 
 	public void setTaxon(Taxon taxon) {
 		this.taxon = taxon;
+	}
+	
+	public Set<User> getUsers() {
+		return users;
 	}
 }

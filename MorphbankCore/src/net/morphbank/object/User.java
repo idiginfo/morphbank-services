@@ -13,6 +13,8 @@ import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Query;
@@ -73,6 +75,15 @@ public class User extends BaseObject implements Serializable {
 	// @JoinColumn(name="userId", table="BaseObject")
 	private Set<Image> images;
 
+	@ManyToMany(fetch = FetchType.LAZY)
+	@JoinTable(name="UserGroup",
+        joinColumns=
+            @JoinColumn(name="userId"),
+        inverseJoinColumns=
+            @JoinColumn(name="groups")
+        )
+	private Set<Group> groups;
+	
 	// Set<Specimen> specimens;
 
 	public User() {
@@ -327,5 +338,9 @@ public class User extends BaseObject implements Serializable {
 
 	public static String getUSER_LOGO_BASE_URL() {
 		return USER_LOGO_BASE_URL;
+	}
+	
+	public Set<Group> getGroups() {
+		return groups;
 	}
 }
