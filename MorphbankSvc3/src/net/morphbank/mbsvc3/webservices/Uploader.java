@@ -42,6 +42,7 @@ import net.morphbank.mbsvc3.mapping.ProcessRequest;
 import net.morphbank.mbsvc3.mapsheet.MapSpreadsheetToXml;
 import net.morphbank.mbsvc3.request.RequestParams;
 import net.morphbank.mbsvc3.sharing.UpdateRemote;
+import net.morphbank.mbsvc3.webservices.tools.IOTools;
 import net.morphbank.mbsvc3.webservices.tools.Split;
 import net.morphbank.mbsvc3.xml.Credentials;
 import net.morphbank.mbsvc3.xml.Request;
@@ -70,6 +71,8 @@ public class Uploader extends javax.servlet.http.HttpServlet implements javax.se
 	private ArrayList<String> listOfXmlFiles = new ArrayList<String>();
 	private boolean sendToDB;
 	private static int maxSize = 401000;
+	private static String folderPath = "";
+	private static boolean folderCreated = false;
 
 	/*
 	 * (non-Java-doc)
@@ -230,11 +233,15 @@ public class Uploader extends javax.servlet.http.HttpServlet implements javax.se
 	private void saveTempFile(FileItem item) {
 		FileOutputStream outputStream;
 		String filename = "";
+		if (!folderCreated) {
+			folderPath = MorphbankConfig.getFilepath() + IOTools.createFolder(item.getName()) + "/";
+			folderCreated = true;
+		}
 		if (item.getName().endsWith(".xls")) {
-			filename = MorphbankConfig.getFilepath() + "temp.xls";
+			filename = folderPath + "temp.xls";
 		}
 		else {
-			filename = MorphbankConfig.getFilepath() + "temp.csv";
+			filename = folderPath + "temp.csv";
 		}
 		try {
 			outputStream = new FileOutputStream(filename);
@@ -247,19 +254,19 @@ public class Uploader extends javax.servlet.http.HttpServlet implements javax.se
 		}
 	}
 
-	private void eraseTempFile(String fileName) {
-		File file = new File(fileName);
-		if (file.exists()) {
-			file.delete();
-		}
-	}
+//	private void eraseTempFile(String fileName) {
+//		File file = new File(fileName);
+//		if (file.exists()) {
+//			file.delete();
+//		}
+//	}
 
 	/**
 	 * Split a custom workbook 
 	 * @return list of xls files to process
 	 */
 	private ArrayList<String> splitXls() {
-		Split split = new Split(MorphbankConfig.getFilepath() + "temp.xls", numLines);
+		Split split = new Split(folderPath + "temp.xls", numLines);
 		try {
 			return split.createMultiplefiles();
 		} catch (WriteException e) {
@@ -283,23 +290,22 @@ public class Uploader extends javax.servlet.http.HttpServlet implements javax.se
 				}
 			}
 			else { //it's a csv file
-				filesToProcess.add(MorphbankConfig.getFilepath() + "temp.csv");
+				filesToProcess.add(folderPath + "temp.csv");
 			}
 			Iterator<String> iter = filesToProcess.iterator();
 			while (iter.hasNext()) {
 				String next = iter.next();
-				listOfXmlFiles.add(next);
 				Request requestDoc = createRequest(next);
-				if (requestDoc == null) {
-					listOfXmlFiles.add("request null");
-				}
+//				if (requestDoc == null) {
+//					listOfXmlFiles.add("request null");
+//				}
 				String xmlFileName = this.processXls(requestDoc); //convert xls to xml
 				if (sendToDB) { //upload the file to morphbank
 					this.processUpload(xmlFileName);
 				}
 			}
-			this.eraseTempFile(MorphbankConfig.getFilepath() + "temp.xls");
-			this.eraseTempFile(MorphbankConfig.getFilepath() + "temp.csv");
+			IOTools.eraseTempFile(folderPath, "temp.xls", false);
+			IOTools.eraseTempFile(folderPath, "temp.csv", false);
 		} catch (Exception e) {
 			e.printStackTrace(out);
 			out.close();
@@ -315,8 +321,8 @@ public class Uploader extends javax.servlet.http.HttpServlet implements javax.se
 	private String processXls(Request requestDoc) {
 		String reqFileName = saveRequestXmlAsFile(requestDoc);
 		MorphbankConfig.SYSTEM_LOGGER.info("<!-- request file: "
-				+ MorphbankConfig.getFilepath() + reqFileName + " -->");
-		listOfXmlFiles.add(MorphbankConfig.getFilepath() + reqFileName);
+				+ folderPath + reqFileName + " -->");
+		listOfXmlFiles.add(folderPath + reqFileName);
 		return reqFileName;
 	}
 
@@ -326,8 +332,8 @@ public class Uploader extends javax.servlet.http.HttpServlet implements javax.se
 	private void processUpload(String file) {
 		Request request = null;
 		String xmlOutputFile = file.replaceFirst(".xml", "-report.xml");
-		file = MorphbankConfig.getFilepath() + file;
-		xmlOutputFile = MorphbankConfig.getFilepath() + xmlOutputFile;
+		file = folderPath + file;
+		xmlOutputFile = folderPath + xmlOutputFile;
 		listOfXmlFiles.add(xmlOutputFile);
 		try {
 			InputStream in = new FileInputStream(file);
@@ -356,14 +362,14 @@ public class Uploader extends javax.servlet.http.HttpServlet implements javax.se
 		Credentials owner = new Credentials(OWNER_ID, GROUP_ID, null);
 		Request request = mapper.createRequestFromFile(fileName, submitter, owner, null,
 				numLines, firstLine);
-		eraseTempFile(fileName);
+		IOTools.eraseTempFile(folderPath, fileName, false);
 		return request;
 	}
 
 	static String FILE_PREFIX = "req";
 
 	private String[] getReqFileNames() {
-		File dir = new File(MorphbankConfig.getFilepath());
+		File dir = new File(folderPath);
 
 		// It is also possible to filter the list of returned files.
 		// This example does not return any files that start with `.'.
@@ -398,7 +404,7 @@ public class Uploader extends javax.servlet.http.HttpServlet implements javax.se
 		String fileName = null;
 		int i = getNextReqFileNumber();
 		fileName = FILE_PREFIX + i + ".xml";
-		String filePath = MorphbankConfig.getFilepath() + fileName;
+		String filePath = folderPath + fileName;
 		try {
 			FileOutputStream outFileStr = new FileOutputStream(filePath);
 			PrintWriter out = new PrintWriter(outFileStr);
@@ -416,10 +422,10 @@ public class Uploader extends javax.servlet.http.HttpServlet implements javax.se
 		if (fileName == null) {
 			fileName = "resp"+reqFileName;
 		}
-		String filePath = MorphbankConfig.getFilepath() + fileName;
+		String filePath = folderPath + fileName;
 		// open a file
 		try {
-			FileOutputStream outFile = new FileOutputStream(MorphbankConfig.getFilepath() + fileName);
+			FileOutputStream outFile = new FileOutputStream(folderPath + fileName);
 			PrintWriter out = new PrintWriter(outFile);
 			XmlUtils.printXml(out, xmlDoc);
 			out.close();
@@ -474,8 +480,9 @@ public class Uploader extends javax.servlet.http.HttpServlet implements javax.se
 				listOfFiles.append(next + "<br />");
 			}
 			else {
+				String nameToDisplay = next.replaceFirst(folderPath, "");
 				next = next.replaceFirst(MorphbankConfig.getFilepath(), "");
-				String link = "<a href=\"" + "xmlfiles/" + next + "\">" + next + "</a>";
+				String link = "<a href=\"" + "xmlfiles/" + next + "\">" + nameToDisplay + "</a>";
 				if (!sendToDB) {
 					listOfFiles.append(this.createHtmlForm(link, next));
 				}

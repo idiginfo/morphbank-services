@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
@@ -16,13 +17,19 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import jxl.Workbook;
+import jxl.read.biff.BiffException;
+
 import net.morphbank.MorphbankConfig;
 import net.morphbank.loadexcel.GetConnection;
 import net.morphbank.loadexcel.SheetReader;
 import net.morphbank.loadexcel.ValidateXls;
 import net.morphbank.mbsvc3.request.RequestParams;
+import net.morphbank.mbsvc3.webservices.tools.IOTools;
 import net.morphbank.mbsvc3.webservices.tools.RedirectSysStreams;
+import net.morphbank.mbsvc3.webservices.tools.ValidateCustomXls;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileItemFactory;
 import org.apache.commons.fileupload.FileUploadException;
@@ -36,7 +43,10 @@ public class Validate extends javax.servlet.http.HttpServlet implements javax.se
 	 */
 	private static final long serialVersionUID = 1L;
 	private StringBuffer output = new StringBuffer();
-	
+	private static String MB3AP_BOOK = "mb3ap";
+	private static String CUSTOM_BOOK = "custom";
+	private static String folderPath = "";
+
 	/*
 	 * (non-Java-doc)
 	 * 
@@ -48,8 +58,8 @@ public class Validate extends javax.servlet.http.HttpServlet implements javax.se
 
 	public void init(ServletConfig config) throws ServletException {
 		super.init(config);
-		
-		
+
+
 		// setup persistence unit from parameter, if available
 		RequestParams.initService(config);
 	}
@@ -81,7 +91,7 @@ public class Validate extends javax.servlet.http.HttpServlet implements javax.se
 	throws ServletException, IOException {
 
 		PrintWriter out = response.getWriter();
-		
+
 		MorphbankConfig.SYSTEM_LOGGER.info("starting post");
 		MorphbankConfig.ensureWorkingConnection();
 		MorphbankConfig.SYSTEM_LOGGER.info("<!-- persistence: "
@@ -94,31 +104,28 @@ public class Validate extends javax.servlet.http.HttpServlet implements javax.se
 		response.setContentType("text/html");
 
 		try {
-			PrintStream console = System.out;
-			PrintStream consoleErr = System.err;
 			RedirectSysStreams redirect = new RedirectSysStreams(output);
 			redirect.run();
-			
+			String fileType = "";
+
 			// Process the uploaded items
 			List<?> /* FileItem */items = upload.parseRequest(request);
 			Iterator<?> iter = items.iterator();
 			while (iter.hasNext()) {
 				FileItem item = (FileItem) iter.next();
 				if (item.isFormField()) {
-					//processFormField(item);
+					fileType = processFormField(item);
 				} else {
 					//String paramName = item.getFieldName();
 					//if (checkFilesBeforeUpload(item)) {
-						String fileName = item.getName();
-						saveTempFile(item);
-						InputStream stream = item.getInputStream();
-						//Reader reader = new InputStreamReader(stream);
-						// if ("uploadFile".equals(paramName)) {
-						MorphbankConfig.SYSTEM_LOGGER.info("Processing file " + fileName);
-						processRequest(stream, out, fileName);
-						MorphbankConfig.SYSTEM_LOGGER.info("Processing complete");
-						this.eraseTempFile(MorphbankConfig.getFilepath() + fileName);
-						// }
+					String fileName = item.getName();
+					saveTempFile(item);
+					InputStream stream = item.getInputStream();
+					MorphbankConfig.SYSTEM_LOGGER.info("Processing file " + fileName);
+					processRequest(stream, out, fileName, fileType);
+					MorphbankConfig.SYSTEM_LOGGER.info("Processing complete");
+					IOTools.eraseTempFile(folderPath, fileName, true);
+					// }
 					//}
 				}
 			}
@@ -131,26 +138,65 @@ public class Validate extends javax.servlet.http.HttpServlet implements javax.se
 		}
 	}
 
-	
-	private boolean processRequest(InputStream in, PrintWriter out, String fileName) {
+	/**
+	 * Process the fields in the form that are not FileItem
+	 * @param item
+	 */
+	private String processFormField(FileItem item) {
+		return "";
+	}
+
+
+	private boolean processRequest(InputStream in, PrintWriter out, String fileName, String fileType) {
+		fileType = this.excelFileType(fileName);
 		try {
-			SheetReader sheetReader = new SheetReader(MorphbankConfig.getFilepath() + fileName, null);
-			ValidateXls isvalid = new ValidateXls(sheetReader);
-			if (!isvalid.checkEverything()) {
-				output.append("Error(s) in SpreadSheet. Please check for errors in rows mentioned above.");
+			if (fileType.equalsIgnoreCase(MB3AP_BOOK)){ //Animalia or Plantae
+				SheetReader sheetReader = new SheetReader(folderPath + fileName, null);
+				ValidateXls isvalid = new ValidateXls(sheetReader);
+				if (!isvalid.checkEverything()) {
+					output.append("Error(s) in SpreadSheet. Please check for errors in rows mentioned above.<br />");
+					output.append("<br/><i>\"does not match\" errors are typically from modifying rows in the Locality, Specimen or View sheet.<br />");
+					output.append("Excel does not automatically update the item selected from the drop down list after a change.<br />");
+					output.append("You need to go to the row with an error and select the right Locality, Specimen or View from the list again.</i><br />");
+				}
+				else {
+					output.append("No error found in the document. Congratulations!<br />");
+				}
 			}
-			else {
-				output.append("No error found in the document.");
+			else { //TODO Custom Workbook
+				ValidateCustomXls isvalid = new ValidateCustomXls(folderPath + fileName);
+				if (!isvalid.checkEverything()){
+					output.append("Error(s) in SpreadSheet. Please check for errors in rows mentioned above.<br />");
+					output.append("<br/><i>\"duplicates\" errors exit if a column should only have unique values per row and the same value is found<br />");
+					output.append("more than once.</i>");
+				}
+				else {
+					output.append("No error found in the document. Congratulations!<br />");
+				}
 			}
+
 		} catch (Exception e) {
 			e.printStackTrace(out);
 			out.close();
 		}
 		return true;
 	}
-	
+
+	private String excelFileType(String fileName) {
+		try {
+			Workbook workbook = Workbook.getWorkbook(new File(folderPath + fileName));
+			String[] sheets = workbook.getSheetNames();
+			if (sheets.length < 8) return CUSTOM_BOOK;
+			return MB3AP_BOOK;
+		} catch (BiffException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
 	private void htmlPresentation(HttpServletRequest request, HttpServletResponse response) {
-		output.toString().lastIndexOf("adding a blank");
 		String html = removeUnusedWarnings();
 		html = html.replaceAll("\n", "<br />");
 		output = new StringBuffer();
@@ -163,45 +209,48 @@ public class Validate extends javax.servlet.http.HttpServlet implements javax.se
 			e.printStackTrace();
 		}
 	}
-	
+
 	private void saveTempFile(FileItem item) {
 		FileOutputStream outputStream;
 		String filename = "";
-			filename = MorphbankConfig.getFilepath() + item.getName();
-			try {
-				outputStream = new FileOutputStream(filename);
-				outputStream.write(item.get());
-				outputStream.close();
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-	}
-	
-	private void eraseTempFile(String fileName) {
-		File file = new File(fileName);
-		if (file.exists()) {
-			file.delete();
+		folderPath = MorphbankConfig.getFilepath() + IOTools.createFolder(item.getName()) + "/";
+		filename =  item.getName();
+		try {
+			outputStream = new FileOutputStream(folderPath + filename);
+			outputStream.write(item.get());
+			outputStream.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
-	
+
 	/*
 	 * Fix to solve a problem when not rebooting tomcat between two tests.
 	 * Some error messages seem to appear on the second try but not on the first
+	 * Also used to removed unwanted diagnotic messages that users don't need to see.
 	 */
 	private String removeUnusedWarnings() {
 		int blank = output.toString().lastIndexOf("adding a blank");
 		int data = output.toString().lastIndexOf("already contains data");
-		if (blank == -1 && data == -1) {
+		int empty = output.toString().lastIndexOf("setting to empty");
+		int ELInfo = output.toString().lastIndexOf("login successul");
+		if (blank == -1 && data == -1 && empty == -1 && ELInfo == -1) {
 			return output.toString();
 		}
-		if (blank > data) {
+		if (ELInfo != -1) {
+			output.delete(output.toString().indexOf("[EL Info]"), ELInfo + 15);
+		}
+		if (blank > data && blank > empty) {
 			return output.toString().substring(blank + 15);
 		}
-		else {
+		else if (data > blank && data > empty){
 			return output.toString().substring(data + 22);
 		}
-		
+		else {
+			return output.toString().substring(empty + 17);
+		}
+
 	}
 }
