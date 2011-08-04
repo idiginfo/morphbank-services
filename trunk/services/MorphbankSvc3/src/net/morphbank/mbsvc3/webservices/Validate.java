@@ -117,15 +117,15 @@ public class Validate extends javax.servlet.http.HttpServlet implements javax.se
 					fileType = processFormField(item);
 				} else {
 					//String paramName = item.getFieldName();
-					//if (checkFilesBeforeUpload(item)) {
-					String fileName = item.getName();
-					saveTempFile(item);
-					InputStream stream = item.getInputStream();
-					MorphbankConfig.SYSTEM_LOGGER.info("Processing file " + fileName);
-					processRequest(stream, out, fileName, fileType);
-					MorphbankConfig.SYSTEM_LOGGER.info("Processing complete");
-					IOTools.eraseTempFile(folderPath, fileName, true);
-					// }
+					if (checkFilesBeforeUpload(item)) {
+						String fileName = item.getName();
+						saveTempFile(item);
+						InputStream stream = item.getInputStream();
+						MorphbankConfig.SYSTEM_LOGGER.info("Processing file " + fileName);
+						processRequest(stream, out, fileName, fileType);
+						MorphbankConfig.SYSTEM_LOGGER.info("Processing complete");
+						IOTools.eraseTempFile(folderPath, fileName, true);
+					 }
 					//}
 				}
 			}
@@ -138,6 +138,25 @@ public class Validate extends javax.servlet.http.HttpServlet implements javax.se
 		}
 	}
 
+	/**
+	 * safety check on each file uploaded
+	 * @param item
+	 * @return
+	 */
+	private boolean checkFilesBeforeUpload(FileItem item) {
+		boolean testPassed = true;
+		if (item.getName() == null || item.getName().length() < 1) return false;
+//		if ((item.getSize()) > maxSize) {
+//			listOfXmlFiles.add("Size of file " + item.getName() + " is too big. Max is " + maxSize / 1000 + "KB.");
+//			testPassed = false;
+//		}
+		if (!(item.getName().endsWith(".xls") || item.getName().endsWith(".csv"))) {
+			output.append("The file extension must be .xls");
+			testPassed = false;
+		}
+		return testPassed;
+	}
+	
 	/**
 	 * Process the fields in the form that are not FileItem
 	 * @param item
