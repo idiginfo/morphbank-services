@@ -278,7 +278,6 @@ public class MapSpreadsheetToXml {
 	// specimenPart/ViewAngle/imagingTechnique/ImagingPreparationTechnique
 	// DevelopmentalStage/Sex/Form
 
-	//why this way of generating idStr instead of the same kind as Image and Specimen?
 	public static String getViewIdStr(FieldMapper view) {
 		StringBuffer viewId = new StringBuffer();
 		String separator = "";
