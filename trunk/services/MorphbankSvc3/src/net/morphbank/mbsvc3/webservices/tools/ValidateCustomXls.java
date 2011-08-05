@@ -2,25 +2,16 @@ package net.morphbank.mbsvc3.webservices.tools;
 
 import java.io.File;
 import java.io.IOException;
-import java.sql.Connection;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
-import java.util.SortedMap;
-import java.util.TreeMap;
 
 import javax.persistence.Query;
 
-import org.apache.commons.codec.digest.DigestUtils;
 
 import net.morphbank.MorphbankConfig;
-import net.morphbank.loadexcel.GetConnection;
 import net.morphbank.object.Group;
 
 import jxl.Cell;
@@ -56,7 +47,7 @@ public class ValidateCustomXls {
 	}
 
 	public static void main(String[] args) {
-		ValidateCustomXls test = new ValidateCustomXls("/home/gjimenez/Downloads/customWorkbook-testContinentWaterBody.xls");
+		ValidateCustomXls test = new ValidateCustomXls("/home/gjimenez/Downloads/customWorkbook.xls");
 		boolean passed = test.checkEverything();
 		System.out.println(passed);
 	}
@@ -271,12 +262,23 @@ public class ValidateCustomXls {
 	
 	private boolean checkCredentials() {
 		boolean credentialsOK = true;
+		boolean emptyCells = false;
 		String cName = contributorSheet.getCell(1, 1).getContents();
+		emptyCells |= isCellEmpty(contributorSheet.getCell(0, 1).getContents(), cName);
 		String cId = contributorSheet.getCell(1, 2).getContents();
+		emptyCells |= isCellEmpty(contributorSheet.getCell(0, 2).getContents(), cId);
 		String sName = contributorSheet.getCell(1, 3).getContents();
+		emptyCells |= isCellEmpty(contributorSheet.getCell(0, 3).getContents(), sName);
 		String sId = contributorSheet.getCell(1, 4).getContents();
+		emptyCells |= isCellEmpty(contributorSheet.getCell(0, 4).getContents(), sId);
 		String gName = contributorSheet.getCell(1, 5).getContents();
+		emptyCells |= isCellEmpty(contributorSheet.getCell(0, 5).getContents(), gName);
 		String gId = contributorSheet.getCell(1, 6).getContents();
+		emptyCells |= isCellEmpty(contributorSheet.getCell(0, 6).getContents(), gId);
+		String date = contributorSheet.getCell(1, 7).getContents();
+		emptyCells |= isCellEmpty(contributorSheet.getCell(0, 7).getContents(), date);
+		if(emptyCells) return false;
+		
 		String select = "select u.userName, u.id from User u where u.userName = :name";
 		Query query = MorphbankConfig.getEntityManager().createQuery(select);
 		query.setParameter("name", cName);
@@ -291,9 +293,17 @@ public class ValidateCustomXls {
 		select = "select u.groups from User u where u.id = :id";
 		query = MorphbankConfig.getEntityManager().createQuery(select);
 		query.setParameter("id", Integer.valueOf(cId));
-		this.compareUserGroup(query, cName, cId, gName, gId);
+		credentialsOK &= this.compareUserGroup(query, cName, cId, gName, gId);
 		
 		return credentialsOK;
+	}
+	
+	private boolean isCellEmpty(String label, String cell) {
+		if (cell.length() < 1) {
+			System.out.println(label.replaceFirst(":", "") + " cannot be empty.");
+			return true;
+		}
+		return false;
 	}
 	
 	private boolean compareNameId(Query query, String name, String id) {
