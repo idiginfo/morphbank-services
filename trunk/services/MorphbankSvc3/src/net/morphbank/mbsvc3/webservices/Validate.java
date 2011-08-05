@@ -5,10 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.PrintStream;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
@@ -21,7 +18,6 @@ import jxl.Workbook;
 import jxl.read.biff.BiffException;
 
 import net.morphbank.MorphbankConfig;
-import net.morphbank.loadexcel.GetConnection;
 import net.morphbank.loadexcel.SheetReader;
 import net.morphbank.loadexcel.ValidateXls;
 import net.morphbank.mbsvc3.request.RequestParams;
@@ -29,7 +25,6 @@ import net.morphbank.mbsvc3.webservices.tools.IOTools;
 import net.morphbank.mbsvc3.webservices.tools.RedirectSysStreams;
 import net.morphbank.mbsvc3.webservices.tools.ValidateCustomXls;
 
-import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileItemFactory;
 import org.apache.commons.fileupload.FileUploadException;
