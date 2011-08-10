@@ -22,7 +22,6 @@ public class IOTools {
 
 	public static void eraseTempFile(String folderPath, String fileName, boolean eraseFolder) {
 		File file = new File(folderPath + fileName);
-
 		if (file.exists()) {
 			file.delete();
 		}
@@ -33,5 +32,6 @@ public class IOTools {
 			}
 		}
 	}
+	
 
 }

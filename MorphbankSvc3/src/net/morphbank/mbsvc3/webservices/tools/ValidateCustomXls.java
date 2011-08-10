@@ -8,6 +8,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
 import javax.persistence.Query;
 
 
@@ -24,6 +27,7 @@ import jxl.read.biff.BiffException;
 
 public class ValidateCustomXls {
 
+	private StringBuffer output = new StringBuffer();
 	public static final String PERSISTENCE = MorphbankConfig.PERSISTENCE_MBPROD;
 	private static final String DROP_DOWNS_SHEET_NAME = "Drop Downs";
 	private static final String DATA_SHEET_NAME = "Data";
@@ -37,7 +41,7 @@ public class ValidateCustomXls {
 	Sheet contributorSheet;
 	private String[] headersDropDowns;
 	private String[] headersData;
-
+	private EntityManager em;
 	
 	public ValidateCustomXls(String fileName) {
 		this.fileName = fileName;
@@ -47,7 +51,7 @@ public class ValidateCustomXls {
 	}
 
 	public static void main(String[] args) {
-		ValidateCustomXls test = new ValidateCustomXls("/home/gjimenez/Downloads/customWorkbook.xls");
+		ValidateCustomXls test = new ValidateCustomXls("/home/gjimenez/Downloads/customWorkbook-testContinentWaterBody.xls");
 		boolean passed = test.checkEverything();
 		System.out.println(passed);
 	}
@@ -71,11 +75,11 @@ public class ValidateCustomXls {
 
 	public boolean checkEverything() {
 		System.out.println("Version Info: " + getVersionNumber());
+		output.append("Version Info: " + getVersionNumber() + "<br />");
 		isXlsValid &= this.checkUniqueImageExtId();
 		isXlsValid &= this.checkFormatDateColumns();
 		isXlsValid &= this.checkNoSpaceInFileName();
 		isXlsValid &= this.checkDBMatch();
-		isXlsValid &= this.checkCredentials();
 		return isXlsValid;
 	}
 
@@ -170,6 +174,7 @@ public class ValidateCustomXls {
 		}
 		if (duplicates.size() > 0) {
 			System.out.print("In column Image External id, rows ");
+			output.append("In column Image External id, rows ");
 			Iterator<Entry<Integer, Integer>> it = duplicates.entrySet().iterator();
 			
 			StringBuffer list = new StringBuffer();
@@ -179,6 +184,7 @@ public class ValidateCustomXls {
 				list.append(", ");
 			}
 			System.out.println(list.toString() + "have duplicate entries.");
+			output.append(list.toString() + "have duplicate entries.<br />");
 			return false;
 		}
 		return true;
@@ -192,6 +198,7 @@ public class ValidateCustomXls {
 			correctFormat = this.checkCellType(cells[i], CellType.LABEL);
 			if (!correctFormat) {
 				System.out.println("In column Date Determined, row " + (i+1) + " should be formatted as text.");
+				output.append("In column Date Determined, row " + (i+1) + " should be formatted as text.<br />");
 			}
 		}
 		return correctFormat;
@@ -210,6 +217,7 @@ public class ValidateCustomXls {
 			if (cells[i].getContents().indexOf(" ") > 0) {
 				isValid = false;
 				System.out.println("In column Original File Name, row " + (i+1) + " should not contain spaces.");
+				output.append("In column Original File Name, row " + (i+1) + " should not contain spaces.<br />");
 			}
 		}
 		return isValid;
@@ -220,9 +228,12 @@ public class ValidateCustomXls {
 	
 	private boolean checkDBMatch() {
 		boolean matchDB = true;
-		MorphbankConfig.setPersistenceUnit(PERSISTENCE);
-		MorphbankConfig.init();
+//		MorphbankConfig.setPersistenceUnit(PERSISTENCE);
+//		MorphbankConfig.init();
+		EntityManagerFactory emf = Persistence.createEntityManagerFactory(PERSISTENCE);
+		em = emf.createEntityManager();
 		matchDB &= this.checkTSN();
+		matchDB &= this.checkCredentials();
 		
 		return matchDB;
 	}
@@ -232,7 +243,8 @@ public class ValidateCustomXls {
 		Cell[] cellsDetermination = dataSheet.getColumn(this.getColumnNumberByName(DATA_SHEET_NAME, "Determination Scientific Name"));
 		Cell[] cellsTSN = dataSheet.getColumn(this.getColumnNumberByName(DATA_SHEET_NAME, "Determination TSN"));
 		String select = "select t.tsn from Taxon t where t.scientificName = :scientificName";
-		Query query = MorphbankConfig.getEntityManager().createQuery(select);
+		Query query = em.createQuery(select);
+//		query = MorphbankConfig.getEntityManager().createQuery(select);
 		for (int i = 1; i < cellsDetermination.length; i++) {
 			boolean matchFound = false;
 			if (isEmpty(cellsDetermination[i])) continue;
@@ -249,12 +261,14 @@ public class ValidateCustomXls {
 						matchFound |= true;
 				}
 				if (matchFound == false) {
-					System.out.println("Scientific name " + cellsDetermination[i].getContents() + "does not match TSN " + cellsTSN[i].getContents() + " at row " + (i+1) + ".");
+					System.out.println("Scientific name " + cellsDetermination[i].getContents() + " does not match TSN " + cellsTSN[i].getContents() + " at row " + (i+1) + ".");
+					output.append("Scientific name " + cellsDetermination[i].getContents() + " does not match TSN " + cellsTSN[i].getContents() + " at row " + (i+1) + ".<br />");
 				}
 				columnValid &= matchFound;
 			}
 			else {
 				System.out.println("Scientific name " + cellsDetermination[i] + " at row " + (i+1) + " is not in Morphbank.");
+				output.append("Scientific name " + cellsDetermination[i] + " at row " + (i+1) + " is not in Morphbank.<br />");
 			}
 		}
 		return columnValid;
@@ -280,18 +294,21 @@ public class ValidateCustomXls {
 		if(emptyCells) return false;
 		
 		String select = "select u.userName, u.id from User u where u.userName = :name";
-		Query query = MorphbankConfig.getEntityManager().createQuery(select);
+		Query query = em.createQuery(select);
+//		query = MorphbankConfig.getEntityManager().createQuery(select);
 		query.setParameter("name", cName);
 		credentialsOK &= this.compareNameId(query, cName, cId);
 		query.setParameter("name", sName);
 		credentialsOK &= this.compareNameId(query, sName, sId);
 		select = "select g.groupName, g.id from Group g where g.groupName = :name";
-		query = MorphbankConfig.getEntityManager().createQuery(select);
+		query = em.createQuery(select);
+//		query = MorphbankConfig.getEntityManager().createQuery(select);
 		query.setParameter("name", gName);
 		credentialsOK &= this.compareNameId(query, gName, gId);
 		
 		select = "select u.groups from User u where u.id = :id";
-		query = MorphbankConfig.getEntityManager().createQuery(select);
+		query = em.createQuery(select);
+//		query = MorphbankConfig.getEntityManager().createQuery(select);
 		query.setParameter("id", Integer.valueOf(cId));
 		credentialsOK &= this.compareUserGroup(query, cName, cId, gName, gId);
 		
@@ -301,6 +318,7 @@ public class ValidateCustomXls {
 	private boolean isCellEmpty(String label, String cell) {
 		if (cell.length() < 1) {
 			System.out.println(label.replaceFirst(":", "") + " cannot be empty.");
+			output.append(label.replaceFirst(":", "") + " cannot be empty.<br />");
 			return true;
 		}
 		return false;
@@ -310,6 +328,7 @@ public class ValidateCustomXls {
 		List names = query.getResultList();
 		if (names.isEmpty()) {
 			System.out.println(name + " is not in Morphbank.");
+			output.append(name + " is not in Morphbank.<br />");
 			return false;
 		}
 		Iterator it = names.iterator();
@@ -321,6 +340,7 @@ public class ValidateCustomXls {
 				matchFound = true;
 				if (uid != Integer.valueOf(id)) {
 					System.out.println(name + " and " + id + " do not match. One of them must be misstyped.");
+					output.append(name + " and " + id + " do not match. One of them must be misstyped.<br />");
 					matchFound = false;
 				}
 			}
@@ -332,6 +352,7 @@ public class ValidateCustomXls {
 		List names = query.getResultList();
 		if (names.isEmpty()) {
 			System.out.println("Id:" + id + " is not in the group " + groupName + ".");
+			output.append("Id:" + id + " is not in the group " + groupName + ".<br />");
 			return false;
 		}
 		Iterator it = names.iterator();
@@ -348,9 +369,15 @@ public class ValidateCustomXls {
 		}
 		if (!matchFound) {
 			System.out.println("Id:" + id + " is not in the group " + groupName + ".");
+			output.append("Id:" + id + " is not in the group " + groupName + ".");
 		}
 		return matchFound;
 	}
+
+	public StringBuffer getOutput() {
+		return output;
+	}
+
 	
 	
 }
