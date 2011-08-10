@@ -71,7 +71,6 @@ public class Uploader extends javax.servlet.http.HttpServlet implements javax.se
 	private ArrayList<String> listOfXmlFiles = new ArrayList<String>();
 	private boolean sendToDB;
 	private static int maxSize = 401000;
-	private static String folderPath = "";
 	private static boolean folderCreated = false;
 
 	/*
@@ -85,8 +84,6 @@ public class Uploader extends javax.servlet.http.HttpServlet implements javax.se
 
 	public void init(ServletConfig config) throws ServletException {
 		super.init(config);
-		
-		
 		// setup persistence unit from parameter, if available
 		RequestParams.initService(config);
 	}
@@ -140,6 +137,7 @@ public class Uploader extends javax.servlet.http.HttpServlet implements javax.se
 		response.setContentType("text/html");
 
 		try {
+			String folderPath = "";
 			// Process the uploaded items
 			List<?> /* FileItem */items = upload.parseRequest(request);
 			Iterator<?> iter = items.iterator();
@@ -151,18 +149,18 @@ public class Uploader extends javax.servlet.http.HttpServlet implements javax.se
 					//String paramName = item.getFieldName();
 					if (checkFilesBeforeUpload(item)) {
 						String fileName = item.getName();
-						saveTempFile(item);
+						folderPath = saveTempFile(item);
 						InputStream stream = item.getInputStream();
 						//Reader reader = new InputStreamReader(stream);
 						// if ("uploadFile".equals(paramName)) {
 						MorphbankConfig.SYSTEM_LOGGER.info("Processing file " + fileName);
-						processRequest(stream, out, fileName);
+						processRequest(stream, out, fileName, folderPath);
 						MorphbankConfig.SYSTEM_LOGGER.info("Processing complete");
 						// }
 					}
 				}
 			}
-			this.htmlPresentation(request, response);
+			this.htmlPresentation(request, response, folderPath);
 			out.close();
 		} catch (FileUploadException e) {
 			e.printStackTrace();
@@ -173,7 +171,7 @@ public class Uploader extends javax.servlet.http.HttpServlet implements javax.se
 	private void resetVariables() {
 		listOfXmlFiles = new ArrayList<String>();
 		sendToDB = false;
-		//code below is for testing purpuses only and should be removed
+		//code below is for testing purposes only and should be removed
 		String propertyFile = this.getInitParameter("properties");
 		Properties prop = new Properties();
 		try {
@@ -230,8 +228,9 @@ public class Uploader extends javax.servlet.http.HttpServlet implements javax.se
 		}
 	}
 
-	private void saveTempFile(FileItem item) {
+	private String saveTempFile(FileItem item) {
 		FileOutputStream outputStream;
+		String folderPath = "";
 		String filename = "";
 		if (!folderCreated) {
 			folderPath = MorphbankConfig.getFilepath() + IOTools.createFolder(item.getName()) + "/";
@@ -247,25 +246,20 @@ public class Uploader extends javax.servlet.http.HttpServlet implements javax.se
 			outputStream = new FileOutputStream(filename);
 			outputStream.write(item.get());
 			outputStream.close();
+			return folderPath;
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		return null;
 	}
-
-//	private void eraseTempFile(String fileName) {
-//		File file = new File(fileName);
-//		if (file.exists()) {
-//			file.delete();
-//		}
-//	}
 
 	/**
 	 * Split a custom workbook 
 	 * @return list of xls files to process
 	 */
-	private ArrayList<String> splitXls() {
+	private ArrayList<String> splitXls(String folderPath) {
 		Split split = new Split(folderPath + "temp.xls", numLines);
 		try {
 			return split.createMultiplefiles();
@@ -279,12 +273,12 @@ public class Uploader extends javax.servlet.http.HttpServlet implements javax.se
 		return null;
 	}
 
-	private boolean processRequest(InputStream in, PrintWriter out, String fileName) {
+	private boolean processRequest(InputStream in, PrintWriter out, String fileName, String folderPath) {
 		try {
 			ArrayList<String> filesToProcess = new ArrayList<String>();
 			//TODO check if it is a csv file
 			if (fileName.endsWith(".xls")) {
-				filesToProcess = splitXls();
+				filesToProcess = splitXls(folderPath);
 				if (filesToProcess == null) {
 					return false;
 				}
@@ -295,13 +289,13 @@ public class Uploader extends javax.servlet.http.HttpServlet implements javax.se
 			Iterator<String> iter = filesToProcess.iterator();
 			while (iter.hasNext()) {
 				String next = iter.next();
-				Request requestDoc = createRequest(next);
+				Request requestDoc = createRequest(next, folderPath);
 //				if (requestDoc == null) {
 //					listOfXmlFiles.add("request null");
 //				}
-				String xmlFileName = this.processXls(requestDoc); //convert xls to xml
+				String xmlFileName = this.processXls(requestDoc, folderPath); //convert xls to xml
 				if (sendToDB) { //upload the file to morphbank
-					this.processUpload(xmlFileName);
+					this.processUpload(xmlFileName, folderPath);
 				}
 			}
 			IOTools.eraseTempFile(folderPath, "temp.xls", false);
@@ -318,8 +312,8 @@ public class Uploader extends javax.servlet.http.HttpServlet implements javax.se
 	 * @param requestDoc
 	 * @return the name of the xml file
 	 */
-	private String processXls(Request requestDoc) {
-		String reqFileName = saveRequestXmlAsFile(requestDoc);
+	private String processXls(Request requestDoc, String folderPath) {
+		String reqFileName = saveRequestXmlAsFile(requestDoc, folderPath);
 		MorphbankConfig.SYSTEM_LOGGER.info("<!-- request file: "
 				+ folderPath + reqFileName + " -->");
 		listOfXmlFiles.add(folderPath + reqFileName);
@@ -329,7 +323,7 @@ public class Uploader extends javax.servlet.http.HttpServlet implements javax.se
 	/**
 	 * Upload to morphbank
 	 */
-	private void processUpload(String file) {
+	private void processUpload(String file, String folderPath) {
 		Request request = null;
 		String xmlOutputFile = file.replaceFirst(".xml", "-report.xml");
 		file = folderPath + file;
@@ -352,7 +346,7 @@ public class Uploader extends javax.servlet.http.HttpServlet implements javax.se
 		}
 	}
 
-	private Request createRequest(String fileName) {
+	private Request createRequest(String fileName, String folderPath) {
 		int OWNER_ID = 477719;
 		int SUBMITTER_ID = 477719;
 		int GROUP_ID = 2505490;
@@ -368,7 +362,7 @@ public class Uploader extends javax.servlet.http.HttpServlet implements javax.se
 
 	static String FILE_PREFIX = "req";
 
-	private String[] getReqFileNames() {
+	private String[] getReqFileNames(String folderPath) {
 		File dir = new File(folderPath);
 
 		// It is also possible to filter the list of returned files.
@@ -382,8 +376,8 @@ public class Uploader extends javax.servlet.http.HttpServlet implements javax.se
 		return children;
 	}
 
-	private int getNextReqFileNumber() {
-		String[] children = getReqFileNames();
+	private int getNextReqFileNumber(String folderPath) {
+		String[] children = getReqFileNames(folderPath);
 		int max = 0;
 		if (children == null) return 0;
 		for (int i = 0; i < children.length; i++) {
@@ -399,10 +393,10 @@ public class Uploader extends javax.servlet.http.HttpServlet implements javax.se
 		return max + 1;
 	}
 
-	private String saveRequestXmlAsFile(Object xmlDoc) {
+	private String saveRequestXmlAsFile(Object xmlDoc, String folderPath) {
 
 		String fileName = null;
-		int i = getNextReqFileNumber();
+		int i = getNextReqFileNumber(folderPath);
 		fileName = FILE_PREFIX + i + ".xml";
 		String filePath = folderPath + fileName;
 		try {
@@ -417,7 +411,7 @@ public class Uploader extends javax.servlet.http.HttpServlet implements javax.se
 		return fileName;
 	}
 
-	private String saveResponseXmlAsFile(String reqFileName, Object xmlDoc) {
+	private String saveResponseXmlAsFile(String reqFileName, Object xmlDoc, String folderPath) {
 		String fileName = reqFileName.replaceFirst("req", "resp");
 		if (fileName == null) {
 			fileName = "resp"+reqFileName;
@@ -438,14 +432,6 @@ public class Uploader extends javax.servlet.http.HttpServlet implements javax.se
 
 	}
 
-	/**
-	 * Creates a folder with a complex name so
-	 * that external users would not access it.
-	 * @return the name of the folder.
-	 */
-	private String createUniqueFolder() {
-		return null;
-	}
 
 	private String createHtmlForm(String link, String fileName) {
 		String table = 
@@ -471,7 +457,7 @@ public class Uploader extends javax.servlet.http.HttpServlet implements javax.se
 	 * @param request
 	 * @param response
 	 */
-	private void htmlPresentation(HttpServletRequest request, HttpServletResponse response) {
+	private void htmlPresentation(HttpServletRequest request, HttpServletResponse response, String folderPath) {
 		StringBuffer listOfFiles = new StringBuffer();
 		Iterator<String> iter = listOfXmlFiles.iterator();
 		while (iter.hasNext()) {
