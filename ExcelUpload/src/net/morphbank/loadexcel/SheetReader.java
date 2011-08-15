@@ -73,6 +73,7 @@ public class SheetReader {
 	protected String[] headersLocality= null;
 	protected String[] headersTaxon = null;
 	protected String[] headersExtLink = null;
+	protected String[] headersSupportData = null;
 	int numFields;
 	
 	// constructor for the class SheetReader;
@@ -175,6 +176,11 @@ public class SheetReader {
 		for (int i = 0; i < numFields; i++) {
 			headersExtLink[i] = extLinkSheet.getCell(i, 0).getContents().toLowerCase().trim();
 		}
+		numFields = supportDataSheet.getColumns();
+		headersSupportData = new String[numFields];
+		for (int i = 0; i < numFields; i++) {
+			headersSupportData[i] = supportDataSheet.getCell(i, 0).getContents().toLowerCase().trim();
+		}
 	}
 	
 	public String getValue(String sheet, String fieldName, int row) {
@@ -192,6 +198,8 @@ public class SheetReader {
 			headers = headersTaxon;
 		if (sheet.equalsIgnoreCase("ExternalLinks")) 
 			headers = headersExtLink;
+		if (sheet.equalsIgnoreCase("SupportData")) 
+			headers = headersSupportData;
 		
 		for (int i = 0; i < headers.length; i++) {
 			if (headers != null && fieldName.equals(headers[i])) {
@@ -210,6 +218,7 @@ public class SheetReader {
 		if (sheet.equalsIgnoreCase("Locality")) headers = headersLocality;
 		if (sheet.equalsIgnoreCase("Taxon")) headers = headersTaxon;
 		if (sheet.equalsIgnoreCase("ExternalLinks")) headers = headersExtLink;
+		if (sheet.equalsIgnoreCase("SupportData")) headers = headersSupportData;
 		for (int i = 0; i < headers.length; i++) {
 			if (headers != null && fieldName.equalsIgnoreCase(headers[i])) {
 				return i;
