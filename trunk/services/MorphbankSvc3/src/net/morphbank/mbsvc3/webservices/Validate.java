@@ -52,8 +52,6 @@ public class Validate extends javax.servlet.http.HttpServlet implements javax.se
 
 	public void init(ServletConfig config) throws ServletException {
 		super.init(config);
-
-
 		// setup persistence unit from parameter, if available
 		RequestParams.initService(config);
 	}
@@ -83,11 +81,8 @@ public class Validate extends javax.servlet.http.HttpServlet implements javax.se
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 	throws ServletException, IOException {
-
 		PrintWriter out = response.getWriter();
-
 		MorphbankConfig.SYSTEM_LOGGER.info("starting post");
-//		MorphbankConfig.ensureWorkingConnection();
 		MorphbankConfig.SYSTEM_LOGGER.info("<!-- persistence: "
 				+ MorphbankConfig.getPersistenceUnit() + " -->");
 		MorphbankConfig.SYSTEM_LOGGER.info("<!-- filepath: " + MorphbankConfig.getFilepath()
@@ -99,33 +94,36 @@ public class Validate extends javax.servlet.http.HttpServlet implements javax.se
 
 		try {
 			String fileType = "";
-
+			String[] fileTypes = {"empty", "empty"};
+			boolean versionInfo = false;
+			boolean errors = false;
 			// Process the uploaded items
 			List<?> /* FileItem */items = upload.parseRequest(request);
 			Iterator<?> iter = items.iterator();
 			while (iter.hasNext()) {
 				FileItem item = (FileItem) iter.next();
 				if (item.isFormField()) {
-					fileType = processFormField(item);
+					versionInfo = processFormField(item);
 				} else {
-					//String paramName = item.getFieldName();
 					if (checkFilesBeforeUpload(item)) {
 						String fileName = item.getName();
 						String folderPath = saveTempFile(item);
-						if (folderPath == null) {
+						if (folderPath == null) 
 							output.append("Error creating a folder. Try again later. <br />");
-						}
 						else {
 							InputStream stream = item.getInputStream();
 							MorphbankConfig.SYSTEM_LOGGER.info("Processing file " + fileName);
-							processRequest(stream, out, fileName, fileType, folderPath);
+							fileType = this.excelFileType(fileName, folderPath);
+							if (fileType == MB3AP_BOOK) fileTypes[0] = MB3AP_BOOK;
+							if (fileType == CUSTOM_BOOK) fileTypes[1] = CUSTOM_BOOK;
+							errors |= processRequest(stream, out, fileName, fileType, folderPath, errors, versionInfo);
 							MorphbankConfig.SYSTEM_LOGGER.info("Processing complete");
 							IOTools.eraseTempFile(folderPath, fileName, true);
 						}
 					}
-					//}
 				}
 			}
+			if (errors)	this.errorExplanations(fileTypes);
 			htmlPresentation(request, response);
 			out.close();
 		} catch (FileUploadException e) {
@@ -147,7 +145,7 @@ public class Validate extends javax.servlet.http.HttpServlet implements javax.se
 //			testPassed = false;
 //		}
 		if (!(item.getName().endsWith(".xls") || item.getName().endsWith(".csv"))) {
-			output.append("The file extension must be .xls");
+			output.append("The file extension of " + item.getName() +" must be .xls<br/>");
 			testPassed = false;
 		}
 		return testPassed;
@@ -157,54 +155,51 @@ public class Validate extends javax.servlet.http.HttpServlet implements javax.se
 	 * Process the fields in the form that are not FileItem
 	 * @param item
 	 */
-	private String processFormField(FileItem item) {
-		return "";
+	private boolean processFormField(FileItem item) {
+		if(item.getFieldName().equalsIgnoreCase("VersionInfo")) {
+			if(item.getString().equalsIgnoreCase("Info"))
+					return true;
+		}
+		return false;
 	}
 
 
-	private boolean processRequest(InputStream in, PrintWriter out, String fileName, String fileType, String folderPath) {
+	private boolean processRequest(InputStream in, PrintWriter out, String fileName, String fileType, String folderPath, boolean errors, boolean versionInfo) {
 		fileType = this.excelFileType(fileName, folderPath);
-		
 		try {
 			if (fileType.equalsIgnoreCase(MB3AP_BOOK)){ //Animalia or Plantae
 				SheetReader sheetReader = new SheetReader(folderPath + fileName, null);
-				ValidateXls isvalid = new ValidateXls(sheetReader);
+				ValidateXls isvalid = new ValidateXls(sheetReader, versionInfo);
 
 				if (!isvalid.checkEverything()) {
 					output.append("<b>Testing file: " + fileName + "</b><br />");
-					output.append(isvalid.getOutput());
-					output.append("Error(s) in SpreadSheet. Please check for errors in rows mentioned above.<br />");
-					output.append("<br/><i>\"does not match\" errors are typically from modifying rows in the Locality, Specimen or View sheet.<br />");
-					output.append("Excel does not automatically update the item selected from the drop down list after a change.<br />");
-					output.append("You need to go to the row with an error and select the right Locality, Specimen or View from the list again.</i><br />");
+					output.append(isvalid.getOutput() + "<br />");
+					errors = true;
 				}
 				else {
 					output.append("<b>Testing file: " + fileName + "</b><br />");
 					output.append(isvalid.getOutput());
-					output.append("No error found in the document. Congratulations!<br />");
+					output.append("<b>No error found in the document. Congratulations!</b><br /><br />");
 				}
 			}
 			else { //TODO Custom Workbook
-				ValidateCustomXls isvalid = new ValidateCustomXls(folderPath + fileName);
+				ValidateCustomXls isvalid = new ValidateCustomXls(folderPath + fileName, versionInfo);
 				if (!isvalid.checkEverything()){
 					output.append("<b>Testing file: " + fileName + "</b><br />");
-					output.append(isvalid.getOutput());
-					output.append("Error(s) in SpreadSheet. Please check for errors in rows mentioned above.<br />");
-					output.append("<br/><i>\"duplicates\" errors exit if a column should only have unique values per row and the same value is found<br />");
-					output.append("more than once.</i>");
+					output.append(isvalid.getOutput() + "<br />");
+					errors = true;
 				}
 				else {
 					output.append("<b>Testing file: " + fileName + "</b><br />");
 					output.append(isvalid.getOutput());
-					output.append("No error found in the document. Congratulations!<br />");
+					output.append("<b>No error found in the document. Congratulations!</b><br /><br />");
 				}
 			}
-
 		} catch (Exception e) {
 			e.printStackTrace(out);
 			out.close();
 		}
-		return true;
+		return errors;
 	}
 
 	private String excelFileType(String fileName, String folderPath) {
@@ -235,8 +230,10 @@ public class Validate extends javax.servlet.http.HttpServlet implements javax.se
 		}
 	}
 
-	/*
-	 * saves the item and creates a unique folder
+	/**
+	 *  saves the item and creates a unique folder
+	 * @param item  the file to save
+	 * @return the unique folder created
 	 */
 	private String saveTempFile(FileItem item) {
 		FileOutputStream outputStream;
@@ -254,5 +251,23 @@ public class Validate extends javax.servlet.http.HttpServlet implements javax.se
 			e.printStackTrace();
 		}
 		return null;
+	}
+	
+	/**
+	 * Various errors found in the Excel spreadsheet are explained
+	 * here to be displayed at the end of the response document.
+	 * @param fileType type of excel file (custom or animalia, plantae)
+	 */
+	private void errorExplanations(String[] fileTypes) {
+		output.append("<b>Error(s) in SpreadSheet(s). Please check for errors in rows mentioned above.</b><br />");
+		if (fileTypes[0].equals(MB3AP_BOOK)) {
+		output.append("<br/><i>\"does not match\" errors in mb3a or mb3p are typically from modifying rows in the Locality, Specimen or View sheet.<br />");
+		output.append("Excel does not automatically update the item selected from the drop down list after a change.<br />");
+		output.append("You need to go to the row with an error and select the right Locality, Specimen or View from the list again.</i><br />");
+		}
+		if (fileTypes[1].equals(CUSTOM_BOOK)) {
+		output.append("<br/><i>\"duplicates\" errors exit if a column should only have unique values per row<br />");
+		output.append("and the same value is found more than once.</i>");
+		}
 	}
 }

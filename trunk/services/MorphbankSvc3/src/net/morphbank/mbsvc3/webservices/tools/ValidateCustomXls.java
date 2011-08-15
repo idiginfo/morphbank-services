@@ -33,6 +33,7 @@ public class ValidateCustomXls {
 	private static final String DATA_SHEET_NAME = "Data";
 	private static final String CONTRIBUTOR_SHEET_NAME = "ContributorInfo";
 	private boolean isXlsValid = true;
+	private boolean versionInfo = false;
 	private String fileName;
 	private int numFields;
 	private Workbook workbook;
@@ -43,15 +44,16 @@ public class ValidateCustomXls {
 	private String[] headersData;
 	private EntityManager em;
 	
-	public ValidateCustomXls(String fileName) {
+	public ValidateCustomXls(String fileName, boolean versionInfo) {
 		this.fileName = fileName;
 		this.workbook = this.createWorkbook();
 		this.createSheets();
 		this.readHeaders();
+		this.versionInfo = versionInfo;
 	}
 
 	public static void main(String[] args) {
-		ValidateCustomXls test = new ValidateCustomXls("/home/gjimenez/Downloads/customWorkbook-testContinentWaterBody.xls");
+		ValidateCustomXls test = new ValidateCustomXls("/home/gjimenez/Downloads/customWorkbook-testContinentWaterBody.xls", true);
 		boolean passed = test.checkEverything();
 		System.out.println(passed);
 	}
@@ -74,8 +76,10 @@ public class ValidateCustomXls {
 	}
 
 	public boolean checkEverything() {
-		System.out.println("Version Info: " + getVersionNumber());
-		output.append("Version Info: " + getVersionNumber() + "<br />");
+		if (versionInfo) {
+			System.out.println("Version Info: " + getVersionNumber());
+			output.append("Version Info: " + getVersionNumber() + "<br />");
+		}
 		isXlsValid &= this.checkUniqueImageExtId();
 		isXlsValid &= this.checkFormatDateColumns();
 		isXlsValid &= this.checkNoSpaceInFileName();
@@ -85,7 +89,7 @@ public class ValidateCustomXls {
 
 	private String getVersionNumber() {
 		Integer col = this.getColumnNumberByName(DROP_DOWNS_SHEET_NAME, "Version Info");
-		if (col == null) return "no version for this file";
+		if (col == null) return "no version for this file (that's ok, this is not an error. It means there is a more recent version available online.)";
 		return this.getEntry(DROP_DOWNS_SHEET_NAME, col, 1);
 	}
 
