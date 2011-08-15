@@ -12,12 +12,25 @@ public class ValidateXls {
 	
 	SheetReader sheetReader;
 	private boolean isXlsValid = true;
+	private boolean versionInfo;
+	StringBuffer output = new StringBuffer();
 
-	public ValidateXls(SheetReader sheetReader) {
+	public ValidateXls(SheetReader sheetReader, boolean versionInfo) {
 		this.sheetReader = sheetReader;
+		this.versionInfo = versionInfo;
 	}
 	
 	public boolean checkEverything() {
+		if (this.sheetReader == null) {
+			System.out.println("Unknown error with the Excel file. Please try again.");
+			output.append("Unknown error with the Excel file. Please try again.");
+			return false;
+		}
+		if (versionInfo) {
+			System.out.println("Version Info: " + getVersionNumber());
+			output.append("Version Info: " + getVersionNumber() + "<br />");
+		}
+		isXlsValid &= checkCredentials();
 		isXlsValid &= isSpecimenVSLocalityOk();
 		isXlsValid &= isImageVSSpecimenOk();
 		isXlsValid &= isImageVSViewOk();
@@ -90,9 +103,41 @@ public class ValidateXls {
 				System.err.println("The " + col1Sheet + "'s " + col2Sheet.toLowerCase() +" row " + (i+1) +
 						" does not match any " + col2Sheet.toLowerCase() +
 						" in the " + col2Sheet + " spreadsheet.");
+				output.append("The " + col1Sheet + "'s " + col2Sheet.toLowerCase() +" row " + (i+1) +
+						" does not match any " + col2Sheet.toLowerCase() +
+						" in the " + col2Sheet + " spreadsheet. <br />");
 				noErrorInColumn &= false;
 			}
 		}
 		return noErrorInColumn;
 	}
+	
+	private String getVersionNumber() {
+		Integer col = sheetReader.getColumnNumberByName("SupportData", "Version Info");
+		if (col == null) return "no version for this file. (that's ok, this is not an error. It means there is a more recent version available online.)";
+		return sheetReader.getEntry("SupportData", col, 1);
+	}
+	
+	public StringBuffer getOutput() {
+		return output;
+	}
+	
+	/**
+	 * Checks if any required field in ImageCollection
+	 * is empty.
+	 * @return false if any mandatory field is empty
+	 */
+	private boolean checkCredentials() {
+		Sheet credentials = sheetReader.getSheet("ImageCollection");
+		boolean anyEmpty = false;
+		for (int i= 3; i <= 7; i++) {
+			if (credentials.getCell(1, i) == null || credentials.getCell(1, i).getContents().equalsIgnoreCase("")) {
+				output.append(credentials.getCell(0, i).getContents() + " cannot be empty.<br />");
+				anyEmpty = true;
+			}
+				
+		}
+		return !anyEmpty;
+	}
+	
 }

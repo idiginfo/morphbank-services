@@ -34,6 +34,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Properties;
 import java.util.Vector;
 
@@ -98,11 +99,12 @@ public class LoadData {
 
 			// reading from the excel sheet
 			sheetReader = new SheetReader(filename, newconnect);
-			ValidateXls isvalid = new ValidateXls(sheetReader);
+			ValidateXls isvalid = new ValidateXls(sheetReader, true);
 			if (!isvalid.checkEverything()) {
 				System.err.println("Error(s) in SpreadSheet. Program interrupted.");
 				System.exit(0);
 			}
+			System.out.println("No Error found. Let's get this baby runnin'!");
 			checkNames = new CheckNameTable();
 			externalLinks = new ExternalLinks();
 
