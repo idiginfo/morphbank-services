@@ -97,6 +97,7 @@ public class Locality {
 			if (sheetReader.getColumnNumberByName(MYTYPE, "State or Province") != null) {
 				updater.addViewLocalityStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "County"), row, "county");
 			}
+			updater.addStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "Information Withheld"), row, "informationWithheld");
 			String matchQuery = "";
 			if (!updater.isMatchQueryNull()) {
 				matchQuery = updater.getMatchQuery();
