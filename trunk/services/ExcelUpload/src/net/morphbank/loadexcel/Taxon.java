@@ -74,7 +74,7 @@ public class Taxon {
 			ResultSet result = statement.executeQuery(query);
 			if (!result.next()) return false;
 			this.tsn = result.getInt(1);
-			this.parentTsn = result.getInt(2);
+			this.parentTsn = result.getInt("parent_tsn");
 			this.kingdomId = result.getInt(3);
 			this.rankId = result.getInt(4);
 			this.scientificName = result.getString(5);
