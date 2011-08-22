@@ -346,7 +346,7 @@ public class MapSpreadsheetToXml {
 	}
 
 	public static XmlId getTaxonId(FieldMapper specimen) {
-		String tsn = specimen.getValue("tsn");
+		String tsn = specimen.getValue("Determination TSN");
 		XmlId taxonId = new XmlId();
 		if (tsn != null && tsn.length() > 0) taxonId.addExternal("ITIS:" + tsn);
 		String sciName = specimen.getValue("Determination Scientific Name");
