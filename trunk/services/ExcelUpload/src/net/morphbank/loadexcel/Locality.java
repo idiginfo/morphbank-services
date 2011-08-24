@@ -59,7 +59,7 @@ public class Locality {
 		rows = sheetReader.GetRows(MYTYPE);
 		for (int row = 1; row < rows; row++) {
 			//			String localityRef = sheetReader.getEntry(MYTYPE, 11, row);
-			String localityRef = sheetReader.getValue(MYTYPE, "Locality Name [Auto generated--Do not change!]", row);
+			String localityRef = sheetReader.getValue(MYTYPE, ExcelTools.COL_LOCALITY_NAME, row);
 			updater = new Updater(sheetReader, MYTYPE);
 
 			// get and process field values
@@ -73,31 +73,31 @@ public class Locality {
 			//			updater.addNumericMatchColumn(8, row, "maximumElevation");
 			//			updater.addNumericMatchColumn(9, row, "minimumDepth");
 			//			updater.addNumericMatchColumn(10, row, "maximumDepth");
-			if(sheetReader.getColumnNumberByName(MYTYPE, "Continent Ocean") != null) {
-				updater.addStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "Continent Ocean"), row, "continentOcean");
+			if(sheetReader.getColumnNumberByName(MYTYPE, ExcelTools.COL_CONTINENT_OCEAN) != null) {
+				updater.addStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, ExcelTools.COL_CONTINENT_OCEAN), row, "continentOcean");
 			}
-			if(sheetReader.getColumnNumberByName(MYTYPE, "Continent") != null) {
-				updater.addStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "Continent"), row, "continent");
+			if(sheetReader.getColumnNumberByName(MYTYPE, ExcelTools.COL_CONTINENT) != null) {
+				updater.addStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, ExcelTools.COL_CONTINENT), row, "continent");
 			}
-			if(sheetReader.getColumnNumberByName(MYTYPE, "Water Body") != null) {
-				updater.addStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "Water Body"), row, "ocean");
+			if(sheetReader.getColumnNumberByName(MYTYPE, ExcelTools.COL_WATER_BODY) != null) {
+				updater.addStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, ExcelTools.COL_WATER_BODY), row, "ocean");
 			}
-			updater.addViewLocalityStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "Country"), row, "country");
-			updater.addViewLocalityStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "Locality Description"), row, "locality");
-			updater.addLocalityLatLongMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "Latitude"), row, "latitude");
-			updater.addLocalityLatLongMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "Longitude"), row, "longitude");
-			updater.addNumericMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "Coordinate Precision"), row, "coordinatePrecision");
-			updater.addNumericMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "Minimum Elevation"), row, "minimumElevation");
-			updater.addNumericMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "Maximum Elevation"), row, "maximumElevation");
-			updater.addNumericMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "Minimum Depth"), row, "minimumDepth");
-			updater.addNumericMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "Maximum Depth"), row, "maximumDepth");
+			updater.addViewLocalityStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, ExcelTools.COL_COUNTRY), row, "country");
+			updater.addViewLocalityStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, ExcelTools.COL_LOCALITY_DESCRIPTION), row, "locality");
+			updater.addLocalityLatLongMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, ExcelTools.COL_LATITUDE), row, "latitude");
+			updater.addLocalityLatLongMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, ExcelTools.COL_LONGITUDE), row, "longitude");
+			updater.addNumericMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, ExcelTools.COL_COORDINATE_PRECISION), row, "coordinatePrecision");
+			updater.addNumericMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, ExcelTools.COL_MINIMUM_ELEVATION), row, "minimumElevation");
+			updater.addNumericMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, ExcelTools.COL_MAXIMUM_ELEVATION), row, "maximumElevation");
+			updater.addNumericMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, ExcelTools.COL_MINIMUM_DEPTH), row, "minimumDepth");
+			updater.addNumericMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, ExcelTools.COL_MAXIMUM_DEPTH), row, "maximumDepth");
 			if (sheetReader.getColumnNumberByName(MYTYPE, "State or Province") != null) {
-				updater.addViewLocalityStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "State or Province"), row, "state");
+				updater.addViewLocalityStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, ExcelTools.COL_STATE_OR_PROVINCE), row, "state");
 			}
 			if (sheetReader.getColumnNumberByName(MYTYPE, "State or Province") != null) {
-				updater.addViewLocalityStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "County"), row, "county");
+				updater.addViewLocalityStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, ExcelTools.COL_COUNTY), row, "county");
 			}
-			updater.addStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "Information Withheld"), row, "informationWithheld");
+			updater.addStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, ExcelTools.COL_INFORMATION_WITHHELD), row, "informationWithheld");
 			String matchQuery = "";
 			if (!updater.isMatchQueryNull()) {
 				matchQuery = updater.getMatchQuery();

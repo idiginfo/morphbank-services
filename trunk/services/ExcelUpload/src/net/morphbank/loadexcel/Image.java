@@ -67,16 +67,16 @@ public class Image {
 		int rows = sheetReader.GetRows(MYTYPE);
 		for (int row = 1; row < rows; row++) {
 //			originalFileName = sheetReader.getEntry(MYTYPE, 5, row);
-			originalFileName = sheetReader.getValue(MYTYPE, "Image file name", row);
+			originalFileName = sheetReader.getValue(MYTYPE, ExcelTools.COL_IMAGE_FILE_NAME, row);
 			if (originalFileName.equals("")) continue;
 //			magnification = sheetReader.getEntry(MYTYPE, 3, row);// int
-			magnification = sheetReader.getValue(MYTYPE, "Magnification", row);
+			magnification = sheetReader.getValue(MYTYPE, ExcelTools.COL_MAGNIFICATION, row);
 //			copyrightText = sheetReader.getEntry(MYTYPE, 4, row);
-			copyrightText = sheetReader.getValue(MYTYPE, "Copyright Info", row);
+			copyrightText = sheetReader.getValue(MYTYPE, ExcelTools.COL_COPYRIGHT_INFO, row);
 			imageType = getImageType(originalFileName);
 
 //			String viewRef = sheetReader.getEntry(MYTYPE, 2, row);
-			String viewRef = sheetReader.getValue(MYTYPE, "My View Name", row);
+			String viewRef = sheetReader.getValue(MYTYPE, ExcelTools.COL_MY_VIEW_NAME, row);
 			viewId = View.getView(viewRef);
 			if (viewId == 0) {
 				System.out.println("Image row " + row
@@ -90,10 +90,10 @@ public class Image {
 			// System.out.println("Specimen id for this image is " +
 			// specimenId);
 			
-			photographer = sheetReader.getValue(MYTYPE, "Photographer", row);
-			if (sheetReader.getValue(MYTYPE, "eol", row).equalsIgnoreCase("yes")) eol = 1;
+			photographer = sheetReader.getValue(MYTYPE, ExcelTools.COL_PHOTOGRAPHER, row);
+			if (sheetReader.getValue(MYTYPE, ExcelTools.COL_EOL, row).equalsIgnoreCase("yes")) eol = 1;
 			else eol =0;
-			creativeCommons = sheetReader.getValue(MYTYPE, "Creative Commons", row);
+			creativeCommons = sheetReader.getValue(MYTYPE, ExcelTools.COL_CREATIVE_COMMONS, row);
 			
 			dateToPublish = sheetReader.getReleaseDate();
 			userId = sheetReader.GetUserId();

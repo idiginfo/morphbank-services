@@ -62,7 +62,7 @@ public class View {
 		// "rows" );
 
 		for (int row = 1; row < rows; row++) {
-			if (sheetReader.getEntry(MYTYPE, 9, row).equals("View Applicable to Taxon")) continue;
+			if (sheetReader.getEntry(MYTYPE, 9, row).equals(ExcelTools.COL_VIEW_APPLICABLE_TO_TAXON)) continue;
 			// if (!isValidView(row)) continue;
 
 			updater = new Updater(sheetReader, MYTYPE);
@@ -80,13 +80,13 @@ public class View {
 			//			updater.addNamedMatchColumn(7, row, "sex", "Sex");
 			//			updater.addNamedMatchColumn(8, row, "form", "Form");
 			//			updater.addStringColumn("viewName", viewName);
-			updater.addViewLocalityStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "Specimen Part"), row, "specimenPart");
-			updater.addViewLocalityStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "View Angle"), row, "viewAngle");
-			updater.addViewLocalityStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "Imaging Technique"), row, "imagingTechnique");
-			updater.addViewLocalityStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "Imaging Preparation Technique"), row, "imagingPreparationTechnique");
-			updater.addViewLocalityStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "Developmental Stage"), row, "developmentalStage");
-			updater.addViewLocalityNamedMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "Sex"), row, "sex", "Sex");
-			updater.addViewLocalityNamedMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, "Form"), row, "form", "Form");
+			updater.addViewLocalityStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, ExcelTools.COL_SPECIMEN_PART), row, "specimenPart");
+			updater.addViewLocalityStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, ExcelTools.COL_VIEW_ANGLE), row, "viewAngle");
+			updater.addViewLocalityStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, ExcelTools.COL_IMAGING_TECHNIQUE), row, "imagingTechnique");
+			updater.addViewLocalityStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, ExcelTools.COL_IMAGING_PREPARATION_TECHNIQUE), row, "imagingPreparationTechnique");
+			updater.addViewLocalityStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, ExcelTools.COL_VIEW_DEVELOPMENTAL_STAGE), row, "developmentalStage");
+			updater.addViewLocalityNamedMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, ExcelTools.COL_VIEW_SEX), row, "sex", "Sex");
+			updater.addViewLocalityNamedMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, ExcelTools.COL_VIEW_FORM), row, "form", "Form");
 			updater.addStringColumn("viewName", viewName);
 			String matchQuery = "";
 			if (!updater.isMatchQueryNull()) {
@@ -94,7 +94,7 @@ public class View {
 
 				if (matchQuery.length() > 0) {
 
-					String taxonName = sheetReader.getValue(MYTYPE, "View Applicable to Taxon", row);
+					String taxonName = sheetReader.getValue(MYTYPE, ExcelTools.COL_VIEW_APPLICABLE_TO_TAXON, row);
 
 					// System.out.println("Before getTsnFromName Row " + row +
 					// " name: " + taxonName);
@@ -104,7 +104,7 @@ public class View {
 						updater.addNumericMatchColumn("viewTSN", Integer.toString(viewTsn), row);
 					}
 					if (sheetReader.getEntry(MYTYPE, 1, row).equals(
-					"My ViewName[ Auto generated, do not change this field!]")) {
+							ExcelTools.COL_MY_VIEW_NAME_AUTO)) {
 						continue;
 					}
 					viewId = getExistingViewId(row);
@@ -113,8 +113,6 @@ public class View {
 						viewIds.put(viewRef, viewId);
 						continue;
 					}
-					// System.out.println("ViewName is: " + viewName);
-					String description = "New view object was added using Excel file";
 					try {
 						String insertQuery = "{call CreateObject( 'View', ?, ?, ?, ?, ?, '')}";
 						insertStmt = LoadData.getConnection().prepareCall(insertQuery);
@@ -161,7 +159,7 @@ public class View {
 				// Check if it is exactly the same view or viewTSN differs,
 				// update View accordingly
 				int dbViewTsn = result.getInt(2);
-				String viewApplTaxon = sheetReader.getValue(MYTYPE, "View Applicable to Taxon", row);
+				String viewApplTaxon = sheetReader.getValue(MYTYPE, ExcelTools.COL_VIEW_APPLICABLE_TO_TAXON, row);
 				// TODO expose this action outside of method-- hidden side
 				// effect
 				ViewUpdate(id, dbViewTsn, viewApplTaxon);
@@ -187,7 +185,7 @@ public class View {
 		int specimenRows = sheetReader.GetRows("Specimen");
 		int viewTsn = 0;
 		//		String viewName = sheetReader.getEntry(MYTYPE, 1, row);
-		String viewName = sheetReader.getValue(MYTYPE, "My View Name", row);
+		String viewName = sheetReader.getValue(MYTYPE, ExcelTools.COL_MY_VIEW_NAME, row);
 		// System.out.println("view name is " + viewName);
 		String specDesc = "";
 		String imageViewName = "";
@@ -196,21 +194,21 @@ public class View {
 		// Looking for a cooresponding Image to a provided ViewName
 		for (int imageRow = 1; imageRow < imageRows; imageRow++) {
 			//			imageViewName = sheetReader.getEntry("Image", 2, imageRow);
-			imageViewName = sheetReader.getValue("Image", "My View Name", imageRow);
+			imageViewName = sheetReader.getValue("Image", ExcelTools.COL_MY_VIEW_NAME, imageRow);
 			if ((imageViewName.length() == 0) || (!viewName.equals(imageViewName))) {
 				continue;
 			}
 			//			specDesc = sheetReader.getEntry("Image", 1, imageRow);
-			specDesc = sheetReader.getValue("Image", "Specimen Description", imageRow);
+			specDesc = sheetReader.getValue("Image", ExcelTools.COL_SPECIMEN_DESCRIPTION, imageRow);
 			if (specDesc.length() == 0) {
 				LoadData.log("No specimen description for image " + (imageRow + 1));
 				return true;// no specimen for view!
 			}
 			//			String entry = sheetReader.getEntry(MYTYPE, 9, 0);
-			String entry = sheetReader.getValue(MYTYPE, "View Applicable to Taxon", 0);
+			String entry = sheetReader.getValue(MYTYPE, ExcelTools.COL_VIEW_APPLICABLE_TO_TAXON, 0);
 			if (entry.equals("View Applicable to Taxon")) {
 				//				String taxon = sheetReader.getEntry(MYTYPE, 9, row);
-				String taxon = sheetReader.getValue(MYTYPE, "View Applicable to Taxon", row);
+				String taxon = sheetReader.getValue(MYTYPE, ExcelTools.COL_VIEW_APPLICABLE_TO_TAXON, row);
 				// System.out.println("Taxon is " + taxon);
 				temp = "SELECT tsn FROM Tree WHERE scientificName=\"" + taxon + "\"";
 				// System.out.println("Row " + row + "query: " + temp);
@@ -248,12 +246,12 @@ public class View {
 		int viewRank = 0;
 		for (int specimenRow = 1; specimenRow < specimenRows; specimenRow++) {
 			//			String specDesc = sheetReader.getEntry("Specimen", 23, specimenRow);
-			String specDesc = sheetReader.getValue("Specimen", "Specimen Description [Autogenerated -- do not change!]", specimenRow);
+			String specDesc = sheetReader.getValue("Specimen", ExcelTools.COL_SPECIMEN_DESCRIPTION, specimenRow);
 			if (!specimenDescription.equals(specDesc)) continue;
 
 			// System.out.println("I found a match");
 			//			String name = sheetReader.getEntry("Specimen", 1, specimenRow);
-			String name = sheetReader.getValue("Specimen", "Scientific Name", specimenRow);
+			String name = sheetReader.getValue("Specimen", ExcelTools.COL_SCIENTIFIC_NAME, specimenRow);
 			Taxon taxon = new Taxon(name);
 			int tsn = taxon.getTsn();
 			// System.out.println("TSN from Specimen is " + tsn);
