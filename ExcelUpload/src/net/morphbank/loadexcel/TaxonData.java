@@ -26,6 +26,8 @@ package net.morphbank.loadexcel;
 import java.io.*;
 import java.sql.*;
 import java.sql.Date;
+import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -107,15 +109,15 @@ public class TaxonData {
 			//			variety = sheetReader.getEntry(MYTYPE, 5, j);
 			//			forma = sheetReader.getEntry(MYTYPE, 6, j);
 			//			scientificName = sheetReader.getEntry(MYTYPE, 7, j);
-			family = sheetReader.getValue(MYTYPE, "Family", j);
-			genus = sheetReader.getValue(MYTYPE, "Genus", j);
-			subgenus = sheetReader.getValue(MYTYPE, "Subgenus", j);
-			specificEpithet = sheetReader.getValue(MYTYPE, "Specific epithet", j);
-			subspecies = sheetReader.getValue(MYTYPE, "ssp.", j);
-			variety = sheetReader.getValue(MYTYPE, "var.", j);
-			forma = sheetReader.getValue(MYTYPE, "forma", j);
+			family = sheetReader.getValue(MYTYPE, ExcelTools.COL_FAMILY, j);
+			genus = sheetReader.getValue(MYTYPE, ExcelTools.COL_GENUS, j);
+			subgenus = sheetReader.getValue(MYTYPE, ExcelTools.COL_SUBGENUS, j);
+			specificEpithet = sheetReader.getValue(MYTYPE, ExcelTools.COL_SPECIFIC_EPITHET, j);
+			subspecies = sheetReader.getValue(MYTYPE, ExcelTools.COL_SSP, j);
+			variety = sheetReader.getValue(MYTYPE, ExcelTools.COL_VAR, j);
+			forma = sheetReader.getValue(MYTYPE, ExcelTools.COL_FORMA, j);
 			dateToPublish = sheetReader.getReleaseDate();
-			scientificName = sheetReader.getValue(MYTYPE, "ScientificNameString", j);
+			scientificName = sheetReader.getValue(MYTYPE, ExcelTools.COL_SCIENTIFICNAMESTRING, j);
 			if (scientificName.length() == 0) {
 				continue;
 			}
@@ -132,14 +134,14 @@ public class TaxonData {
 				//				pages = sheetReader.getEntry(MYTYPE, 10, j);
 				//				tradeName = sheetReader.getEntry(MYTYPE, 11, j);
 				//				code = sheetReader.getEntry(MYTYPE, 12, j);
-				authorId = sheetReader.getValue(MYTYPE, "Taxon Author(s),year (use if not in morphbank)", j);
+				authorId = sheetReader.getValue(MYTYPE, ExcelTools.COL_TAXON_AUTHOR_YEAR, j);
 				taxonAuthorId = findAuthor(authorId);
-				publicationId = sheetReader.getValue(MYTYPE, "Morphbank Publication Id", j);
-				pages = sheetReader.getValue(MYTYPE, "Publication Pages", j);
-				tradeName = sheetReader.getValue(MYTYPE, "TradeDesignationNames", j);
-				code = sheetReader.getValue(MYTYPE, "Nomenclatural Code", j);
-				nameSource = sheetReader.getValue(MYTYPE, "Name Source", j);
-				comments = sheetReader.getValue(MYTYPE, "Comments", j);
+				publicationId = sheetReader.getValue(MYTYPE, ExcelTools.COL_MORPHBANK_PUBLICATION_ID, j);
+				pages = sheetReader.getValue(MYTYPE,ExcelTools.COL_PUBLICATION_PAGES, j);
+				tradeName = sheetReader.getValue(MYTYPE, ExcelTools.COL_TRADEDESIGNATIONNAMES, j);
+				code = sheetReader.getValue(MYTYPE, ExcelTools.COL_NOMENCLATURAL_CODE, j);
+				nameSource = sheetReader.getValue(MYTYPE, ExcelTools.COL_NAME_SOURCE, j);
+				comments = sheetReader.getValue(MYTYPE, ExcelTools.COL_COMMENTS, j);
 				if (code.equals("ICNCP")) { // it is a cultivar or hybrid
 					if (scientificName.indexOf("'") > 0) { // cultivar
 						typeName = "Cultivar name";
@@ -426,9 +428,15 @@ public class TaxonData {
 	private void setStatus() {
 		java.util.Date now = new java.util.Date();
 		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-		java.util.Date dateToPublishFormatted = Date.valueOf(format.format(dateToPublish));
+		java.util.Date dateToPublishFormatted = null;
+		try {
+			dateToPublishFormatted = format.parse(dateToPublish);
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 //		releaseDate = Date.valueOf(format.format(datecell.getDate()));
-		if (dateToPublishFormatted.before(new Date(now.getTime()))) {
+		if (dateToPublishFormatted.before(new java.util.Date(now.getTime()))) {
 			status = "public";
 		}
 	}

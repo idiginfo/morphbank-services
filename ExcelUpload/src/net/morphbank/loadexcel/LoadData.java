@@ -65,7 +65,7 @@ public class LoadData {
 		// filename = "C:/dev/java31/lib/Morphbank_MS2_p1Deb.xls";
 		// filename = "C:/dev/java2008/testutf8a.xls";
 //		filename = "/usr/local/dev/morphbank/upload/mb3a_current.xls";
-		filename = "/home/gjimenez/Downloads/mb3a_japan_prous.xls";
+		filename = "/home/gjimenez/Downloads/MatthewBuffington/mb3a_Oberthuerellinae04.xls";
 //		filename = "/home/gjimenez/Downloads/mb3a_MattBuffington_forQC.xls";
 //		imageDirectoryPath = "../Camellia/";
 		if (args.length == 0) {
