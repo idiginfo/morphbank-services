@@ -42,7 +42,7 @@ import net.morphbank.mbsvc3.mapping.ProcessRequest;
 import net.morphbank.mbsvc3.mapsheet.MapSpreadsheetToXml;
 import net.morphbank.mbsvc3.request.RequestParams;
 import net.morphbank.mbsvc3.sharing.UpdateRemote;
-import net.morphbank.mbsvc3.webservices.tools.IOTools;
+import net.morphbank.mbsvc3.webservices.tools.Tools;
 import net.morphbank.mbsvc3.webservices.tools.Split;
 import net.morphbank.mbsvc3.xml.Credentials;
 import net.morphbank.mbsvc3.xml.Request;
@@ -233,7 +233,7 @@ public class Uploader extends javax.servlet.http.HttpServlet implements javax.se
 		String folderPath = "";
 		String filename = "";
 		if (!folderCreated) {
-			folderPath = MorphbankConfig.getFilepath() + IOTools.createFolder(item.getName()) + "/";
+			folderPath = MorphbankConfig.getFilepath() + Tools.createFolder(item.getName()) + "/";
 			folderCreated = true;
 		}
 		if (item.getName().endsWith(".xls")) {
@@ -298,8 +298,8 @@ public class Uploader extends javax.servlet.http.HttpServlet implements javax.se
 					this.processUpload(xmlFileName, folderPath);
 				}
 			}
-			IOTools.eraseTempFile(folderPath, "temp.xls", false);
-			IOTools.eraseTempFile(folderPath, "temp.csv", false);
+			Tools.eraseTempFile(folderPath, "temp.xls", false);
+			Tools.eraseTempFile(folderPath, "temp.csv", false);
 		} catch (Exception e) {
 			e.printStackTrace(out);
 			out.close();
@@ -356,7 +356,7 @@ public class Uploader extends javax.servlet.http.HttpServlet implements javax.se
 		Credentials owner = new Credentials(OWNER_ID, GROUP_ID, null);
 		Request request = mapper.createRequestFromFile(fileName, submitter, owner, null,
 				numLines, firstLine);
-		IOTools.eraseTempFile(folderPath, fileName, false);
+		Tools.eraseTempFile(folderPath, fileName, false);
 		return request;
 	}
 

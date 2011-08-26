@@ -21,7 +21,7 @@ import net.morphbank.MorphbankConfig;
 import net.morphbank.loadexcel.SheetReader;
 import net.morphbank.loadexcel.ValidateXls;
 import net.morphbank.mbsvc3.request.RequestParams;
-import net.morphbank.mbsvc3.webservices.tools.IOTools;
+import net.morphbank.mbsvc3.webservices.tools.Tools;
 import net.morphbank.mbsvc3.webservices.tools.ValidateCustomXls;
 
 import org.apache.commons.fileupload.FileItem;
@@ -118,7 +118,7 @@ public class Validate extends javax.servlet.http.HttpServlet implements javax.se
 							if (fileType == CUSTOM_BOOK) fileTypes[1] = CUSTOM_BOOK;
 							errors |= processRequest(stream, out, fileName, fileType, folderPath, errors, versionInfo);
 							MorphbankConfig.SYSTEM_LOGGER.info("Processing complete");
-							IOTools.eraseTempFile(folderPath, fileName, true);
+							Tools.eraseTempFile(folderPath, fileName, true);
 						}
 					}
 				}
@@ -238,7 +238,7 @@ public class Validate extends javax.servlet.http.HttpServlet implements javax.se
 	private String saveTempFile(FileItem item) {
 		FileOutputStream outputStream;
 		String filename = "";
-		String folderPath = MorphbankConfig.getFilepath() + IOTools.createFolder(item.getName()) + "/";
+		String folderPath = MorphbankConfig.getFilepath() + Tools.createFolder(item.getName()) + "/";
 		filename =  item.getName();
 		try {
 			outputStream = new FileOutputStream(folderPath + filename);
