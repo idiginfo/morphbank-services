@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -16,6 +17,7 @@ import javax.persistence.Query;
 
 import net.morphbank.MorphbankConfig;
 import net.morphbank.object.Group;
+import net.morphbank.object.User;
 
 import jxl.Cell;
 import jxl.CellType;
@@ -53,7 +55,7 @@ public class ValidateCustomXls {
 	}
 
 	public static void main(String[] args) {
-		ValidateCustomXls test = new ValidateCustomXls("/home/gjimenez/Downloads/customWorkbook-testContinentWaterBody.xls", true);
+		ValidateCustomXls test = new ValidateCustomXls("/home/gjimenez/Downloads/JasonMottern/Heraty_16Aug2011.xls", true);
 		boolean passed = test.checkEverything();
 		System.out.println(passed);
 	}
@@ -82,14 +84,14 @@ public class ValidateCustomXls {
 		}
 		isXlsValid &= this.checkUniqueImageExtId();
 		isXlsValid &= this.checkFormatDateColumns();
-		isXlsValid &= this.checkNoSpaceInFileName();
+		isXlsValid &= this.checkOriginalFileName();
 		isXlsValid &= this.checkDBMatch();
 		return isXlsValid;
 	}
 
 	private String getVersionNumber() {
 		Integer col = this.getColumnNumberByName(DROP_DOWNS_SHEET_NAME, "Version Info");
-		if (col == null) return "no version for this file (that's ok, this is not an error. It means there is a more recent version available online.)";
+		if (col == null) return "no version for this file (that's ok, this is not an error. It means there is a more recent version available online).";
 		return this.getEntry(DROP_DOWNS_SHEET_NAME, col, 1);
 	}
 
@@ -195,39 +197,23 @@ public class ValidateCustomXls {
 	}
 	
 	private boolean checkFormatDateColumns() {
+		Integer columnNumber = this.getColumnNumberByName(DATA_SHEET_NAME, "Date Determined");
+		if (columnNumber == null) {
+			System.out.println("No Date Determined found. It could be due to an outdated spreadsheet. Check skipped on that.");
+			output.append("No Date Determined found. It could be due to an outdated spreadsheet. Check skipped on that.<br />");
+			return true;
+		}
 		Cell[] cells = dataSheet.getColumn(this.getColumnNumberByName(DATA_SHEET_NAME, "Date Determined"));
 		boolean correctFormat = true;
 		for (int i = 1; i < cells.length; i++) {
-			if (isEmpty(cells[i])) continue;
-			correctFormat = this.checkCellType(cells[i], CellType.LABEL);
+			if (Tools.isEmpty(cells[i])) continue;
+			correctFormat = Tools.checkCellType(cells[i], CellType.LABEL);
 			if (!correctFormat) {
 				System.out.println("In column Date Determined, row " + (i+1) + " should be formatted as text.");
 				output.append("In column Date Determined, row " + (i+1) + " should be formatted as text.<br />");
 			}
 		}
 		return correctFormat;
-	}
-	
-	private boolean checkCellType(Cell cell, CellType type) {
-		if (cell.getType() != type) return false;
-		return true;
-	}
-	
-	private boolean checkNoSpaceInFileName() {
-		Cell[] cells = dataSheet.getColumn(this.getColumnNumberByName(DATA_SHEET_NAME, "Original File Name"));
-		boolean isValid = true;
-		for (int i = 1; i < cells.length; i++) {
-			if (isEmpty(cells[i])) continue;
-			if (cells[i].getContents().indexOf(" ") > 0) {
-				isValid = false;
-				System.out.println("In column Original File Name, row " + (i+1) + " should not contain spaces.");
-				output.append("In column Original File Name, row " + (i+1) + " should not contain spaces.<br />");
-			}
-		}
-		return isValid;
-	}
-	private boolean isEmpty(Cell cell) {
-		return cell.getContents().equalsIgnoreCase("");
 	}
 	
 	private boolean checkDBMatch() {
@@ -251,14 +237,14 @@ public class ValidateCustomXls {
 //		query = MorphbankConfig.getEntityManager().createQuery(select);
 		for (int i = 1; i < cellsDetermination.length; i++) {
 			boolean matchFound = false;
-			if (isEmpty(cellsDetermination[i])) continue;
+			if (Tools.isEmpty(cellsDetermination[i])) continue;
 			query.setParameter("scientificName", cellsDetermination[i].getContents());
 			List tsns = query.getResultList();
 			if (tsns != null) {
 				Iterator it = tsns.iterator();
 				while (it.hasNext()) {
 					int next = (Integer) it.next();
-					int tsn = Integer.valueOf(cellsTSN[i].getContents());
+					int tsn = Integer.valueOf(this.safeCast(cellsTSN[i].getContents(), i+1));
 					if (tsn != next)
 						matchFound |= false;
 					else
@@ -278,6 +264,15 @@ public class ValidateCustomXls {
 		return columnValid;
 	}
 	
+	private String safeCast(String content, int row) {
+		if (content.indexOf(" ") != -1) {
+			output.append("Extra space found for TSN " + content.trim() + " at row " + row + ".<br />");
+			System.out.println("Extra space found for TSN " + content.trim() + " at row " + row + ".");
+			return content.trim();
+		}
+		return content;
+	}
+
 	private boolean checkCredentials() {
 		boolean credentialsOK = true;
 		boolean emptyCells = false;
@@ -310,10 +305,9 @@ public class ValidateCustomXls {
 		query.setParameter("name", gName);
 		credentialsOK &= this.compareNameId(query, gName, gId);
 		
-		select = "select u.groups from User u where u.id = :id";
-		query = em.createQuery(select);
-//		query = MorphbankConfig.getEntityManager().createQuery(select);
-		query.setParameter("id", Integer.valueOf(cId));
+		String selectTest = "select g.user from UserGroup g where g.groups = ";
+		selectTest += gId;
+		query = em.createNativeQuery(selectTest);
 		credentialsOK &= this.compareUserGroup(query, cName, cId, gName, gId);
 		
 		return credentialsOK;
@@ -361,10 +355,10 @@ public class ValidateCustomXls {
 		}
 		Iterator it = names.iterator();
 		boolean matchFound = false;
+		Integer user;
 		while (it.hasNext()) {
-			Group group = (Group) it.next();
-			int test = group.getId();
-			if (group.getId() != Integer.valueOf(gId))
+			user = (Integer) it.next();
+			if (user.intValue() != Integer.valueOf(id).intValue())
 				matchFound = false;
 			else {
 				matchFound = true;
@@ -373,13 +367,37 @@ public class ValidateCustomXls {
 		}
 		if (!matchFound) {
 			System.out.println("Id:" + id + " is not in the group " + groupName + ".");
-			output.append("Id:" + id + " is not in the group " + groupName + ".");
+			output.append("Id:" + id + " is not in the group " + groupName + ".<br />");
 		}
 		return matchFound;
 	}
 
 	public StringBuffer getOutput() {
 		return output;
+	}
+
+	private boolean checkOriginalFileName() {
+		Cell[] cells = dataSheet.getColumn(this.getColumnNumberByName(DATA_SHEET_NAME, "Original File Name"));
+		boolean isValid = true;
+		for (int i = 1; i < cells.length; i++) {
+			if (Tools.isEmpty(cells[i])) continue;
+			if (cells[i].getContents().indexOf(" ") > 0) {
+				isValid = false;
+				System.out.println("In column Original File Name, row " + (i+1) + " should not contain spaces.");
+				output.append("In column Original File Name, row " + (i+1) + " should not contain spaces.<br />");
+			}
+			if (!Tools.fileExtensionOk(cells[i].getContents())) {
+				isValid = false;
+				System.out.println("In column Original File Name, row " + (i+1) + " file extension should be tif, tiff, jpg, jpeg, gif, png or bmp.");
+				output.append("In column Original File Name, row " + (i+1) + " file extension should be tif, tiff, jpg, jpeg, gif, png or bmp.<br />");
+			}
+			if (!Tools.fileNameFormattedOk(cells[i].getContents())) {
+				isValid = false;
+				System.out.println("In column Original File Name, row " + (i+1) + " cannot use '.' in the file name.");
+				output.append("In column Original File Name, row " + (i+1) + " cannot use '.' in the file name.<br />");
+			}
+		}
+		return isValid;
 	}
 
 	
