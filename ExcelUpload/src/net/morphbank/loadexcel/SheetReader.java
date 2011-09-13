@@ -387,8 +387,8 @@ public class SheetReader {
 			try {
 				result = statement.executeQuery(temp);
 				if (!result.next()) {
-					System.out.println("The contributor does not belong to the specified group");
-					LoadData.log("The contributor does not belong to the specified group");
+					System.out.println("The contributor does not belong to the specified group.");
+					LoadData.log("The contributor does not belong to the specified group.\n\r");
 					return -1;
 //					System.exit(1);
 				}

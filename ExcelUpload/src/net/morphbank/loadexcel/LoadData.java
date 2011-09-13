@@ -91,8 +91,11 @@ public class LoadData {
 
 			// Printing statement for checking purpose
 			System.out.print("Release date: " + sheetReader.getReleaseDate());
+			if (sheetReader.GetUserId() == -1) return logFile;
 			System.out.print(" UserId: " + sheetReader.GetUserId());
+			if (sheetReader.GetGroupId() == -1) return logFile;
 			System.out.print(" group: " + sheetReader.GetGroupId());
+			if (sheetReader.GetSubmitterId() == -1) return logFile;
 			System.out.print(" submitted by: " + sheetReader.GetSubmitterId());
 			System.out.print(" institution: " + sheetReader.GetInstitutionLink());
 			System.out.println(" project: " + sheetReader.GetProjectLink1());
@@ -140,34 +143,34 @@ public class LoadData {
 			System.out.println("Uploading Locality ...");
 			log("Uploading Locality ...");
 			Locality locality = new Locality(sheetReader);
-			locality.processLocalities();
+			if (!locality.processLocalities()) return logFile;
 			System.out.println("Done.");
 			log("Done.");
 
 			System.out.println("Uploading View ...");
 			log("Uploading View ...");
 			View view = new View(sheetReader);
-			view.processViews();
+			if(!view.processViews()) return logFile;
 			System.out.println("Done.");
 			log("Done.");
 
 			System.out.println("Uploading Specimen ...");
 			log("Uploading Specimen ...");
 			Specimen specimen = new Specimen(sheetReader);
-			specimen.processSpecimens();
+			if(!specimen.processSpecimens()) return logFile;
 			System.out.println("Done.");
 			log("Done.");
 
 			System.out.println("Uploading Image ...");
 			log("Uploading Image ...");
 			Image image = new Image(sheetReader, specimen);
-			image.processImages();
+			if (!image.processImages()) return logFile;
 			System.out.println("Done.");
 			log("Done.");
 
 			System.out.println("Uploading External Links ...");
 			log("Uploading External Links ...");
-			externalLinks.processLinks();
+			if (!externalLinks.processLinks()) return logFile;
 			System.out.println("Done.");
 			log("Done.");
 
@@ -284,4 +287,9 @@ public class LoadData {
 		}
 		
 	}
+
+	public static String getLogFile() {
+		return logFile;
+	}
+
 }

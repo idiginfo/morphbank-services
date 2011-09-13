@@ -170,12 +170,13 @@ public class TaxonData {
 					System.out.println("No parent found for " + scientificName
 							+ " family '" + family + ": processing aborted");
 					LoadData.log("No parent found for " + scientificName
-							+ " family '" + family + ": processing aborted");
+							+ " family '" + family + ": processing aborted\n\r");
 //					System.exit(0);
 					return false;
 				}
 				kingdomId = sheetReader.GetKingdom(parentTsn);
 				tsn = createTaxon();
+				if (tsn == -1) return false;
 				System.out.println("Taxon created for row " + j + " '"
 						+ scientificName + "' is " + tsn);
 				LoadData.log("Taxon created for row " + j + " '"

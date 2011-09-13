@@ -63,7 +63,7 @@ public class Image {
 		this.specimen = specimen;
 	}
 
-	public void processImages() {
+	public boolean processImages() {
 		int rows = sheetReader.GetRows(MYTYPE);
 		for (int row = 1; row < rows; row++) {
 //			originalFileName = sheetReader.getEntry(MYTYPE, 5, row);
@@ -98,12 +98,15 @@ public class Image {
 			creativeCommons = sheetReader.getValue(MYTYPE, ExcelTools.COL_CREATIVE_COMMONS, row);
 			
 			dateToPublish = sheetReader.getReleaseDate();
+			if (sheetReader.GetUserId() == -1) return false;
 			userId = sheetReader.GetUserId();
+			if (sheetReader.GetGroupId() == -1) return false;
 			groupId = sheetReader.GetGroupId();
 
 			imageId = createImage(row);
 			imageIds.put(originalFileName, imageId);
 		}// end of for loop
+		return true;
 	}
 
 	private int createImage(int row) {
