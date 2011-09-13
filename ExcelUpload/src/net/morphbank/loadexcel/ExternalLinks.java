@@ -136,18 +136,22 @@ public class ExternalLinks {
 				link.extLinkType);
 		if (names.size() != 1) {
 			System.out.println("External link type '" + link.extLinkType + "' not defined");
+			LoadData.log("External link type '" + link.extLinkType + "' not defined");
 			return false;
 		}
 		link.extLinkTypeId = names.get(0);
 		if (checkForLink(link)) {
 			System.out.println("Extern link row " + link + " matches");
+			LoadData.log("Extern link row " + link + " matches");
 			return true;
 		}
 		if (insertLink(link)) {
 			System.out.println("Extern link row " + link + " added");
+			LoadData.log("Extern link row " + link + " added");
 			return true;
 		}
 		System.out.println("Extern link row " + link + " not added ");
+		LoadData.log("Extern link row " + link + " not added ");
 		return false;
 	}
 
@@ -163,7 +167,8 @@ public class ExternalLinks {
 			int res = stmt.executeUpdate();
 			if (res == 0) {
 				System.out.println("Problems updating ExternalLinksObject table");
-				System.exit(1);
+				LoadData.log("Problems updating ExternalLinksObject table");
+//				System.exit(1);
 			}
 			return true;
 		} catch (SQLException e) {

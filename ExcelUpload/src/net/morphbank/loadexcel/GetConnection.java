@@ -46,12 +46,13 @@ public class GetConnection {
 					+ "&useUnicode=true&characterEncoding=UTF-8";
 			// obtaining credential from authorised user
 			conn = DriverManager
-			// .getConnection(connString, "webuser", "namaste");
 					.getConnection(connString, userId, password);
+			
 			System.out.println("Connection was established to "+dbName+" on "+dbHost);
+			LoadData.log("Connection was established to "+dbName+" on "+dbHost);
 		} catch (Exception e) {
 			e.printStackTrace();
-			System.exit(1);
+//			System.exit(1);
 		}
 		return conn;
 	}

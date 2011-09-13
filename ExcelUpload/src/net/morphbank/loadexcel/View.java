@@ -110,6 +110,7 @@ public class View {
 					viewId = getExistingViewId(row);
 					if (viewId != 0) {
 						System.out.println("View " + row + " ref '" + viewRef + "' matches " + viewId);
+						LoadData.log("View " + row + " ref '" + viewRef + "' matches " + viewId);
 						viewIds.put(viewRef, viewId);
 						continue;
 					}
@@ -117,8 +118,11 @@ public class View {
 						String insertQuery = "{call CreateObject( 'View', ?, ?, ?, ?, ?, '')}";
 						insertStmt = LoadData.getConnection().prepareCall(insertQuery);
 						int i = 1;
+						if (sheetReader.GetUserId() == -1) return;
 						insertStmt.setInt(i++, sheetReader.GetUserId());
+						if (sheetReader.GetGroupId() == -1) return;
 						insertStmt.setInt(i++, sheetReader.GetGroupId());
+						if (sheetReader.GetSubmitterId() == -1) return;
 						insertStmt.setInt(i++, sheetReader.GetSubmitterId());
 //						insertStmt.setDate(i++, sheetReader.getReleaseDate());
 						insertStmt.setString(i++, sheetReader.getReleaseDate());
@@ -128,6 +132,8 @@ public class View {
 						viewId = res.getInt(1);
 						updater.update(viewId);
 						System.out.println("View ref '" + viewRef + "" + "' row " + row
+								+ " added with id " + viewId);
+						LoadData.log("View ref '" + viewRef + "" + "' row " + row
 								+ " added with id " + viewId);
 						LoadData.getExternalLinks().addSheetLinks(viewId);
 					} catch (Exception e) {
@@ -150,6 +156,7 @@ public class View {
 		if (updater.getMatchQuery().length() == 0) return 0;
 		String checkViewSql = "SELECT id,viewTSN FROM View WHERE " + updater.getMatchQuery();
 		System.out.println("Check view: " + checkViewSql);
+		LoadData.log("Check view: " + checkViewSql);
 		try {
 			result = statement.executeQuery(checkViewSql);
 			if (result.next()) {// record exists,read new row from the excel
@@ -167,7 +174,7 @@ public class View {
 			}
 		} catch (SQLException sql) {
 			sql.printStackTrace();
-			System.exit(1);
+//			System.exit(1);
 		}
 		return 0;
 	}
@@ -225,7 +232,7 @@ public class View {
 					}
 				} catch (Exception e) {
 					e.printStackTrace();
-					System.exit(1);
+//					System.exit(1);
 				}
 			}
 			if (imageRow == (imageRows) && (specDesc.equals(""))) {
@@ -268,7 +275,7 @@ public class View {
 					}
 				} catch (SQLException sql) {
 					sql.printStackTrace();
-					System.exit(1);
+//					System.exit(1);
 				}
 				temp = "SELECT kingdom_id,rank_id FROM Tree WHERE tsn=" + tsn;
 				// System.out.println(temp);
@@ -283,7 +290,7 @@ public class View {
 					}
 				} catch (SQLException sql) {
 					sql.printStackTrace();
-					System.exit(1);
+//					System.exit(1);
 				}
 				if ((specimenKingdom == viewKingdom)
 						&& ((viewRank == specimenRank) || (viewRank < specimenRank))) {
@@ -350,7 +357,7 @@ public class View {
 			}
 		} catch (SQLException sql) {
 			sql.printStackTrace();
-			System.exit(1);
+//			System.exit(1);
 		}
 		return true;
 	}
@@ -380,7 +387,7 @@ public class View {
 				continue;
 			} catch (SQLException sql) {
 				sql.printStackTrace();
-				System.exit(1);
+//				System.exit(1);
 			}
 		}
 		return "";

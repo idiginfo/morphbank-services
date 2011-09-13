@@ -66,6 +66,7 @@ public class Specimen {
 			tsn = determination.getTsn();
 			if (tsn == 0) {
 				System.err.println("no tsn found for " + scientificName);
+				LoadData.log("no tsn found for " + scientificName);
 			}
 
 
@@ -125,8 +126,12 @@ public class Specimen {
 			updater.addStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, ExcelTools.COL_COLLECTION_NUMBER), row, "collectionNumber");
 			updater.addStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, ExcelTools.COL_COLLECTOR_NAME), row, "collectorName");
 			updater.addStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, ExcelTools.COL_DATE_COLLECTED), row, "dateCollected");
-			updater.addStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, ExcelTools.COL_EARLIEST_DATE_COLLECTED), row, "earliestDateCollected");
-			updater.addStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, ExcelTools.COL_LATEST_DATE_COLLECTED), row, "latestDateCollected");
+			if (sheetReader.getColumnNumberByName(MYTYPE, ExcelTools.COL_EARLIEST_DATE_COLLECTED) != null) {
+				updater.addStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, ExcelTools.COL_EARLIEST_DATE_COLLECTED), row, "earliestDateCollected");
+			}
+			if (sheetReader.getColumnNumberByName(MYTYPE, ExcelTools.COL_LATEST_DATE_COLLECTED) != null) {
+				updater.addStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, ExcelTools.COL_LATEST_DATE_COLLECTED), row, "latestDateCollected");
+			}
 			//			String localityDesc = sheetReader.getValue(MYTYPE, 23, row);
 			String localityDesc = sheetReader.getValue(MYTYPE, "Locality", row);
 			Integer localityId = Locality.getLocality(localityDesc);
@@ -143,8 +148,11 @@ public class Specimen {
 					String insertQuery = "{call CreateObject( 'Specimen', ?, ?, ?, ?, ?, '')}";
 					insertStmt = LoadData.getConnection().prepareCall(insertQuery);
 					int i = 1;
+					if (sheetReader.GetUserId() == -1) return;
 					insertStmt.setInt(i++, sheetReader.GetUserId());
+					if (sheetReader.GetGroupId() == -1) return;
 					insertStmt.setInt(i++, sheetReader.GetGroupId());
+					if (sheetReader.GetSubmitterId() == -1) return;
 					insertStmt.setInt(i++, sheetReader.GetSubmitterId());
 					//					insertStmt.setDate(i++, sheetReader.getReleaseDate());
 					insertStmt.setString(i++, sheetReader.getReleaseDate());
@@ -158,9 +166,11 @@ public class Specimen {
 
 					System.out.println("Specimen ref '" + specimenRef + "' row " + row
 							+ " added with id " + specimenId);
+					LoadData.log("Specimen ref '" + specimenRef + "' row " + row
+							+ " added with id " + specimenId);
 				} catch (SQLException sql) {
 					sql.printStackTrace();
-					System.exit(1);
+//					System.exit(1);
 				}
 
 				// System.out.println("New specimen with ObjectId" + record
@@ -169,6 +179,8 @@ public class Specimen {
 				// sheetReader, specimenId, 0);
 			} else {
 				System.out.println("Specimen ref '" + specimenRef + "' row " + row + " matches "
+						+ specimenId);
+				LoadData.log("Specimen ref '" + specimenRef + "' row " + row + " matches "
 						+ specimenId);
 			}
 			specimenIds.put(specimenRef, specimenId);
@@ -199,13 +211,15 @@ public class Specimen {
 				if (!result.next()) {
 					System.out.println("No match in tree for scientific name '" + scientificName
 							+ "' tsn " + parentTsn);
+					LoadData.log("No match in tree for scientific name '" + scientificName
+							+ "' tsn " + parentTsn);
 				} else {
 					parentTsn = result.getInt(1);
 					names = result.getString(2).trim() + " " + names;
 				}
 			} catch (SQLException sql) {
 				sql.printStackTrace();
-				System.exit(1);
+//				System.exit(1);
 			}
 		}
 		return names;

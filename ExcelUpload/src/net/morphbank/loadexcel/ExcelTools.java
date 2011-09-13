@@ -16,6 +16,8 @@ public class ExcelTools {
 	public static final String COL_PHOTOGRAPHER = "Photographer";
 	public static final String COL_CREATIVE_COMMONS = "Creative Commons";
 	public static final String COL_EOL = "eol";
+	public static final String COL_IMAGE_SPECIMEN_DESCRIPTION = "Specimen Description";
+	
 	//Locality
 	public static final String COL_LOCALITY_NAME = "Locality Name [Auto generated--Do not change!]";
 	public static final String COL_CONTINENT_OCEAN = "Continent Ocean";
@@ -84,5 +86,6 @@ public class ExcelTools {
 	public static final String COL_VIEW_SEX = "Sex";
 	public static final String COL_VIEW_FORM = "Form";	
 	public static final String COL_MY_VIEW_NAME_AUTO = "My ViewName[ Auto generated, do not change this field!]";
+	public static final String VIEW_APPLICABLE_TO_TAXON = "View Applicable to Taxon";
 	
 }

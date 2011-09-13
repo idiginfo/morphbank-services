@@ -81,13 +81,13 @@ public class QuerySupport {
 								.executeUpdate("INSERT INTO ExternalLinkType(name,description) VALUES ('Project','Not provided')");
 					} catch (SQLException sqle) {
 						sqle.printStackTrace();
-						System.exit(1);
+//						System.exit(1);
 					}
 				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			System.exit(1);
+//			System.exit(1);
 		}
 	}// end of constructor for class QuerySupport
 
@@ -126,7 +126,7 @@ public class QuerySupport {
 			// "columns");
 		} catch (SQLException sql) {
 			sql.printStackTrace();
-			System.exit(1);
+//			System.exit(1);
 		}
 		if (col == 1 && row == 0)
 			return false;
@@ -166,7 +166,7 @@ public class QuerySupport {
 				return true;
 			} catch (SQLException sqle) {
 				sqle.printStackTrace();
-				System.exit(1);
+//				System.exit(1);
 			}
 		}
 		String col_name = sheetReader.getEntry(MYTYPE, i, 0);
@@ -181,13 +181,14 @@ public class QuerySupport {
 		if (col_name.equals("Continent Ocean")) {
 			// System.out.println("In the continentOcean");
 			String new_code = GenerateNewCode();
+			if (new_code == null) return false;
 			temp = "INSERT INTO ContinentOcean (description,name) VALUES ('"
 					+ new_entry.toUpperCase() + "','" + new_code + "')";
 			try {
 				statement.executeUpdate(temp);
 			} catch (SQLException sqle) {
 				sqle.printStackTrace();
-				System.exit(1);
+//				System.exit(1);
 			}
 			return true;
 		}
@@ -213,7 +214,9 @@ public class QuerySupport {
 		}
 		if (i == 90 && j == 90) {
 			System.out.println("No more codes can be generated");
-			System.exit(1);
+			LoadData.log("No more codes can be generated");
+//			System.exit(1);
+			return null;
 		}
 		return code.toUpperCase();
 	}// end of GenerateNewCode
@@ -234,7 +237,7 @@ public class QuerySupport {
 			}
 		} catch (SQLException sql) {
 			sql.printStackTrace();
-			System.exit(1);
+//			System.exit(1);
 		}
 		return false;
 	}// end of CodeExist

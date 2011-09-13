@@ -140,6 +140,7 @@ public class Updater {
 				return true;
 			} catch (SQLException sql) {
 				System.err.println("No " + colName + " match " + entry);
+				LoadData.log("No " + colName + " match " + entry);
 			}
 		}
 		return false;
@@ -173,6 +174,8 @@ public class Updater {
 			return true;
 		} catch (Exception e) {
 			System.err.println("Nonumeric " + columnName + " '" + columnValue + "' in row "
+					+ (row + 1));
+			LoadData.log("Nonumeric " + columnName + " '" + columnValue + "' in row "
 					+ (row + 1));
 			return false;
 		}

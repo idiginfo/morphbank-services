@@ -81,6 +81,8 @@ public class Image {
 			if (viewId == 0) {
 				System.out.println("Image row " + row
 						+ " not added because it has no match for view " + viewRef);
+				LoadData.log("Image row " + row
+						+ " not added because it has no match for view " + viewRef);
 				continue;
 			}
 
@@ -127,6 +129,7 @@ public class Image {
 			if (specimenId != 0) {
 				updater.addIntColumn("specimenId", specimenId);
 				System.out.println("No specimen found for image row " + row);
+				LoadData.log("No specimen found for image row " + row);
 			}
 			updater.addIntColumn("viewId", viewId);
 			updater.addNumericColumn("magnification", magnification, row);
@@ -140,10 +143,14 @@ public class Image {
 			if (numupdated != 1) {
 				System.out.println("Updater failed num " + numupdated);
 				System.out.println("specimen id: " + specimenId);
-				System.exit(0);
+				LoadData.log("Updater failed num " + numupdated);
+				LoadData.log("specimen id: " + specimenId);
+				return 0;
+//				System.exit(0);
 			}
 			LoadData.getExternalLinks().addSheetLinks(imageId);
 			System.out.println("Image row " + row + " added with id " + imageId);
+			LoadData.log("Image row " + row + " added with id " + imageId);
 			return imageId;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -177,7 +184,7 @@ public class Image {
 			return access + 1;
 		} catch (SQLException sql) {
 			sql.printStackTrace();
-			System.exit(1);
+//			System.exit(1);
 		}
 		return 0;
 	}// end of GetAccessNum
