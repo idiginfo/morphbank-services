@@ -22,7 +22,7 @@ public class ExcelTools {
 	public static final String COL_LOCALITY_NAME = "Locality Name [Auto generated--Do not change!]";
 	public static final String COL_CONTINENT_OCEAN = "Continent Ocean";
 	public static final String COL_CONTINENT = "Continent";
-	public static final String COL_WATER_BODY = "Water Body;";
+	public static final String COL_WATER_BODY = "Water Body";
 	public static final String COL_COUNTRY = "Country";
 	public static final String COL_LOCALITY_DESCRIPTION = "Locality Description";
 	public static final String COL_LATITUDE = "Latitude";

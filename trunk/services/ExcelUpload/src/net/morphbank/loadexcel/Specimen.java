@@ -49,7 +49,7 @@ public class Specimen {
 		this.sheetReader = sheetReader;
 	}
 
-	public void processSpecimens() {
+	public boolean processSpecimens() {
 		int rows = sheetReader.GetRows(MYTYPE);
 		String scientificName = "";
 		int k = 0;
@@ -148,11 +148,11 @@ public class Specimen {
 					String insertQuery = "{call CreateObject( 'Specimen', ?, ?, ?, ?, ?, '')}";
 					insertStmt = LoadData.getConnection().prepareCall(insertQuery);
 					int i = 1;
-					if (sheetReader.GetUserId() == -1) return;
+					if (sheetReader.GetUserId() == -1) return false;
 					insertStmt.setInt(i++, sheetReader.GetUserId());
-					if (sheetReader.GetGroupId() == -1) return;
+					if (sheetReader.GetGroupId() == -1) return false;
 					insertStmt.setInt(i++, sheetReader.GetGroupId());
-					if (sheetReader.GetSubmitterId() == -1) return;
+					if (sheetReader.GetSubmitterId() == -1) return false;
 					insertStmt.setInt(i++, sheetReader.GetSubmitterId());
 					//					insertStmt.setDate(i++, sheetReader.getReleaseDate());
 					insertStmt.setString(i++, sheetReader.getReleaseDate());
@@ -185,7 +185,7 @@ public class Specimen {
 			}
 			specimenIds.put(specimenRef, specimenId);
 		}
-		// System.out.println("End of specimen Constructor\n");
+		return true;
 	}
 
 	/**

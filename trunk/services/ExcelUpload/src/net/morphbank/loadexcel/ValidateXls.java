@@ -22,7 +22,7 @@ public class ValidateXls {
 	StringBuffer output = new StringBuffer();
 
 	public static void main(String[] args) {
-		SheetReader sheetReader = new SheetReader("/home/gjimenez/Downloads/MatthewBuffington/mb3a_Oberthuerellinae04.xls", null);
+		SheetReader sheetReader = new SheetReader("/home/gjimenez/Downloads/mb3p_testServices.xls", null);
 		ValidateXls test = new ValidateXls(sheetReader, true);
 		System.out.println(test.checkEverything());
 	}

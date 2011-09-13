@@ -54,7 +54,7 @@ public class Locality {
 		this.sheetReader = sheetReader;
 	}
 
-	public void processLocalities() {
+	public boolean processLocalities() {
 		ResultSet result;
 		rows = sheetReader.GetRows(MYTYPE);
 		for (int row = 1; row < rows; row++) {
@@ -120,11 +120,11 @@ public class Locality {
 							String insertQuery = "{call CreateObject( 'Locality', ?, ?, ?, now(), ?, '')}";
 							insertStmt = LoadData.getConnection().prepareCall(insertQuery);
 							int i = 1;
-							if (sheetReader.GetUserId() == -1) return;
+							if (sheetReader.GetUserId() == -1) return false;
 							insertStmt.setInt(i++, sheetReader.GetUserId());
-							if (sheetReader.GetGroupId() == -1) return;
+							if (sheetReader.GetGroupId() == -1) return false;
 							insertStmt.setInt(i++, sheetReader.GetGroupId());
-							if (sheetReader.GetSubmitterId() == -1) return;
+							if (sheetReader.GetSubmitterId() == -1) return false;
 							insertStmt.setInt(i++, sheetReader.GetSubmitterId());
 							// insertStmt.setString(i++, "2010-09-10");
 							insertStmt.setString(i++, "New locality from upload");
@@ -146,6 +146,7 @@ public class Locality {
 				}
 			}
 		}
+		return true;
 	}
 
 	public static Integer getLocality(String localityRef) {

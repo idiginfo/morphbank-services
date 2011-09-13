@@ -56,7 +56,7 @@ public class View {
 		this.sheetReader = sheetReader;
 	}
 
-	public void processViews() {
+	public boolean processViews() {
 		rows = sheetReader.GetRows(MYTYPE);
 		// System.out.println("MyView has " + columns + "columns and " + rows +
 		// "rows" );
@@ -118,11 +118,11 @@ public class View {
 						String insertQuery = "{call CreateObject( 'View', ?, ?, ?, ?, ?, '')}";
 						insertStmt = LoadData.getConnection().prepareCall(insertQuery);
 						int i = 1;
-						if (sheetReader.GetUserId() == -1) return;
+						if (sheetReader.GetUserId() == -1) return false;
 						insertStmt.setInt(i++, sheetReader.GetUserId());
-						if (sheetReader.GetGroupId() == -1) return;
+						if (sheetReader.GetGroupId() == -1) return false;
 						insertStmt.setInt(i++, sheetReader.GetGroupId());
-						if (sheetReader.GetSubmitterId() == -1) return;
+						if (sheetReader.GetSubmitterId() == -1) return false;
 						insertStmt.setInt(i++, sheetReader.GetSubmitterId());
 //						insertStmt.setDate(i++, sheetReader.getReleaseDate());
 						insertStmt.setString(i++, sheetReader.getReleaseDate());
@@ -143,6 +143,7 @@ public class View {
 				viewIds.put(viewRef, viewId);
 			}
 		}
+		return true;
 	}
 
 	public static int getView(String viewRef) {
