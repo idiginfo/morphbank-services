@@ -58,7 +58,7 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 
 
 /**
- * Servlet implementation class for Servlet: RestService
+ * Servlet implementation class for Servlet: convert
  * 
  */
 public class Uploader extends javax.servlet.http.HttpServlet implements javax.servlet.Servlet {
@@ -70,8 +70,8 @@ public class Uploader extends javax.servlet.http.HttpServlet implements javax.se
 	private int numLines = 700;
 	private ArrayList<String> listOfXmlFiles = new ArrayList<String>();
 	private boolean sendToDB;
-	private static int maxSize = 401000;
 	private static boolean folderCreated = false;
+	private static String folderPath;
 
 	/*
 	 * (non-Java-doc)
@@ -84,6 +84,7 @@ public class Uploader extends javax.servlet.http.HttpServlet implements javax.se
 
 	public void init(ServletConfig config) throws ServletException {
 		super.init(config);
+		folderPath = config.getInitParameter("filepath");
 		// setup persistence unit from parameter, if available
 		RequestParams.initService(config);
 	}
@@ -129,7 +130,7 @@ public class Uploader extends javax.servlet.http.HttpServlet implements javax.se
 		this.resetVariables();
 		MorphbankConfig.SYSTEM_LOGGER.info("<!-- persistence: "
 				+ MorphbankConfig.getPersistenceUnit() + " -->");
-		MorphbankConfig.SYSTEM_LOGGER.info("<!-- filepath: " + MorphbankConfig.getFilepath()
+		MorphbankConfig.SYSTEM_LOGGER.info("<!-- filepath: " + folderPath
 				+ " -->");
 		boolean isMultipart = ServletFileUpload.isMultipartContent(request);
 		FileItemFactory factory = new DiskFileItemFactory();
@@ -137,7 +138,7 @@ public class Uploader extends javax.servlet.http.HttpServlet implements javax.se
 		response.setContentType("text/html");
 
 		try {
-			String folderPath = "";
+//			String folderPath = "";
 			// Process the uploaded items
 			List<?> /* FileItem */items = upload.parseRequest(request);
 			Iterator<?> iter = items.iterator();
@@ -146,17 +147,15 @@ public class Uploader extends javax.servlet.http.HttpServlet implements javax.se
 				if (item.isFormField()) {
 					processFormField(item);
 				} else {
-					//String paramName = item.getFieldName();
 					if (checkFilesBeforeUpload(item)) {
 						String fileName = item.getName();
-						folderPath = saveTempFile(item);
+//						folderPath = saveTempFile(item);
+						saveTempFile(item);
 						InputStream stream = item.getInputStream();
-						//Reader reader = new InputStreamReader(stream);
-						// if ("uploadFile".equals(paramName)) {
 						MorphbankConfig.SYSTEM_LOGGER.info("Processing file " + fileName);
 						processRequest(stream, out, fileName, folderPath);
 						MorphbankConfig.SYSTEM_LOGGER.info("Processing complete");
-						// }
+
 					}
 				}
 			}
@@ -171,17 +170,7 @@ public class Uploader extends javax.servlet.http.HttpServlet implements javax.se
 	private void resetVariables() {
 		listOfXmlFiles = new ArrayList<String>();
 		sendToDB = false;
-		//code below is for testing purposes only and should be removed
-		String propertyFile = this.getInitParameter("properties");
-		Properties prop = new Properties();
-		try {
-			prop.load(new FileInputStream(propertyFile));
-			maxSize = Integer.valueOf(prop.getProperty("max_size"));
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		folderCreated = false;
 	}
 
 	/**
@@ -192,10 +181,7 @@ public class Uploader extends javax.servlet.http.HttpServlet implements javax.se
 	private boolean checkFilesBeforeUpload(FileItem item) {
 		boolean testPassed = true;
 		if (item.getName() == null || item.getName().length() < 1) return false;
-		if ((item.getSize()) > maxSize) {
-			listOfXmlFiles.add("Size of file " + item.getName() + " is too big. Max is " + maxSize / 1000 + "KB.");
-			testPassed = false;
-		}
+		
 		if (!(item.getName().endsWith(".xls") || item.getName().endsWith(".csv"))) {
 			listOfXmlFiles.add("The file extension must be .xls or .csv");
 			testPassed = false;
@@ -230,12 +216,8 @@ public class Uploader extends javax.servlet.http.HttpServlet implements javax.se
 
 	private String saveTempFile(FileItem item) {
 		FileOutputStream outputStream;
-		String folderPath = "";
 		String filename = "";
-		if (!folderCreated) {
-			folderPath = MorphbankConfig.getFilepath() + Tools.createFolder(item.getName()) + "/";
-			folderCreated = true;
-		}
+
 		if (item.getName().endsWith(".xls")) {
 			filename = folderPath + "temp.xls";
 		}
@@ -467,7 +449,7 @@ public class Uploader extends javax.servlet.http.HttpServlet implements javax.se
 			}
 			else {
 				String nameToDisplay = next.replaceFirst(folderPath, "");
-				next = next.replaceFirst(MorphbankConfig.getFilepath(), "");
+				next = next.replaceFirst(folderPath, "");
 				String link = "<a href=\"" + "xmlfiles/" + next + "\">" + nameToDisplay + "</a>";
 				if (!sendToDB) {
 					listOfFiles.append(this.createHtmlForm(link, next));

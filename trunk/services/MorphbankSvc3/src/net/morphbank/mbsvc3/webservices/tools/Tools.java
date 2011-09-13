@@ -12,6 +12,8 @@ import org.apache.commons.codec.digest.DigestUtils;
 
 public class Tools {
 
+	private static final String[] FILE_EXTENSIONS = {".tif", ".tiff",".jpg",".jpeg",".bmp",".gif",".png"};
+	
 	public static String createFolder(String fileName) {
 		Date date = new Date();
 		byte[] bytes = DigestUtils.sha(fileName + date.getTime());
@@ -44,16 +46,12 @@ public class Tools {
 	}
 
 	public static boolean fileExtensionOk(String fileName) {
-		int dot = fileName.lastIndexOf(".");
+		int dot = fileName.lastIndexOf('.');
 		if (dot == -1) return false;
 		String extension = fileName.substring(dot);
-		if (extension.equalsIgnoreCase(".tif")) return true;
-		if (extension.equalsIgnoreCase(".tiff")) return true;
-		if (extension.equalsIgnoreCase(".jpg")) return true;
-		if (extension.equalsIgnoreCase(".jpeg")) return true;
-		if (extension.equalsIgnoreCase(".bmp")) return true;
-		if (extension.equalsIgnoreCase(".gif")) return true;
-		if (extension.equalsIgnoreCase(".png")) return true;
+		for (int i = 0; i < FILE_EXTENSIONS.length; i++) {
+			if (extension.equalsIgnoreCase(FILE_EXTENSIONS[i])) return true;
+		}
 		return false;
 	}
 	
@@ -66,5 +64,16 @@ public class Tools {
 		return cell.getContents().equalsIgnoreCase("");
 	}
 	
-	
+	public static String outputListOfExtensions() {
+		StringBuffer list = new StringBuffer(64);
+		for (int i = 0; i < (FILE_EXTENSIONS.length - 1); i++) {
+			list.append(FILE_EXTENSIONS[i].substring(1));
+			list.append(", ");
+		}
+		list.append("or ");
+		list.append(FILE_EXTENSIONS[FILE_EXTENSIONS.length -1].substring(1));
+		list.append(".");
+		return list.toString();
+		
+	}
 }

@@ -50,6 +50,9 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
  */
 public class RestService extends javax.servlet.http.HttpServlet implements javax.servlet.Servlet {
 
+	
+	private static String folderPath;
+	
 	/*
 	 * (non-Java-doc)
 	 * 
@@ -62,6 +65,7 @@ public class RestService extends javax.servlet.http.HttpServlet implements javax
 	public void init(ServletConfig config) throws ServletException {
 		super.init(config);
 		// setup persistence unit from parameter, if available
+		folderPath = config.getInitParameter("filepath");
 		RequestParams.initService(config);
 	}
 
@@ -106,7 +110,7 @@ public class RestService extends javax.servlet.http.HttpServlet implements javax
 		response.setContentType("text/xml");
 		MorphbankConfig.SYSTEM_LOGGER.info("<!-- persistence: "
 				+ MorphbankConfig.getPersistenceUnit() + " -->");
-		MorphbankConfig.SYSTEM_LOGGER.info("<!-- filepath: " + MorphbankConfig.getFilepath()
+		MorphbankConfig.SYSTEM_LOGGER.info("<!-- filepath: " + folderPath
 				+ " -->");
 		boolean isMultipart = ServletFileUpload.isMultipartContent(request);
 		
@@ -135,12 +139,9 @@ public class RestService extends javax.servlet.http.HttpServlet implements javax
 						String paramName = item.getFieldName();
 						String fileName = item.getName();
 						InputStream stream = item.getInputStream();
-						// Reader reader = new InputStreamReader(stream);
-						// if ("uploadFile".equals(paramName)) {
 						MorphbankConfig.SYSTEM_LOGGER.info("Processing file " + fileName);
 						processRequest(stream, out, fileName);
 						MorphbankConfig.SYSTEM_LOGGER.info("Processing complete");
-						// }
 					}
 				}
 			} catch (FileUploadException e) {
@@ -154,15 +155,15 @@ public class RestService extends javax.servlet.http.HttpServlet implements javax
 			Request requestDoc = XmlUtils.getRequest(in);
 			String reqFileName = saveRequestXmlAsFile(requestDoc);
 			MorphbankConfig.SYSTEM_LOGGER.info("<!-- request file: "
-					+ MorphbankConfig.getFilepath() + reqFileName + " -->");
+					+ folderPath + reqFileName + " -->");
 			ProcessRequest process = new ProcessRequest(requestDoc);
 			Responses responses = process.processRequest();
 			responses.setStatus("request file " + fileName + " stored as " + reqFileName);
 			String respFileName = saveResponseXmlAsFile(reqFileName, responses);
 			responses.setStatus(responses.getStatus() + " response stored as " + respFileName);
 			XmlUtils.printXml(out, responses);
-			out.println("<!-- response: " + MorphbankConfig.getFilepath() + respFileName + " -->");
-			MorphbankConfig.SYSTEM_LOGGER.info("<!-- response: " + MorphbankConfig.getFilepath()
+			out.println("<!-- response: " + folderPath + respFileName + " -->");
+			MorphbankConfig.SYSTEM_LOGGER.info("<!-- response: " + folderPath
 					+ respFileName + " -->");
 			out.close();
 		} catch (Exception e) {
@@ -175,7 +176,7 @@ public class RestService extends javax.servlet.http.HttpServlet implements javax
 	static String FILE_PREFIX = "req";
 
 	public String[] getReqFileNames() {
-		File dir = new File(MorphbankConfig.getFilepath());
+		File dir = new File(folderPath);
 
 		// It is also possible to filter the list of returned files.
 		// This example does not return any files that start with `.'.
@@ -210,7 +211,7 @@ public class RestService extends javax.servlet.http.HttpServlet implements javax
 		String fileName = null;
 		int i = getNextReqFileNumber();
 		fileName = FILE_PREFIX + i + ".xml";
-		String filePath = MorphbankConfig.getFilepath() + fileName;
+		String filePath = folderPath + fileName;
 		try {
 			FileOutputStream outFileStr = new FileOutputStream(filePath);
 			PrintWriter out = new PrintWriter(outFileStr);
@@ -228,10 +229,10 @@ public class RestService extends javax.servlet.http.HttpServlet implements javax
 		if (fileName == null) {
 			fileName = "resp"+reqFileName;
 		}
-		String filePath = MorphbankConfig.getFilepath() + fileName;
+		String filePath = folderPath + fileName;
 		// open a file
 		try {
-			FileOutputStream outFile = new FileOutputStream(MorphbankConfig.getFilepath() + fileName);
+			FileOutputStream outFile = new FileOutputStream(folderPath + fileName);
 			PrintWriter out = new PrintWriter(outFile);
 			XmlUtils.printXml(out, xmlDoc);
 			out.close();

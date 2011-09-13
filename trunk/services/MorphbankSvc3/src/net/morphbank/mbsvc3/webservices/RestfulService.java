@@ -147,7 +147,7 @@ public class RestfulService extends javax.servlet.http.HttpServlet implements ja
 					String fileName = item.getName();
 					InputStream stream = item.getInputStream();
 					// Reader reader = new InputStreamReader(stream);
-					if ("uploadFile".equals(paramName)) {
+					if ("uploadFileXml".equals(paramName)) {
 						MorphbankConfig.SYSTEM_LOGGER.info("Processing file " + fileName);
 						processRequest(stream, out, fileName);
 						MorphbankConfig.SYSTEM_LOGGER.info("Processing complete");
