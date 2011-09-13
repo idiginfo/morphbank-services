@@ -53,6 +53,7 @@ public class MapLocality extends MapObjectBase {
 	protected String locality;
 	protected Integer minimumDepth;
 	protected Integer maximumDepth;
+	protected String informationWithheld;
 
 	protected static final String AND = " and ";
 	protected String and = "";
@@ -93,6 +94,7 @@ public class MapLocality extends MapObjectBase {
 		locality = xmlObject.getFirstTagValue("Locality");
 		minimumDepth = getInteger(xmlObject.getFirstTagValue("MinimumDepthInMeters"));
 		maximumDepth = getInteger(xmlObject.getFirstTagValue("MaximumDepthInMeters"));
+		informationWithheld = xmlObject.getFirstTagValue("InformationWithheld");
 	}
 
 	public void init(Locality localityObj) {
@@ -112,6 +114,7 @@ public class MapLocality extends MapObjectBase {
 		locality = localityObj.getLocality();
 		minimumDepth = localityObj.getMinimumDepth();
 		maximumDepth = localityObj.getMaximumDepth();
+		informationWithheld = localityObj.getInformationWithheld();
 	}
 
 	@Override
@@ -211,9 +214,14 @@ public class MapLocality extends MapObjectBase {
 						ObjectFactory._VerbatimLongitude_QNAME.getNamespaceURI());
 				update = true;
 			}
+			if (this.informationWithheld != null) {
+				localityObj.setInformationWithheld(informationWithheld);
+				update = true;
+			}
 			if (update) {
 				localityObj.updateDateLastModified();
 			}
+
 		} catch (Exception e) {
 			// allow the error of type conversion
 		}
@@ -285,6 +293,9 @@ public class MapLocality extends MapObjectBase {
 		if (verbatimLongitude != null) {
 			xmlObject.addDarwinTag(objectFactory.createVerbatimLongitude(verbatimLongitude));
 		}
+		if (informationWithheld != null) {
+			xmlObject.addDarwinTag(objectFactory.createInformationWithheld(informationWithheld));
+		}
 		return true;
 	}
 
@@ -338,13 +349,14 @@ public class MapLocality extends MapObjectBase {
 		if (null != locality) return false;
 		if (null != minimumDepth) return false;
 		if (null != maximumDepth) return false;
+		if (null != informationWithheld) return false;
 		return true;
 	}
 
 	protected static final String[] LOCALITY_TAG_STRINGS = { "Country", "StateProvince", "County",
 		"Continent", "WaterBody", "CoordinateUncertaintyInMeters", "DecimalLatitude",
 		"DecimalLongitude", "MaximumElevationInMeters", "MinimumElevationInMeters", "Locality",
-		"MinimumDepthInMeters", "MaximumDepthInMeters", "VerbatimLatitude", "VerbatimLongitude" };
+		"MinimumDepthInMeters", "MaximumDepthInMeters", "VerbatimLatitude", "VerbatimLongitude", "InformationWithheld" };
 	protected static Set<String> LOCALITY_TAGS = new HashSet<String>();
 
 	static {

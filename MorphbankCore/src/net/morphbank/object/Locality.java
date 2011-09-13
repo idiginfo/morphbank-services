@@ -45,6 +45,7 @@ public class Locality extends BaseObject implements Serializable {
 	private Integer imagesCount;
 	@OneToMany(mappedBy = "locality", fetch = FetchType.LAZY)
 	private Set<Specimen> specimens;
+	private String informationWithheld;
 
 	public Locality() {
 		super();
@@ -202,6 +203,14 @@ public class Locality extends BaseObject implements Serializable {
 
 	public void setCounty(String county) {
 		this.county = county;
+	}
+	
+	public String getInformationWithheld() {
+		return informationWithheld;
+	}
+
+	public void setInformationWithheld(String informationWithheld) {
+		this.informationWithheld = informationWithheld;
 	}
 
 }
