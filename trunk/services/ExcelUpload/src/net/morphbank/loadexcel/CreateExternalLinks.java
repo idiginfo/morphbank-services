@@ -43,6 +43,7 @@ public class CreateExternalLinks {
 	public static void main(String args[]) {
 		try {
 			System.out.println("Before conection");
+			LoadData.log("Before conection");
 			GetConnection newconnect = new GetConnection();
 			conn = newconnect.getConnect();
 			statement = conn.createStatement();
@@ -53,6 +54,7 @@ public class CreateExternalLinks {
 			filename = "./AlaskaGUID.xls";
 
 			System.out.println("excel path is: " + filename);
+			LoadData.log("excel path is: " + filename);
 
 			// reading from the excel sheet
 			ReadExternalLinks newread = new ReadExternalLinks(filename, newconnect);
@@ -62,7 +64,7 @@ public class CreateExternalLinks {
 		} finally {
 			try {
 				conn.close();
-				System.exit(0);
+//				System.exit(0);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

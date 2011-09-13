@@ -91,10 +91,10 @@ public class Locality {
 			updater.addNumericMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, ExcelTools.COL_MAXIMUM_ELEVATION), row, "maximumElevation");
 			updater.addNumericMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, ExcelTools.COL_MINIMUM_DEPTH), row, "minimumDepth");
 			updater.addNumericMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, ExcelTools.COL_MAXIMUM_DEPTH), row, "maximumDepth");
-			if (sheetReader.getColumnNumberByName(MYTYPE, "State or Province") != null) {
+			if (sheetReader.getColumnNumberByName(MYTYPE, ExcelTools.COL_STATE_OR_PROVINCE) != null) {
 				updater.addViewLocalityStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, ExcelTools.COL_STATE_OR_PROVINCE), row, "state");
 			}
-			if (sheetReader.getColumnNumberByName(MYTYPE, "State or Province") != null) {
+			if (sheetReader.getColumnNumberByName(MYTYPE, ExcelTools.COL_COUNTY) != null) {
 				updater.addViewLocalityStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, ExcelTools.COL_COUNTY), row, "county");
 			}
 			updater.addStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, ExcelTools.COL_INFORMATION_WITHHELD), row, "informationWithheld");
@@ -114,12 +114,17 @@ public class Locality {
 							localityId = result.getInt(1);
 							System.out.println("Locality ref '" + localityRef + "' row " + row
 									+ " matches id " + localityId);
+							LoadData.log("Locality ref '" + localityRef + "' row " + row
+									+ " matches id " + localityId);
 						} else {// no match
 							String insertQuery = "{call CreateObject( 'Locality', ?, ?, ?, now(), ?, '')}";
 							insertStmt = LoadData.getConnection().prepareCall(insertQuery);
 							int i = 1;
+							if (sheetReader.GetUserId() == -1) return;
 							insertStmt.setInt(i++, sheetReader.GetUserId());
+							if (sheetReader.GetGroupId() == -1) return;
 							insertStmt.setInt(i++, sheetReader.GetGroupId());
+							if (sheetReader.GetSubmitterId() == -1) return;
 							insertStmt.setInt(i++, sheetReader.GetSubmitterId());
 							// insertStmt.setString(i++, "2010-09-10");
 							insertStmt.setString(i++, "New locality from upload");
@@ -129,12 +134,14 @@ public class Locality {
 							localityId = res.getInt(1);
 							System.out.println("Locality ref '" + localityRef + "' row " + row
 									+ " added with id " + localityId);
+							LoadData.log("Locality ref '" + localityRef + "' row " + row
+									+ " added with id " + localityId);
 							int numupdated = updater.update(localityId);
 						}
 						localityIds.put(localityRef, localityId);
 					} catch (SQLException sql) {
 						sql.printStackTrace();
-						System.exit(1);
+//						System.exit(1);
 					}
 				}
 			}

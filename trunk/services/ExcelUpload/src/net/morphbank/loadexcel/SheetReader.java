@@ -270,18 +270,7 @@ public class SheetReader {
 //			String releaseDateStr = imageCollectionSheet.getCell(1, 6).getContents().trim().replaceAll(" ", "-").substring(0,10);
 //			releaseDate = Date.valueOf(format.format(datecell.getDate()));
 			releaseDate = imageCollectionSheet.getCell(1, 6).getContents();
-		} else {
-//			statement = LoadData.getStatement();
-//			String temp = "SELECT NOW()";
-//			try {
-//				result = statement.executeQuery(temp);
-//				result.next();
-//				releaseDate = result.getDate(1);
-//			} catch (SQLException sql) {
-//				sql.printStackTrace();
-//				System.exit(1);
-//			}
-		}
+		} 
 		return releaseDate;
 	}
 
@@ -299,7 +288,7 @@ public class SheetReader {
 				statement = connect.getConnect().createStatement();
 			} catch (Exception e) {
 				e.printStackTrace();
-				System.exit(1);
+//				System.exit(1);
 			}
 			String temp = "SELECT id FROM User WHERE uin='" + user + "'";
 			try {
@@ -313,11 +302,13 @@ public class SheetReader {
 				} else {
 					System.out
 							.println("The contributor is not a valid user in the Morphbank Data Base");
-					System.exit(1);
+					LoadData.log("The contributor is not a valid user in the Morphbank Data Base");
+//					System.exit(1);
+					return -1;
 				}
 			} catch (SQLException sql) {
 				sql.printStackTrace();
-				System.exit(1);
+//				System.exit(1);
 			}
 		} else {
 			user = getEntry("ImageCollection", 1, 3);
@@ -328,7 +319,7 @@ public class SheetReader {
 					statement = connect.getConnect().createStatement();
 				} catch (Exception e) {
 					e.printStackTrace();
-					System.exit(1);
+//					System.exit(1);
 				}
 				String temp = "SELECT id FROM User WHERE name='" + user + "'";
 				try {
@@ -342,15 +333,19 @@ public class SheetReader {
 					} else {
 						System.out
 								.println("The contributor is not a valid user in the Morphbank Data Base");
-						System.exit(1);
+						LoadData.log("The contributor is not a valid user in the Morphbank Data Base");
+//						System.exit(1);
+						return -1;
 					}
 				} catch (SQLException sql) {
 					sql.printStackTrace();
-					System.exit(1);
+//					System.exit(1);
 				}
 			} else {
 				System.out.println("No Contributor provided.");
-				System.exit(1);
+				LoadData.log("No Contributor provided.");
+//				System.exit(1);
+				return -1;
 			}
 		}
 		return userId;
@@ -378,11 +373,13 @@ public class SheetReader {
 				} else {
 					System.out
 							.println("The group specified by the contributor does not exist in the data base");
-					System.exit(1);
+					LoadData.log("The group specified by the contributor does not exist in the data base");
+//					System.exit(1);
+					return -1;
 				}
 			} catch (SQLException sql) {
 				sql.printStackTrace();
-				System.exit(1);
+//				System.exit(1);
 			}
 			// check if the contributor belongs to the specified group
 			temp = "SELECT user FROM UserGroup WHERE user=" + GetUserId() + " and groups="
@@ -391,11 +388,13 @@ public class SheetReader {
 				result = statement.executeQuery(temp);
 				if (!result.next()) {
 					System.out.println("The contributor does not belong to the specified group");
-					System.exit(1);
+					LoadData.log("The contributor does not belong to the specified group");
+					return -1;
+//					System.exit(1);
 				}
 			} catch (SQLException sql) {
 				sql.printStackTrace();
-				System.exit(1);
+//				System.exit(1);
 			}
 		} else {
 			// if group not specified personal group of the contributor will be
@@ -408,6 +407,7 @@ public class SheetReader {
 				ResultSet newResult = statement.executeQuery(temp);
 				if (!result.next()) {
 					System.out.println("The contributor does not have a personal group");
+					LoadData.log("The contributor does not have a personal group");
 					// System.exit(1);
 					groupId = 2;
 				} else {
@@ -416,7 +416,7 @@ public class SheetReader {
 
 			} catch (SQLException sql) {
 				sql.printStackTrace();
-				System.exit(1);
+//				System.exit(1);
 			}
 		}
 		return groupId;
@@ -437,7 +437,7 @@ public class SheetReader {
 				statement = connect.getConnect().createStatement();
 			} catch (Exception e) {
 				e.printStackTrace();
-				System.exit(1);
+//				System.exit(1);
 			}
 			String temp = "SELECT id FROM User WHERE name='" + submitter + "'";
 			try {
@@ -451,11 +451,13 @@ public class SheetReader {
 				} else {
 					System.out
 							.println("The submitter is not a valid user in the Morphbank Data Base");
-					System.exit(1);
+					LoadData.log("The submitter is not a valid user in the Morphbank Data Base");
+//					System.exit(1);
+					return -1;
 				}
 			} catch (SQLException sql) {
 				sql.printStackTrace();
-				System.exit(1);
+//				System.exit(1);
 			}
 		}
 		if (submitter.equals("")) submitterId = GetUserId();
@@ -477,7 +479,7 @@ public class SheetReader {
 			kingdomId = result.getInt(1);
 		} catch (SQLException sql) {
 			sql.printStackTrace();
-			System.exit(1);
+//			System.exit(1);
 		}
 		return kingdomId;
 	}

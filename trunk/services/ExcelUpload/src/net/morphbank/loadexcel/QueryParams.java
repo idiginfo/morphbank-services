@@ -78,6 +78,7 @@ public class QueryParams {
 				String coSql = "SELECT name FROM " + tableName + " WHERE description='"
 						+ entry.toUpperCase() + "'";
 				System.out.println(tableName + " query: " + coSql);
+				LoadData.log(tableName + " query: " + coSql);
 				ResultSet result = statement.executeQuery(coSql);
 				result.next();
 				String continentOcean = result.getString(1);
@@ -85,6 +86,7 @@ public class QueryParams {
 				return true;
 			} catch (SQLException sql) {
 				System.err.println("No " + colName + " match " + entry);
+				LoadData.log("No " + colName + " match " + entry);
 			}
 		}
 		return false;
@@ -110,6 +112,7 @@ public class QueryParams {
 			return true;
 		} catch (Exception e) {
 			System.err.println("Nonumeric " + columnName + " in row " + (row + 1));
+			LoadData.log("Nonumeric " + columnName + " in row " + (row + 1));
 			return false;
 		}
 	}

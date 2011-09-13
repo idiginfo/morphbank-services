@@ -34,9 +34,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.Properties;
-import java.util.Vector;
 
 public class LoadData {
 	private static String logFile = "report.txt";
@@ -51,60 +49,43 @@ public class LoadData {
 	private static String dbName;
 	private static String dbUserId;
 	private static String dbPassword;
+	private String fileName;
+	private static String folderPath = "";
 	private static String imageDirectoryPath;
+	private static String propertyFile;
 
-	public static void main(String args[]) {
-
+	public LoadData() {
+		super();
 		System.setProperty("file.encoding", "Cp1252");
-		// System.setProperty("file.encoding", "UTF-8");
-		Charset charSet = Charset.defaultCharset();
-		System.out.println("default charset: " + charSet.displayName());
-		String filename = "";
-		
-//		String dbHost = "dev.morphbank.net";
-		// filename = "C:/dev/java31/lib/Morphbank_MS2_p1Deb.xls";
-		// filename = "C:/dev/java2008/testutf8a.xls";
-//		filename = "/usr/local/dev/morphbank/upload/mb3a_current.xls";
-		filename = "/home/gjimenez/Downloads/MatthewBuffington/mb3a_Oberthuerellinae04.xls";
-//		filename = "/home/gjimenez/Downloads/mb3a_MattBuffington_forQC.xls";
-//		imageDirectoryPath = "../Camellia/";
-		if (args.length == 0) {
-			System.out.println("usage: java net.morphbank.loadexcel.LoadData.java filename"
-					+ " [dbhost] [dbname] [imagepath] [debug]");
-			// System.exit(-1);
-		}
-		
+	}
+	
+	public LoadData(String folder, String fileName, String propertyfile) {
+		super();
+		System.setProperty("file.encoding", "Cp1252");
+		propertyFile = propertyfile;
 		setProperties();
-		
-		if (args.length > 0) filename = args[0];
-		if (args.length > 1) dbHost = args[1];
-		if (args.length > 2) dbName = args[2];
-		if (args.length > 3) imageDirectoryPath = args[3];
-		if (args.length > 4) debug = "debug".equals(args[4]);
+		folderPath = folder;
+		this.fileName = folderPath + fileName;
+		logFile = fileName + "-report.txt";
+	}
 
-		
-		System.out.println("excel file is: " + filename);
-		System.out.println("log file is : " + logFile);
-		System.out.println("db host is: " + dbHost);
-		System.out.println("db name is: " + dbName);
-
-		// System.out.println("Before conection");
+	public String run() {
 		GetConnection newconnect = new GetConnection();
-
-		
 		
 		conn = newconnect.openConnection(dbHost,dbName, dbUserId, dbPassword);
 		try {
 			statement = conn.createStatement();
 
 			// reading from the excel sheet
-			sheetReader = new SheetReader(filename, newconnect);
+			sheetReader = new SheetReader(fileName, newconnect);
 			ValidateXls isvalid = new ValidateXls(sheetReader, true);
 			if (!isvalid.checkEverything()) {
 				System.err.println("Error(s) in SpreadSheet. Program interrupted.");
-				System.exit(0);
+				log("Error(s) in SpreadSheet. Program interrupted.");
+				return logFile;
 			}
 			System.out.println("No Error found. Let's get this baby runnin'!");
+			log(isvalid.getOutput().toString());
 			checkNames = new CheckNameTable();
 			externalLinks = new ExternalLinks();
 
@@ -115,6 +96,13 @@ public class LoadData {
 			System.out.print(" submitted by: " + sheetReader.GetSubmitterId());
 			System.out.print(" institution: " + sheetReader.GetInstitutionLink());
 			System.out.println(" project: " + sheetReader.GetProjectLink1());
+			// Printing statement for checking purpose
+			log("Release date: " + sheetReader.getReleaseDate());
+			log(" UserId: " + sheetReader.GetUserId());
+			log(" group: " + sheetReader.GetGroupId());
+			log(" submitted by: " + sheetReader.GetSubmitterId());
+			log(" institution: " + sheetReader.GetInstitutionLink());
+			log(" project: " + sheetReader.GetProjectLink1());
 
 			// starting a report for the new set
 			log("Report for set of images contributed by "
@@ -137,38 +125,51 @@ public class LoadData {
 			}
 
 			System.out.println("Uploading Taxon Data ...");
+			log("Uploading Taxon Data ...");
 			TaxonData taxon = new TaxonData(sheetReader);
-			taxon.processTaxa();
+			if (!taxon.processTaxa()) return logFile;
 			System.out.println("Done.");
 
 			System.out.println("Uploading Supporting Data ...");
+			log("Uploading Supporting Data ...");
 			QuerySupport support = new QuerySupport(sheetReader);
 			support.loadQuerySupportData();
 			System.out.println("Done.");
+			log("Done.");
 
 			System.out.println("Uploading Locality ...");
+			log("Uploading Locality ...");
 			Locality locality = new Locality(sheetReader);
 			locality.processLocalities();
 			System.out.println("Done.");
+			log("Done.");
 
 			System.out.println("Uploading View ...");
+			log("Uploading View ...");
 			View view = new View(sheetReader);
 			view.processViews();
 			System.out.println("Done.");
+			log("Done.");
 
 			System.out.println("Uploading Specimen ...");
+			log("Uploading Specimen ...");
 			Specimen specimen = new Specimen(sheetReader);
 			specimen.processSpecimens();
 			System.out.println("Done.");
+			log("Done.");
 
 			System.out.println("Uploading Image ...");
+			log("Uploading Image ...");
 			Image image = new Image(sheetReader, specimen);
 			image.processImages();
 			System.out.println("Done.");
+			log("Done.");
 
 			System.out.println("Uploading External Links ...");
+			log("Uploading External Links ...");
 			externalLinks.processLinks();
 			System.out.println("Done.");
+			log("Done.");
 
 			if (debug) {
 				statement.executeQuery("UNLOCK TABLES");
@@ -180,21 +181,61 @@ public class LoadData {
 		} finally {
 			try {
 				conn.close();
-				System.exit(0);
+//				System.exit(0);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
+		return logFile;
+	}
+	
+	public static void main(String args[]) {
+
+		
+		System.setProperty("file.encoding", "Cp1252");
+		// System.setProperty("file.encoding", "UTF-8");
+		Charset charSet = Charset.defaultCharset();
+		System.out.println("default charset: " + charSet.displayName());
+		String filename = "";
+		
+		filename = "/home/gjimenez/Downloads/MatthewBuffington/mb3a_Oberthuerellinae04.xls";
+		folderPath = "/home/gjimenez/Downloads/MatthewBuffington/";
+		propertyFile = "loadData.properties";
+
+		if (args.length == 0) {
+			System.out.println("usage: java net.morphbank.loadexcel.LoadData.java filename"
+					+ " [dbhost] [dbname] [imagepath] [debug]");
+//			 System.exit(-1);
+		}
+		
+		LoadData loadData = new LoadData();
+		setProperties();
+
+		if (args.length > 0) loadData.fileName = args[0];
+		if (args.length > 1) dbHost = args[1];
+		if (args.length > 2) dbName = args[2];
+		if (args.length > 3) imageDirectoryPath = args[3];
+		if (args.length > 4) debug = "debug".equals(args[4]);
+
+		System.out.println("excel file is: " + filename);
+		System.out.println("log file is : " + logFile);
+		System.out.println("db host is: " + dbHost);
+		System.out.println("db name is: " + dbName);
+		
+		loadData.fileName = filename;
+
+		loadData.run();
+		
 	}
 
 	public static void log(String entry) {
 		try {
-			out = new BufferedWriter(new FileWriter(logFile, true));
+			out = new BufferedWriter(new FileWriter(folderPath + logFile, true));
 			out.write(entry + "\n");
 			out.close();
 		} catch (IOException e) {
 			e.printStackTrace();
-			System.exit(1);
+//			System.exit(1);
 		}
 	}
 
@@ -230,17 +271,17 @@ public class LoadData {
 	public static void setProperties() {
 		Properties prop = new Properties();
 		try {
-			prop.load(new FileInputStream("loadData.properties"));
+			prop.load(new FileInputStream(propertyFile));
 			dbHost = prop.getProperty("dbhost");
 			dbName = prop.getProperty("dbname");
 			dbUserId = prop.getProperty("login");
 			dbPassword = prop.getProperty("password");
 		} catch (FileNotFoundException e) {
+			System.out.println(propertyFile);
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		
 	}
-	
 }

@@ -47,6 +47,7 @@ public class CheckNameTable {
 			sql = "SELECT linkTypeId FROM ExternalLinkType WHERE name='" + colValue + "'";
 		} else if (table.equals("Locality")) {
 			System.out.println("Cannot call CheckNameTable with table=Locality");
+			LoadData.log("Cannot call CheckNameTable with table=Locality");
 		} else if (table.equals("BasisOfRecord")) {
 			sql = "SELECT name FROM BasisOfRecord WHERE description=\"" + colValue + "\"";
 		} else {
@@ -59,7 +60,7 @@ public class CheckNameTable {
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
-			System.exit(1);
+//			System.exit(1);
 		}
 		return names;
 	}

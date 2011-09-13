@@ -89,11 +89,11 @@ public class TaxonData {
 
 		} catch (Exception e) {
 			e.printStackTrace();
-			System.exit(-1);
+//			System.exit(-1);
 		}
 	}
 
-	public void processTaxa() {
+	public boolean processTaxa() {
 		int rows = sheetReader.GetRows(MYTYPE);
 
 		for (int j = 1; j < rows; j++) {
@@ -124,6 +124,8 @@ public class TaxonData {
 			tsn = getFirstMatchingTaxon(scientificName);
 			if (tsn != 0) {
 				System.out.println("Taxon for row " + j + " '" + scientificName
+						+ "' is " + tsn);
+				LoadData.log("Taxon for row " + j + " '" + scientificName
 						+ "' is " + tsn);
 			} else {
 				letter = scientificName.substring(0, 1);
@@ -167,15 +169,21 @@ public class TaxonData {
 				if (parentTsn <= 0) {
 					System.out.println("No parent found for " + scientificName
 							+ " family '" + family + ": processing aborted");
-					System.exit(0);
+					LoadData.log("No parent found for " + scientificName
+							+ " family '" + family + ": processing aborted");
+//					System.exit(0);
+					return false;
 				}
 				kingdomId = sheetReader.GetKingdom(parentTsn);
 				tsn = createTaxon();
 				System.out.println("Taxon created for row " + j + " '"
 						+ scientificName + "' is " + tsn);
+				LoadData.log("Taxon created for row " + j + " '"
+						+ scientificName + "' is " + tsn);
 			}
 			taxonIds.put(scientificName, tsn);
 		}
+		return true;
 	}
 
 	// public method to find the parent of the row
@@ -216,7 +224,7 @@ public class TaxonData {
 			}
 		} catch (SQLException sql) {
 			sql.printStackTrace();
-			System.exit(1);
+//			System.exit(1);
 		}
 		return 0;
 	}
@@ -248,12 +256,13 @@ public class TaxonData {
 				String name = result.getString(2);
 				if (name.equals(family)) {
 					System.out.println("Family " + name + " matches");
+					LoadData.log("Family " + name + " matches");
 					return true;
 				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			System.exit(1);
+//			System.exit(1);
 		}
 		return false;
 	}// end of function FindFamily
@@ -296,7 +305,7 @@ public class TaxonData {
 
 		} catch (SQLException sqle) {
 			sqle.printStackTrace();
-			System.exit(1);
+//			System.exit(1);
 		}
 		return tsns;
 	}
@@ -321,10 +330,13 @@ public class TaxonData {
 			// IN iStatus VARCHAR(32),
 			// IN iSubBy INT,
 			insertStmt.setString(j++, status);
+			if (sheetReader.GetSubmitterId() == -1) return -1;
 			insertStmt.setInt(j++, sheetReader.GetSubmitterId());
 			// IN iGroupId INT,
 			// IN iUserId INT,
+			if (sheetReader.GetGroupId() == -1) return -1;
 			insertStmt.setInt(j++, sheetReader.GetGroupId());
+			if (sheetReader.GetUserId() == -1) return -1;
 			insertStmt.setInt(j++, sheetReader.GetUserId());
 			// IN iDateToPublish DATETIME,
 //			insertStmt.setDate(j++, dateToPublish);
@@ -409,12 +421,14 @@ public class TaxonData {
 					statement.executeUpdate(temp);
 				} else {
 					System.out.println("Problems querying the database");
-					System.exit(1);
+					LoadData.log("Problems querying the database");
+//					System.exit(1);
+					return null;
 				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			System.exit(1);
+//			System.exit(1);
 		}
 		return author;
 	}
