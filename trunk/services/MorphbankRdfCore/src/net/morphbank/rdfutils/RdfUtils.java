@@ -85,6 +85,8 @@ public class RdfUtils {
 	public void getRdfObjects(int numResults, int firstResult, List objectIds,
 			int depth, PrintWriter out) {
 		//printNumResults(out, numResults, objectIds.size(), firstResult);
+        // start with a new rdf model
+        RdfOntologies.initializeOntModel(); 
 		Iterator iter = objectIds.iterator();
 		// int i = 0;
 		while (iter.hasNext()) {
