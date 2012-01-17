@@ -27,6 +27,7 @@ package net.morphbank.loadexcel;
 /////////////////////////////////////////////////////////////////
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
@@ -57,6 +58,9 @@ public class LoadData {
 	public LoadData() {
 		super();
 		System.setProperty("file.encoding", "Cp1252");
+		File file = new File(folderPath + logFile);
+		if(file.exists()) 
+			file.delete();
 	}
 	
 	public LoadData(String folder, String fileName, String propertyfile) {
@@ -67,6 +71,8 @@ public class LoadData {
 		folderPath = folder;
 		this.fileName = folderPath + fileName;
 		logFile = fileName + "-report.txt";
+		File file = new File(folderPath + logFile);
+		if(file.exists()) file.delete();
 	}
 
 	public String run() {
@@ -90,14 +96,14 @@ public class LoadData {
 			externalLinks = new ExternalLinks();
 
 			// Printing statement for checking purpose
-			System.out.print("Release date: " + sheetReader.getReleaseDate());
+			System.out.println("Release date: " + sheetReader.getReleaseDate());
 			if (sheetReader.GetUserId() == -1) return logFile;
-			System.out.print(" UserId: " + sheetReader.GetUserId());
+			System.out.println(" UserId: " + sheetReader.GetUserId());
 			if (sheetReader.GetGroupId() == -1) return logFile;
-			System.out.print(" group: " + sheetReader.GetGroupId());
+			System.out.println(" group: " + sheetReader.GetGroupId());
 			if (sheetReader.GetSubmitterId() == -1) return logFile;
-			System.out.print(" submitted by: " + sheetReader.GetSubmitterId());
-			System.out.print(" institution: " + sheetReader.GetInstitutionLink());
+			System.out.println(" submitted by: " + sheetReader.GetSubmitterId());
+			System.out.println(" institution: " + sheetReader.GetInstitutionLink());
 			System.out.println(" project: " + sheetReader.GetProjectLink1());
 			// Printing statement for checking purpose
 			log("Release date: " + sheetReader.getReleaseDate());
@@ -172,7 +178,7 @@ public class LoadData {
 			log("Uploading External Links ...");
 			if (!externalLinks.processLinks()) return logFile;
 			System.out.println("Done.");
-			log("Done.");
+			log("Done.\n\r\n\r");
 
 			if (debug) {
 				statement.executeQuery("UNLOCK TABLES");
@@ -201,8 +207,8 @@ public class LoadData {
 		System.out.println("default charset: " + charSet.displayName());
 		String filename = "";
 		
-		filename = "/home/gjimenez/Downloads/MatthewBuffington/mb3a_Oberthuerellinae04.xls";
-		folderPath = "/home/gjimenez/Downloads/MatthewBuffington/";
+		filename = "/home/gjimenez/Documents/tests/Alejandro/PLATY-PBI_ATS_howardi/avalerio_PLATYPBI_ATS_howardi.xls";
+		folderPath = "/home/gjimenez/Downloads/";
 		propertyFile = "loadData.properties";
 
 		if (args.length == 0) {
