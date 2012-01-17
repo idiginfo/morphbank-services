@@ -11,23 +11,17 @@
  ******************************************************************************/
 package net.morphbank.mbsvc3.webservices;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FilenameFilter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
-import java.io.PrintWriter;
-import java.net.URL;
 import java.util.ArrayList;
-import java.util.Enumeration;
+
 import java.util.Iterator;
 import java.util.List;
 
@@ -35,17 +29,9 @@ import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import net.morphbank.MorphbankConfig;
 import net.morphbank.loadexcel.LoadData;
-import net.morphbank.mbsvc3.mapping.ProcessRequest;
-import net.morphbank.mbsvc3.mapping.XmlServices;
 import net.morphbank.mbsvc3.request.RequestParams;
 import net.morphbank.mbsvc3.sharing.UpdateRemote;
-import net.morphbank.mbsvc3.xml.Request;
-import net.morphbank.mbsvc3.xml.Response;
-import net.morphbank.mbsvc3.xml.Responses;
-import net.morphbank.mbsvc3.xml.XmlUtils;
 
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileItemFactory;
@@ -60,8 +46,13 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 public class RestServiceExcelUpload extends javax.servlet.http.HttpServlet implements javax.servlet.Servlet {
 
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	private static String folderPath;
-	private ArrayList<String> listOfXmlFiles = new ArrayList<String>();
+	
 	private static String propertyFile;
 	
 	/*
@@ -116,7 +107,7 @@ public class RestServiceExcelUpload extends javax.servlet.http.HttpServlet imple
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		PrintWriter out = response.getWriter();
+		ArrayList<String> listOfXmlFiles = new ArrayList<String>();
 		response.setContentType("text/xml");
 		boolean isMultipart = ServletFileUpload.isMultipartContent(request);
 		
@@ -134,8 +125,8 @@ public class RestServiceExcelUpload extends javax.servlet.http.HttpServlet imple
 					// processFormField(item);
 				} else {
 					String report = this.processUploadedFile(item);
-					this.outputReport(report);
-					htmlPresentation(request, response, null);
+					this.outputReport(report, listOfXmlFiles);
+					htmlPresentation(request, response, null, listOfXmlFiles);
 				}
 			}
 		} catch (FileUploadException e) {
@@ -144,7 +135,7 @@ public class RestServiceExcelUpload extends javax.servlet.http.HttpServlet imple
 
 	}
 
-	private void outputReport(String report) {
+	private void outputReport(String report, ArrayList<String> listOfXmlFiles) {
 		File file = new File(folderPath + report);
 		FileInputStream input;
 		BufferedReader reader;
@@ -158,6 +149,9 @@ public class RestServiceExcelUpload extends javax.servlet.http.HttpServlet imple
 				System.out.println(line);
 				listOfXmlFiles.add(line);
 			}
+			input.close();
+			dis.close();
+			reader.close();
 			
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
@@ -178,6 +172,8 @@ public class RestServiceExcelUpload extends javax.servlet.http.HttpServlet imple
 		String filename = "";
 			filename = folderPath + item.getName();
 		try {
+			File file = new File(filename);
+			if (file.exists()) file.delete();
 			outputStream = new FileOutputStream(filename);
 			outputStream.write(item.get());
 			outputStream.close();
@@ -190,7 +186,7 @@ public class RestServiceExcelUpload extends javax.servlet.http.HttpServlet imple
 		return null;
 	}
 	
-	private void htmlPresentation(HttpServletRequest request, HttpServletResponse response, String folderPath) {
+	private void htmlPresentation(HttpServletRequest request, HttpServletResponse response, String folderPath, ArrayList<String> listOfXmlFiles) {
 		StringBuffer listOfFiles = new StringBuffer();
 		Iterator<String> iter = listOfXmlFiles.iterator();
 		while (iter.hasNext()) {
@@ -210,5 +206,5 @@ public class RestServiceExcelUpload extends javax.servlet.http.HttpServlet imple
 			e.printStackTrace();
 		}
 	}
-
+	
 }
