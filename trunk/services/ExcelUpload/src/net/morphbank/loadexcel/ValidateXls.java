@@ -22,7 +22,7 @@ public class ValidateXls {
 	StringBuffer output = new StringBuffer();
 
 	public static void main(String[] args) {
-		SheetReader sheetReader = new SheetReader("/home/gjimenez/Downloads/mb3p_testServices.xls", null);
+		SheetReader sheetReader = new SheetReader("/home/gjimenez/Documents/tests/test_mb3a.xls", null);
 		ValidateXls test = new ValidateXls(sheetReader, true);
 		System.out.println(test.checkEverything());
 	}
@@ -34,13 +34,15 @@ public class ValidateXls {
 	
 	public boolean checkEverything() {
 		if (this.sheetReader == null) {
-			System.out.println("Unknown error with the Excel file. Please try again.");
-			output.append("Unknown error with the Excel file. Please try again.");
+			String error = "Unknown error with the Excel file. Please try again.";
+			System.out.println(error);
+			output.append(error);
 			return false;
 		}
 		if (versionInfo) {
-			System.out.println("Version Info: " + getVersionNumber());
-			output.append("Version Info: " + getVersionNumber() + "<br />");
+			String version = "Version Info: " + getVersionNumber();
+			System.out.println(version);
+			this.messageToOuput(version);
 		}
 		isXlsValid &= checkCredentials();
 		isXlsValid &= isSpecimenVSLocalityOk();
@@ -50,6 +52,7 @@ public class ValidateXls {
 		isXlsValid &= checkOriginalFileName();
 		isXlsValid &= checkLatLong();
 		isXlsValid &= isViewTSNOk();
+		isXlsValid &= checkMandatoryCellsNotEmpty(); 
 		return isXlsValid;
 	}
 	
@@ -142,19 +145,18 @@ public class ValidateXls {
 		for (int i=1; i < col1.length; i++) {
 			boolean test = false;
 			for (int j=1; j < col2.length; j++) {
-				test |= col1[i].getContents().equalsIgnoreCase(col2[j].getContents());
+				test |= col1[i].getContents().equals(col2[j].getContents());
 				if(col1[i].getContents().length() < 1 || test) {
 					test = true;
 					break;
 				}
 			}
 			if (!test) {
-				System.err.println("The " + col1Sheet + "'s " + col2Sheet.toLowerCase() +" row " + (i+1) +
+				String error = "The " + col1Sheet + "'s " + col2Sheet.toLowerCase() +" row " + (i+1) +
 						" does not match any " + col2Sheet.toLowerCase() +
-						" in the " + col2Sheet + " spreadsheet.");
-				output.append("The " + col1Sheet + "'s " + col2Sheet.toLowerCase() +" row " + (i+1) +
-						" does not match any " + col2Sheet.toLowerCase() +
-						" in the " + col2Sheet + " spreadsheet. <br />");
+						" in the " + col2Sheet + " spreadsheet.";
+				System.out.println(error);
+				this.messageToOuput(error);
 				noErrorInColumn &= false;
 			}
 		}
@@ -179,7 +181,7 @@ public class ValidateXls {
 	private boolean checkCredentials() {
 		Sheet credentials = sheetReader.getSheet("ImageCollection");
 		boolean anyEmpty = false;
-		for (int i= 3; i <= 7; i++) {
+		for (int i= 3; i <= 7; i+=2) {
 			if (credentials.getCell(1, i) == null || credentials.getCell(1, i).getContents().equalsIgnoreCase("")) {
 				String error = credentials.getCell(0, i).getContents().replaceAll(":", "") + " cannot be empty.";
 				System.out.println(error);
@@ -314,5 +316,90 @@ public class ValidateXls {
 			}
 		}
 		return formatting;
+	}
+	
+	/** check if a row with mandatory cells is either all filled or all empty
+	 * Applicable to Images and Specimen sheets
+	 * @return true is test passed
+	 */
+	private boolean checkMandatoryCellsNotEmpty() {
+		boolean isValid = true;
+		//either all cells empty or all full
+		Sheet imagesSheet = sheetReader.getSheet("Image");
+		int maxRows = imagesSheet.getRows();
+		for (int i = 1; i < maxRows; i++) {
+			String[] row = this.getMandatoryRow("Images", imagesSheet.getRow(i));
+			isValid &= this.checkMandatoryRow(row, "Images", i);
+		}
+		Sheet specimenSheet = sheetReader.getSheet("Specimen");
+		maxRows = specimenSheet.getRows();
+		for (int i = 2; i < maxRows; i++) {
+			String[] row = this.getMandatoryRow("Specimen", specimenSheet.getRow(i));
+			isValid &= this.checkMandatoryRow(row, "Specimen", i);
+		}
+		
+		return isValid;
+	}
+	
+	private String[] getMandatoryRow(String type, Cell[] entireRow){
+		if (type.equals("Images")) {
+			int colISpecimenDescription= sheetReader.getColumnNumberByName("Image", "Specimen Description");
+			int colIMyViewName = sheetReader.getColumnNumberByName("Image", "My View Name");
+			int colICopyright= sheetReader.getColumnNumberByName("Image", "Copyright Info");
+			int colIImageFileName = sheetReader.getColumnNumberByName("Image", "Image file name");
+			int colICreativeCommons = sheetReader.getColumnNumberByName("Image", "Creative Commons");
+			String[] row = new String[5];
+			row[0] = entireRow[colISpecimenDescription].getContents(); 
+			row[1] = entireRow[colIMyViewName].getContents(); 
+			row[2] = entireRow[colICopyright].getContents(); 
+			row[3] = entireRow[colIImageFileName].getContents(); 
+			row[4] = entireRow[colICreativeCommons].getContents();
+			return row;
+		}
+		if (type.equals("Specimen")) {
+			int colSScientificName = sheetReader.getColumnNumberByName("Specimen", "Scientific Name");
+			int colSBasisOfRecord = sheetReader.getColumnNumberByName("Specimen", "Basis of Record");
+			int colSSex = sheetReader.getColumnNumberByName("Specimen", "Sex");
+			int colSDevelopmentalStage = sheetReader.getColumnNumberByName("Specimen", "Developmental Stage");
+			int colSForm = sheetReader.getColumnNumberByName("Specimen", "Form");
+			int colSTypeStatus = sheetReader.getColumnNumberByName("Specimen", "Type Status");
+			int colSLocality = sheetReader.getColumnNumberByName("Specimen", "Locality");
+			String[] row = new String[7];
+			row[0] = entireRow[colSScientificName].getContents(); 
+			row[1] = entireRow[colSBasisOfRecord].getContents(); 
+			row[2] = entireRow[colSSex].getContents(); 
+			row[3] = entireRow[colSDevelopmentalStage].getContents(); 
+			row[4] = entireRow[colSForm].getContents();
+			row[5] = entireRow[colSTypeStatus].getContents(); 
+			row[6] = entireRow[colSLocality].getContents();
+			return row;
+		}
+		return null;
+	}
+	
+	
+	private boolean checkMandatoryRow(String[] row, String sheetName, int rowNumber) {
+		boolean hasContent = true;
+		boolean isEmpty = true;
+		for (String cell:row) {
+			if (cell.length() > 0) {
+				hasContent &= true;
+				isEmpty = false;
+			}
+			else {
+				hasContent = false;
+				isEmpty &= true;
+			}
+		}
+		//either hasContent = false and isEmpty = true;
+		//or hasContent = true and isEmpty = false;
+		if (!(hasContent || isEmpty)) printMandatoryCellError(sheetName, rowNumber);
+		return hasContent || isEmpty;
+	}
+	
+	private void printMandatoryCellError(String sheet, int row) {
+		String error = "In " + sheet + " sheet, row " + (row + 1) + ", one or more mandatory cells are empty.";
+		System.out.println(error);
+		this.messageToOuput(error);
 	}
 }
