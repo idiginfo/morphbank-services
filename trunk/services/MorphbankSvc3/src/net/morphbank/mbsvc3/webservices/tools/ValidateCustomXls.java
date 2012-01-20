@@ -26,7 +26,7 @@ import jxl.read.biff.BiffException;
 public class ValidateCustomXls {
 
 	private StringBuffer output = new StringBuffer(1024);
-	public static final String PERSISTENCE = MorphbankConfig.PERSISTENCE_MBPROD;
+	public static String PERSISTENCE = MorphbankConfig.PERSISTENCE_LOCALHOST;
 	private static final String DROP_DOWNS_SHEET_NAME = "Drop Downs";
 	private static final String DATA_SHEET_NAME = "Data";
 	private static final String CONTRIBUTOR_SHEET_NAME = "ContributorInfo";
@@ -41,16 +41,18 @@ public class ValidateCustomXls {
 	private String[] headersData;
 	private EntityManager em;
 	
-	public ValidateCustomXls(String fileName, boolean versionInfo) {
+	public ValidateCustomXls(String fileName, boolean versionInfo, String persistence) {
 		this.fileName = fileName;
 		this.workbook = this.createWorkbook();
 		this.createSheets();
 		this.readHeaders();
 		this.versionInfo = versionInfo;
+		PERSISTENCE = persistence;
 	}
-
+	
 	public static void main(String[] args) {
-		ValidateCustomXls test = new ValidateCustomXls("/home/gjimenez/Downloads/JasonMottern/Heraty_16Aug2011.xls", true);
+		ValidateCustomXls test = new ValidateCustomXls("/home/gjimenez/Documents/tests/customWorkbook-testContinentWaterBody.xls"
+				, true, MorphbankConfig.PERSISTENCE_LOCALHOST);
 		boolean passed = test.checkEverything();
 		System.out.println(passed);
 	}
@@ -78,10 +80,14 @@ public class ValidateCustomXls {
 			System.out.println(message);
 			this.messageToOuput(message);
 		}
+		String beginTesting = "Let's see what the file looks like...";
+		System.out.println(beginTesting);
+		this.messageToOuput("<b>" + beginTesting + "</b>");
 		isXlsValid &= this.checkUniqueImageExtId();
 		isXlsValid &= this.checkFormatDateColumns();
 		isXlsValid &= this.checkOriginalFileName();
 		isXlsValid &= this.checkDBMatch();
+		isXlsValid &= this.checkMandatoryCellsNotEmpty();
 		return isXlsValid;
 	}
 
@@ -217,8 +223,8 @@ public class ValidateCustomXls {
 	
 	private boolean checkDBMatch() {
 		boolean matchDB = true;
-//		MorphbankConfig.setPersistenceUnit(PERSISTENCE);
-//		MorphbankConfig.init();
+		MorphbankConfig.setPersistenceUnit(PERSISTENCE);
+		MorphbankConfig.init();
 		EntityManagerFactory emf = Persistence.createEntityManagerFactory(PERSISTENCE);
 		em = emf.createEntityManager();
 		matchDB &= this.checkTSN();
@@ -244,6 +250,7 @@ public class ValidateCustomXls {
 				System.out.println(error);
 				this.messageToOuput(error);
 			}
+			if (Tools.isEmpty(cellsTSN[i])) continue;
 			else {
 				Iterator it = tsns.iterator();
 				while (it.hasNext()) {
@@ -280,31 +287,32 @@ public class ValidateCustomXls {
 		boolean credentialsOK = true;
 		boolean emptyCells = false;
 		String cName = contributorSheet.getCell(1, 1).getContents();
-		emptyCells |= isCellEmpty(contributorSheet.getCell(0, 1).getContents(), cName);
 		String cId = contributorSheet.getCell(1, 2).getContents();
-		emptyCells |= isCellEmpty(contributorSheet.getCell(0, 2).getContents(), cId);
+		emptyCells |= areCellsBothEmpty(contributorSheet.getCell(0, 1).getContents(), cName,
+				contributorSheet.getCell(1, 1).getContents(), cId);
+
 		String sName = contributorSheet.getCell(1, 3).getContents();
-		emptyCells |= isCellEmpty(contributorSheet.getCell(0, 3).getContents(), sName);
 		String sId = contributorSheet.getCell(1, 4).getContents();
-		emptyCells |= isCellEmpty(contributorSheet.getCell(0, 4).getContents(), sId);
+		emptyCells |= areCellsBothEmpty(contributorSheet.getCell(0, 3).getContents(), sName,
+				contributorSheet.getCell(1, 3).getContents(), sId);
+		
 		String gName = contributorSheet.getCell(1, 5).getContents();
-		emptyCells |= isCellEmpty(contributorSheet.getCell(0, 5).getContents(), gName);
 		String gId = contributorSheet.getCell(1, 6).getContents();
-		emptyCells |= isCellEmpty(contributorSheet.getCell(0, 6).getContents(), gId);
+		emptyCells |= areCellsBothEmpty(contributorSheet.getCell(0, 5).getContents(), gName,
+				contributorSheet.getCell(1, 6).getContents(), gId);
+		
 		String date = contributorSheet.getCell(1, 7).getContents();
 		emptyCells |= isCellEmpty(contributorSheet.getCell(0, 7).getContents(), date);
 		if(emptyCells) return false;
 		
 		String select = "select u.userName, u.id from User u where u.userName = :name";
 		Query query = em.createQuery(select);
-//		query = MorphbankConfig.getEntityManager().createQuery(select);
 		query.setParameter("name", cName);
 		credentialsOK &= this.compareNameId(query, cName, cId);
 		query.setParameter("name", sName);
 		credentialsOK &= this.compareNameId(query, sName, sId);
 		select = "select g.groupName, g.id from Group g where g.groupName = :name";
 		query = em.createQuery(select);
-//		query = MorphbankConfig.getEntityManager().createQuery(select);
 		query.setParameter("name", gName);
 		credentialsOK &= this.compareNameId(query, gName, gId);
 		
@@ -324,8 +332,20 @@ public class ValidateCustomXls {
 		}
 		return false;
 	}
+
+	private boolean areCellsBothEmpty(String label1, String cell1, String label2, String cell2) {
+		if (cell1.length() < 1 && cell2.length() < 1) {
+			String error = label1.replaceFirst(":", "") + " cannot be empty if " +
+					label2.replaceFirst(":", "") + " is also empty.";
+			System.out.println(error);
+			this.messageToOuput(error);
+			return true;
+		}
+		return false;
+	}
 	
 	private boolean compareNameId(Query query, String name, String id) {
+		if(name == null || name.equals("") || id == null || id.equals("")) return true;
 		List names = query.getResultList();
 		if (names.isEmpty()) {
 			String error = name + " is not in Morphbank.";
@@ -352,6 +372,7 @@ public class ValidateCustomXls {
 	}
 
 	private boolean compareUserGroup(Query query, String id, String groupName) {
+		if(groupName == null || groupName.equals("") || id == null || id.equals("")) return true;
 		List names = query.getResultList();
 		if (names.isEmpty()) {
 			String error = "Id:" + id + " is not in the group " + groupName + ".";
@@ -364,11 +385,12 @@ public class ValidateCustomXls {
 		Integer user;
 		while (it.hasNext()) {
 			user = (Integer) it.next();
-			if (user.intValue() == Integer.parseInt(id))
+			if (user.intValue() == Integer.parseInt(id)) {
 				matchFound = true;
+				break;
+			}
 			else {
 				matchFound = false;
-				break;
 			}
 		}
 		if (!matchFound) {
@@ -415,6 +437,93 @@ public class ValidateCustomXls {
 	private void messageToOuput(String message) {
 		output.append(message);
 		output.append("<br />");
+	}
+	
+	/** check if a row with mandatory cells is either all filled or all empty
+	 * @return true is test passed
+	 */
+	private boolean checkMandatoryCellsNotEmpty() {
+		boolean isValid = true;
+		//either all cells empty or all full
+		int maxRows = dataSheet.getRows();
+		for (int i = 1; i < maxRows; i++) {
+			String[] row = this.getMandatoryRow(dataSheet.getRow(i));
+			if (row == null) return printMandatoryRowsHelp(isValid);
+			isValid &= this.checkMandatoryRow(row, i);
+		}
+		return isValid;
+	}
+	
+	private boolean printMandatoryRowsHelp(boolean isValid) {
+		if (isValid)
+			return isValid;
+		String listMandatoryCells = "If a row is not empty, the corresponding columns must be filled: "
+				+ "Please check Image External id, Image External id Prefix, Original File Name, Creative Commons, "
+				+ "Specimen External id, Specimen External id Prefix, Determination Scientific Name, "
+				+ "Determination TSN, Basis of Record, Type Status, View Applicable to Taxon.";
+		System.out.println(listMandatoryCells);
+		this.messageToOuput(listMandatoryCells);
+		return isValid;
+	}
+	
+	private String[] getMandatoryRow(Cell[] entireRow){
+
+			int colImgExtId = this.getColumnNumberByName(DATA_SHEET_NAME, "Image External id");
+			int colImgExtIdPrfx = this.getColumnNumberByName(DATA_SHEET_NAME, "Image External id Prefix");
+			int colOriglFileName = this.getColumnNumberByName(DATA_SHEET_NAME, "Original File Name");
+			int colCreativeCommons = this.getColumnNumberByName(DATA_SHEET_NAME, "Creative Commons");
+			int colSpExtId = this.getColumnNumberByName(DATA_SHEET_NAME, "Specimen External id");
+			int colSpExtIdPrfx = this.getColumnNumberByName(DATA_SHEET_NAME, "Specimen External id Prefix");
+			int colDetScName = this.getColumnNumberByName(DATA_SHEET_NAME, "Determination Scientific Name");
+			int colDetTSN = this.getColumnNumberByName(DATA_SHEET_NAME, "Determination TSN");
+			int colBasisOfRecord = this.getColumnNumberByName(DATA_SHEET_NAME, "Basis of Record");
+			int colTypeStatus = this.getColumnNumberByName(DATA_SHEET_NAME, "Type Status");
+			int colViewAppTaxon = this.getColumnNumberByName(DATA_SHEET_NAME, "View Applicable to Taxon");
+			
+			if (colViewAppTaxon > entireRow.length - 1) {
+				return null;
+			}
+			
+			String[] row = new String[11];
+			row[0] = entireRow[colImgExtId].getContents(); 
+			row[1] = entireRow[colImgExtIdPrfx].getContents(); 
+			row[2] = entireRow[colOriglFileName].getContents(); 
+			row[3] = entireRow[colCreativeCommons].getContents(); 
+			row[4] = entireRow[colSpExtId].getContents();
+			row[5] = entireRow[colSpExtIdPrfx].getContents(); 
+			row[6] = entireRow[colDetScName].getContents(); 
+			row[7] = entireRow[colDetTSN].getContents(); 
+			row[8] = entireRow[colBasisOfRecord].getContents(); 
+			row[9] = entireRow[colTypeStatus].getContents();
+			row[10] = entireRow[colViewAppTaxon].getContents(); 
+			
+			return row;
+	}
+	
+	
+	private boolean checkMandatoryRow(String[] row, int rowNumber) {
+		boolean hasContent = true;
+		boolean isEmpty = true;
+		for (String cell:row) {
+			if (cell.length() > 0) {
+				hasContent &= true;
+				isEmpty = false;
+			}
+			else {
+				hasContent = false;
+				isEmpty &= true;
+			}
+		}
+		//either hasContent = false and isEmpty = true;
+		//or hasContent = true and isEmpty = false;
+		if (!(hasContent || isEmpty)) printMandatoryCellError(rowNumber);
+		return hasContent || isEmpty;
+	}
+	
+	private void printMandatoryCellError(int row) {
+		String error = "In row " + (row + 1) + ", one or more mandatory cells are empty.";
+		System.out.println(error);
+		this.messageToOuput(error);
 	}
 	
 }
