@@ -12,6 +12,8 @@
 package net.morphbank.mbsvc3.webservices;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
@@ -19,9 +21,11 @@ import java.io.InputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Properties;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -52,6 +56,7 @@ public class RestService extends javax.servlet.http.HttpServlet implements javax
 
 	
 	private static String folderPath;
+	private static ArrayList<String> ipAddresses;
 	
 	/*
 	 * (non-Java-doc)
@@ -67,6 +72,25 @@ public class RestService extends javax.servlet.http.HttpServlet implements javax
 		// setup persistence unit from parameter, if available
 		folderPath = config.getInitParameter("filepath");
 		RequestParams.initService(config);
+		setProperties();
+		
+	}
+
+	private void setProperties() {
+		Properties properties = new Properties();
+		try {
+			properties.load(new FileInputStream(MorphbankConfig.getIpAllowed()));
+			String[] ips = properties.getProperty("IP").replaceAll(" ", "").split(",");
+			ipAddresses = new ArrayList<String>();
+			for (String ip : ips) {
+				ipAddresses.add(ip);
+			}
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
 	}
 
 	/*
@@ -104,8 +128,12 @@ public class RestService extends javax.servlet.http.HttpServlet implements javax
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
+		if (!isIPAllowed(request.getRemoteAddr())) {
+			response.sendError(HttpServletResponse.SC_FORBIDDEN);
+			return;
+		}
 		PrintWriter out = response.getWriter();
-		MorphbankConfig.SYSTEM_LOGGER.info("starting post");
+		MorphbankConfig.SYSTEM_LOGGER.info("starting post from ip:" + request.getRemoteAddr());
 		MorphbankConfig.ensureWorkingConnection();
 		response.setContentType("text/xml");
 		MorphbankConfig.SYSTEM_LOGGER.info("<!-- persistence: "
@@ -148,6 +176,31 @@ public class RestService extends javax.servlet.http.HttpServlet implements javax
 				e.printStackTrace();
 			}
 		}
+	}
+
+	private boolean isIPAllowed(String ip) {
+		if (ipAddresses.contains(ip)) {
+			return true;
+		}
+		String[] ipParts = ip.split("\\.");
+		for (String ipInList : ipAddresses) {
+			boolean authorized = true;
+			if (ipInList.contains("*")) {
+				String[] ipInListParts = ipInList.split("\\.");
+				for (int i = 0; i < 4; i++) {
+					authorized &= ipPartMatch(ipInListParts[i], 
+							ipParts[i]);
+				}
+				if (authorized) return true;
+			}
+		}
+		return false;
+	}
+	
+	private boolean ipPartMatch(String inList, String ipToTest) {
+		if (inList.equals("*") || inList.equals(ipToTest))
+			return true;
+		return false;
 	}
 
 	public boolean processRequest(InputStream in, PrintWriter out, String fileName) {
