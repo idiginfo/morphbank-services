@@ -28,6 +28,8 @@ import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -142,12 +144,13 @@ public class Uploader extends javax.servlet.http.HttpServlet implements javax.se
 			// Process the uploaded items
 			List<?> /* FileItem */items = upload.parseRequest(request);
 			Iterator<?> iter = items.iterator();
+			boolean testPassed = false;
 			while (iter.hasNext()) {
 				FileItem item = (FileItem) iter.next();
 				if (item.isFormField()) {
 					processFormField(item);
 				} else {
-					if (checkFilesBeforeUpload(item)) {
+					if (testPassed = checkFilesBeforeUpload(item)) {
 						String fileName = item.getName();
 //						folderPath = saveTempFile(item);
 						saveTempFile(item);
@@ -159,12 +162,47 @@ public class Uploader extends javax.servlet.http.HttpServlet implements javax.se
 					}
 				}
 			}
-			this.htmlPresentation(request, response, folderPath);
+			this.htmlPresentation(request, response, folderPath, testPassed);
 			out.close();
 		} catch (FileUploadException e) {
 			e.printStackTrace();
 			out.close();
 		}
+	}
+
+	private String createZipFile() {
+		String fileName = folderPath + "xml" + getNextReqFileNumber(folderPath) + ".zip";
+		String list = "";
+		try {
+			FileOutputStream fout = new FileOutputStream(fileName);
+			ZipOutputStream zout = new ZipOutputStream(fout);
+			
+			
+			for (int i = 0; i < listOfXmlFiles.size(); i++) {
+				String file = listOfXmlFiles.get(i);
+				
+				if (file.endsWith(".xml")) {
+				list += file;
+				FileInputStream fin = new FileInputStream(listOfXmlFiles.get(i));
+				ZipEntry ze = new ZipEntry(listOfXmlFiles.get(i).replaceAll(folderPath, ""));
+				zout.putNextEntry(ze);
+			    for (int c = fin.read(); c != -1; c = fin.read()) {
+			        zout.write(c);
+			      }
+			      fin.close();
+				}
+			     
+			}
+			 zout.close();
+			 fout.close();
+			
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return fileName.replaceAll(folderPath, "");
+		
 	}
 
 	private void resetVariables() {
@@ -430,7 +468,7 @@ public class Uploader extends javax.servlet.http.HttpServlet implements javax.se
 		"<input type=\"hidden\" name=\"uploadxml\" value=\"xmlfiles/" + fileName +"\">" + 
 		"<input type=\"hidden\" name=\"fileName\" value=\"" + fileName +"\">";
 		
-		return "<form action=\"restful\" method=\"post\">" + table +
+		return "<form action=\"restful\" method=\"post\" onsubmit=\"pleaseWait()\">" + table +
 		"</form>";
 	}
 
@@ -439,8 +477,9 @@ public class Uploader extends javax.servlet.http.HttpServlet implements javax.se
 	 * @param request
 	 * @param response
 	 */
-	private void htmlPresentation(HttpServletRequest request, HttpServletResponse response, String folderPath) {
+	private void htmlPresentation(HttpServletRequest request, HttpServletResponse response, String folderPath, boolean testPassed) {
 		StringBuffer listOfFiles = new StringBuffer();
+		ArrayList<String> filesToZip = new ArrayList<String>();
 		Iterator<String> iter = listOfXmlFiles.iterator();
 		while (iter.hasNext()) {
 			String next = iter.next();
@@ -450,6 +489,7 @@ public class Uploader extends javax.servlet.http.HttpServlet implements javax.se
 			else {
 				String nameToDisplay = next.replaceFirst(folderPath, "");
 				next = next.replaceFirst(folderPath, "");
+				filesToZip.add(next);
 				String link = "<a href=\"" + "xmlfiles/" + next + "\">" + nameToDisplay + "</a>";
 				if (!sendToDB) {
 					listOfFiles.append(this.createHtmlForm(link, next));
@@ -458,6 +498,11 @@ public class Uploader extends javax.servlet.http.HttpServlet implements javax.se
 					listOfFiles.append(link + "<br />");
 				}
 			}
+		}
+		if (testPassed) {
+			String zipFile = this.createZipFile();
+			listOfFiles.append("<br/><b>Download all xml files: </b>");
+			listOfFiles.append("<a href=\"" + "xmlfiles/" + zipFile + "\">" + zipFile + "</a>");
 		}
 		if (listOfFiles.length() == 0) {
 			listOfFiles.append("No file selected.");
@@ -471,8 +516,5 @@ public class Uploader extends javax.servlet.http.HttpServlet implements javax.se
 			e.printStackTrace();
 		}
 	}
-
-
-
 
 }
