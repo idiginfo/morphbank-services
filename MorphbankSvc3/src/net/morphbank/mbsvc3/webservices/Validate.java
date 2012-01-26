@@ -183,7 +183,7 @@ public class Validate extends javax.servlet.http.HttpServlet implements javax.se
 				}
 			}
 			else { //TODO Custom Workbook
-				ValidateCustomXls isvalid = new ValidateCustomXls(folderPath + fileName, versionInfo);
+				ValidateCustomXls isvalid = new ValidateCustomXls(folderPath + fileName, versionInfo, MorphbankConfig.getPersistenceUnit());
 				if (!isvalid.checkEverything()){
 					output.append("<b>Testing file: " + fileName + "</b><br />");
 					output.append(isvalid.getOutput() + "<br />");
