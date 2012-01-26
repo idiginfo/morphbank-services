@@ -5,6 +5,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import javax.swing.SwingWorker;
+
+import jxl.Cell;
+import jxl.Sheet;
 import jxl.Workbook;
 import jxl.read.biff.BiffException;
 import jxl.write.WritableSheet;
@@ -56,7 +59,7 @@ public class Split extends SwingWorker<Object, Object>
 	public ArrayList<String> createMultiplefiles() throws WriteException, IOException, BiffException
 	{
 		ArrayList<String> fileList = new ArrayList<String>();
-		int files = this.workbook.getSheet(0).getRows() / this.limit + 1;
+		int files = this.countRows() / this.limit + 1;
 		for (int i = 0; i < files; i++) {
 			Date before = new Date();
 			String newFile = this.originalFile.substring(0, this.originalFile.length() - 4) + String.valueOf(i) + ".xls";
@@ -68,6 +71,23 @@ public class Split extends SwingWorker<Object, Object>
 		}
 		return fileList;
 	}
+	
+	private boolean isCellEmpty(Cell cell) {
+		if (cell.getContents() == null || cell.getContents().equals(""))
+			return true;
+		return false;
+	}
+	
+	private int countRows() {
+		Cell[] cells = this.workbook.getSheet(0).getColumn(3);
+		int size = 0;
+		for (int i = 0; i < cells.length; i++) {
+			if (!isCellEmpty(cells[i])) {
+				size++;
+			}
+		}
+		return size;
+	}
 
 	protected Object doInBackground() throws Exception
 	{
@@ -77,4 +97,5 @@ public class Split extends SwingWorker<Object, Object>
 		System.out.println("done");
 		return null;
 	}
+	
 }
