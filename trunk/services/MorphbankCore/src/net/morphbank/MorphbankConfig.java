@@ -37,6 +37,7 @@ import javax.persistence.Query;
  * @author riccardi
  */
 public class MorphbankConfig {
+	
 	protected static ThreadLocal<EntityManager> entityManager = new ThreadLocal<EntityManager>();
 	protected static EntityManagerFactory emf;
 
