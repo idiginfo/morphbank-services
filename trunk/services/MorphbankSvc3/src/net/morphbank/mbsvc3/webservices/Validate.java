@@ -166,38 +166,44 @@ public class Validate extends javax.servlet.http.HttpServlet implements javax.se
 
 	private boolean processRequest(InputStream in, PrintWriter out, String fileName, String fileType, String folderPath, boolean errors, boolean versionInfo) {
 		fileType = this.excelFileType(fileName, folderPath);
-		try {
-			if (fileType.equalsIgnoreCase(MB3AP_BOOK)){ //Animalia or Plantae
-				SheetReader sheetReader = new SheetReader(folderPath + fileName, null);
-				ValidateXls isvalid = new ValidateXls(sheetReader, versionInfo);
+		if (fileType != null) {
+			try {
+				if (fileType.equalsIgnoreCase(MB3AP_BOOK)){ //Animalia or Plantae
+					SheetReader sheetReader = new SheetReader(folderPath + fileName, null);
+					ValidateXls isvalid = new ValidateXls(sheetReader, versionInfo);
 
-				if (!isvalid.checkEverything()) {
-					output.append("<b>Testing file: " + fileName + "</b><br />");
-					output.append(isvalid.getOutput() + "<br />");
-					errors = true;
+					if (!isvalid.checkEverything()) {
+						output.append("<b>Testing file: " + fileName + "</b><br />");
+						output.append(isvalid.getOutput() + "<br />");
+						errors = true;
+					}
+					else {
+						output.append("<b>Testing file: " + fileName + "</b><br />");
+						output.append(isvalid.getOutput());
+						output.append("<b>No error found in the document. Congratulations!</b><br /><br />");
+					}
 				}
-				else {
-					output.append("<b>Testing file: " + fileName + "</b><br />");
-					output.append(isvalid.getOutput());
-					output.append("<b>No error found in the document. Congratulations!</b><br /><br />");
+				else { //TODO Custom Workbook
+					ValidateCustomXls isvalid = new ValidateCustomXls(folderPath + fileName, versionInfo, MorphbankConfig.getPersistenceUnit());
+					if (!isvalid.checkEverything()){
+						output.append("<b>Testing file: " + fileName + "</b><br />");
+						output.append(isvalid.getOutput() + "<br />");
+						errors = true;
+					}
+					else {
+						output.append("<b>Testing file: " + fileName + "</b><br />");
+						output.append(isvalid.getOutput());
+						output.append("<b>No error found in the document. Congratulations!</b><br /><br />");
+					}
 				}
+			} catch (Exception e) {
+				e.printStackTrace(out);
+				out.close();
 			}
-			else { //TODO Custom Workbook
-				ValidateCustomXls isvalid = new ValidateCustomXls(folderPath + fileName, versionInfo, MorphbankConfig.getPersistenceUnit());
-				if (!isvalid.checkEverything()){
-					output.append("<b>Testing file: " + fileName + "</b><br />");
-					output.append(isvalid.getOutput() + "<br />");
-					errors = true;
-				}
-				else {
-					output.append("<b>Testing file: " + fileName + "</b><br />");
-					output.append(isvalid.getOutput());
-					output.append("<b>No error found in the document. Congratulations!</b><br /><br />");
-				}
-			}
-		} catch (Exception e) {
-			e.printStackTrace(out);
-			out.close();
+		}
+		else {
+			output.append("Unknown error reading the file type (mb3a or custom). It may be corrupted.<br />");
+			errors = true;
 		}
 		return errors;
 	}
