@@ -23,10 +23,12 @@ public class MapSheetImage {
 	protected XmlBaseObject xmlImage;
 	FieldMapper image;
 	private String[][] userProperties = null;
+	Fields fields;
 
-	public MapSheetImage(FieldMapper fieldMapper) {
+	public MapSheetImage(FieldMapper fieldMapper, Fields fields) {
 		this.image = fieldMapper;
 		this.userProperties = this.getUserProperties();
+		this.fields = fields;
 	}
 
 	String getImageType(String fileName) {
@@ -44,18 +46,18 @@ public class MapSheetImage {
 		xmlImage.setSpecimen(MapSpreadsheetToXml.getSpecimenId(image));
 		xmlImage.getView().add(MapSpreadsheetToXml.getViewId(image));
 
-		xmlImage.addDescription(image.getValue("Image Description"));
-		xmlImage.addUserProperty("ImageDescription", image.getValue("Image Description"));
+		xmlImage.addDescription(image.getValue(fields.getI_IMAGE_DESCRIPTION()));
+		xmlImage.addUserProperty("ImageDescription", image.getValue(fields.getI_IMAGE_DESCRIPTION()));
 
-		String originalFileName = image.getValue("Original File Name");
+		String originalFileName = image.getValue(fields.getI_ORIGINAL_FILE_NAME());
 		xmlImage.setOriginalFileName(originalFileName);
-		xmlImage.addUserProperty("imageUrl", image.getValue("imageURL"));
+		xmlImage.addUserProperty("imageUrl", image.getValue(fields.getI_IMAGEURL()));
 		xmlImage.setImageType(getImageType(originalFileName));
-		xmlImage.setCreativeCommons(image.getValueFormula("Creative Commons"));
-		xmlImage.setPhotographer(image.getValue("Photographer"));
-		xmlImage.setCopyrightText(image.getValue("Copyright"));
-		if (image.getValue("Encyclopedia of Life").equalsIgnoreCase("yes")) {
-			xmlImage.setEol(image.getValue("Encyclopedia of Life")); 
+		xmlImage.setCreativeCommons(image.getValueFormula(fields.getI_CREATIVE_COMMONS()));
+		xmlImage.setPhotographer(image.getValue(fields.getI_PHOTOGRAPHER()));
+		xmlImage.setCopyrightText(image.getValue(fields.getI_COPYRIGHT()));
+		if (image.getValue(fields.getI_ENCYCLOPEDIA_OF_LIFE()).equalsIgnoreCase("yes")) {
+			xmlImage.setEol(image.getValue(fields.getI_ENCYCLOPEDIA_OF_LIFE())); 
 		}
 		              
 		// TODO add user properties and ext links as necessary

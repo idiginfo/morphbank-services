@@ -21,10 +21,12 @@ public class MapSheetView {
 	protected XmlBaseObject xmlView;
 	FieldMapper view;
 	private String[][] userProperties = null;
+	Fields fields;
 
-	public MapSheetView(FieldMapper fieldMapper) {
+	public MapSheetView(FieldMapper fieldMapper, Fields fields) {
 		this.view = fieldMapper;
 		this.userProperties = this.getUserProperties();
+		this.fields = fields;
 	}
 
 	public String createViewDescription() {
@@ -36,21 +38,21 @@ public class MapSheetView {
 	public void setXmlViewFields(XmlBaseObject xmlView) {
 		// TODO add rest of view fields
 		xmlView.setSourceId(MapSpreadsheetToXml.getViewId(view));
-		xmlView.setDescription(view.getValue("View Description"));
+		xmlView.setDescription(view.getValue(fields.getV_VIEW_DESCRIPTION()));
 		xmlView.addUserProperty("ViewDescription",
-				view.getValue("View Description"));
+				view.getValue(fields.getV_VIEW_DESCRIPTION()));
 
 		xmlView.setName(MapSpreadsheetToXml.getViewIdStr(view));
-		xmlView.setViewAngle(view.getValue("View Angle"));
-		xmlView.setImagingTechnique(view.getValue("Imaging Technique"));
+		xmlView.setViewAngle(view.getValue(fields.getV_VIEW_ANGLE()));
+		xmlView.setImagingTechnique(view.getValue(fields.getV_IMAGING_TECHNIQUE()));
 		xmlView.setImagingPreparationTechnique(view
-				.getValue("Imaging Preparation Technique"));
-		xmlView.setSex(view.getValue("View Sex"));
-		xmlView.setForm(view.getValue("View Form"));
-		xmlView.setDevelopmentalStage(view.getValue("View Developmental Stage"));
-		xmlView.setSpecimenPart(view.getValue("Specimen Part"));
+				.getValue(fields.getV_IMAGING_PREPARATION_TECHNIQUE()));
+		xmlView.setSex(view.getValue(fields.getV_VIEW_SEX()));
+		xmlView.setForm(view.getValue(fields.getV_VIEW_FORM()));
+		xmlView.setDevelopmentalStage(view.getValue(fields.getV_VIEW_DEVELOPMENTAL_STAGE()));
+		xmlView.setSpecimenPart(view.getValue(fields.getV_SPECIMEN_PART()));
 		xmlView.setViewRestrictedTo(MapSpreadsheetToXml.getTaxonId(view
-				.getValue("View Applicable to Taxon")));
+				.getValue(fields.getV_VIEW_APPLICABLE_TO_TAXON())));
 		xmlView.addDescription(createViewDescription());
 		Extref extref = MapSpreadsheetToXml.getExternalLink(view, "View");
 		if (extref != null) xmlView.addExternalRef(extref);

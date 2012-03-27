@@ -11,10 +11,11 @@
  ******************************************************************************/
 package net.morphbank.mbsvc3.mapsheet;
 
+import java.util.Map;
+
 import jxl.Cell;
 import jxl.Sheet;
 import net.morphbank.MorphbankConfig;
-import net.morphbank.mbsvc3.fsuherb.MapFsuHerbSpreadsheetToXml;
 import net.morphbank.mbsvc3.xml.*;
 
 public class MapSheetSpecimen {
@@ -22,90 +23,93 @@ public class MapSheetSpecimen {
 	FieldMapper specimen;
 	static ObjectFactory objectFactory = new ObjectFactory();
 	private String[][] userProperties = null;
+	Fields fields;
 
-	public MapSheetSpecimen(FieldMapper specimen) {
+	public MapSheetSpecimen(FieldMapper specimen, Fields fields) {
 		this.specimen = specimen;
 		this.userProperties = this.getUserProperties();
+		this.fields = fields;
 	}
 
 	public void setXmlSpecimenFields(XmlBaseObject xmlSpecimen) {
 		xmlSpecimen.setId(MapSpreadsheetToXml.getSpecimenId(specimen));
-		xmlSpecimen.addDescription(specimen.getValue("Specimen Description"));
-		xmlSpecimen.addUserProperty("SpecimenDescription", specimen.getValue("Specimen Description"));
-
+//		xmlSpecimen.addDescription(specimen.getValue("Specimen Description"));
+		xmlSpecimen.addDescription(specimen.getValue(fields.getS_SPECIMEN_DESCRIPTION()));
+//		xmlSpecimen.addUserProperty("SpecimenDescription", specimen.getValue("Specimen Description"));
+		xmlSpecimen.addUserProperty("SpecimenDescription", specimen.getValue(fields.getS_SPECIMEN_DESCRIPTION()));
 		xmlSpecimen.setDetermination(MapSpreadsheetToXml.getTaxonId(specimen));
 		xmlSpecimen.addDarwinTag(objectFactory.createIdentifiedBy(specimen
-				.getValue("Determined By")));
+				.getValue(fields.getS_DETERMINED_BY())));
 		xmlSpecimen.addDarwinTag(objectFactory.createDateIdentified(MapSpreadsheetToXml
-				.createDate(specimen.getValueDate("Date Determined"))));
+				.createDate(specimen.getValueDate(fields.getS_DATE_DETERMINED()))));
 		xmlSpecimen.setStandardImage(MapSpreadsheetToXml.getStandarImageId(specimen));///////////////////////////////
 
 		xmlSpecimen.addDarwinTag(objectFactory.createRemarks(specimen
-				.getValue("Comment by Determiner")));
-		xmlSpecimen.setForm(specimen.getValue("Form"));
+				.getValue(fields.getS_COMMENT_BY_DETERMINER())));
+		xmlSpecimen.setForm(specimen.getValue(fields.getS_FORM()));
 		xmlSpecimen.addDarwinTag(objectFactory.createCollectionCode(specimen
-				.getValue("Collection Code")));
+				.getValue(fields.getS_COLLECTION_CODE())));
 		xmlSpecimen.addDarwinTag(objectFactory.createInstitutionCode(specimen
-				.getValue("Institution Code")));
+				.getValue(fields.getS_INSTITUTION_CODE())));
 		xmlSpecimen.addDarwinTag(objectFactory.createCatalogNumber(specimen
-				.getValue("Catalog Number")));
+				.getValue(fields.getS_CATALOG_NUMBER())));
 		xmlSpecimen.addDarwinTag(objectFactory.createOtherCatalogNumbers(specimen
-				.getValue("Previous Catalog Number")));
+				.getValue(fields.getS_PREVIOUS_CATALOG_NUMBER())));
 		xmlSpecimen.addDarwinTag(objectFactory.createRelatedCatalogedItems(specimen
-				.getValue("Related Catalog Item")));
+				.getValue(fields.getS_RELATED_CATALOG_ITEM())));
 		xmlSpecimen.addDarwinTag(objectFactory.createRelationshipType(specimen
-				.getValue("Relationship Type")));
+				.getValue(fields.getS_RELATIONSHIP_TYPE())));
 		xmlSpecimen.addDarwinTag(objectFactory.createCollectorNumber(specimen
-				.getValue("Collection Number")));
+				.getValue(fields.getS_COLLECTION_NUMBER())));
 		xmlSpecimen.addDarwinTag(objectFactory.createBasisOfRecord(specimen
-				.getValue("Basis of Record")));
-		xmlSpecimen.addDarwinTag(objectFactory.createSex(specimen.getValue("Sex")));
-		xmlSpecimen.addDarwinTag(objectFactory.createTypeStatus(specimen.getValue("Type Status")));
+				.getValue(fields.getS_BASIS_OF_RECORD())));
+		xmlSpecimen.addDarwinTag(objectFactory.createSex(specimen.getValue(fields.getS_SEX())));
+		xmlSpecimen.addDarwinTag(objectFactory.createTypeStatus(specimen.getValue(fields.getS_TYPE_STATUS())));
 		xmlSpecimen.addDarwinTag(objectFactory.createLifeStage(specimen
-				.getValue("Developmental Stage")));
+				.getValue(fields.getS_DEVELOPMENTAL_STAGE())));
 		xmlSpecimen.addDarwinTag(objectFactory.createPreparations(specimen
-				.getValue("Preparation Type")));
+				.getValue(fields.getS_PREPARATION_TYPE())));
 		xmlSpecimen
-		.addDarwinTag(objectFactory.createCollector(specimen.getValue("Collector Name")));
-		xmlSpecimen.addDarwinTag(objectFactory.createFieldNotes(specimen.getValue("Notes")));
+		.addDarwinTag(objectFactory.createCollector(specimen.getValue(fields.getS_COLLECTOR_NAME())));
+		xmlSpecimen.addDarwinTag(objectFactory.createFieldNotes(specimen.getValue(fields.getS_NOTES())));
 
 
 		xmlSpecimen.addDarwinTag(objectFactory.createEarliestDateCollected(MapSpreadsheetToXml
-				.createDate(specimen.getValueDate("Earliest Date Collected"))));
+				.createDate(specimen.getValueDate(fields.getS_EARLIEST_DATE_COLLECTED()))));
 		xmlSpecimen.addDarwinTag(objectFactory.createEarliestDateCollected(MapSpreadsheetToXml
-				.createDate(specimen.getValueDate("Latest Date Collected"))));
+				.createDate(specimen.getValueDate(fields.getS_LATEST_DATE_COLLECTED()))));
 		
 
 
 
 		// Locality properties
-		xmlSpecimen.addDarwinTag(objectFactory.createContinent(specimen.getValue("Continent")));
-		xmlSpecimen.addDarwinTag(objectFactory.createWaterBody(specimen.getValue("Ocean")));
-		xmlSpecimen.addDarwinTag(objectFactory.createWaterBody(specimen.getValue("Water Body")));
-		xmlSpecimen.addDarwinTag(objectFactory.createCountry(specimen.getValue("Country")));
+		xmlSpecimen.addDarwinTag(objectFactory.createContinent(specimen.getValue(fields.getS_CONTINENT())));
+		xmlSpecimen.addDarwinTag(objectFactory.createWaterBody(specimen.getValue(fields.getS_OCEAN())));
+		xmlSpecimen.addDarwinTag(objectFactory.createWaterBody(specimen.getValue(fields.getS_WATER_BODY())));
+		xmlSpecimen.addDarwinTag(objectFactory.createCountry(specimen.getValue(fields.getS_COUNTRY())));
 		xmlSpecimen.addDarwinTag(objectFactory.createStateProvince(specimen
-				.getValue("State or Province")));
-		xmlSpecimen.addDarwinTag(objectFactory.createCounty(specimen.getValue("County")));
-		xmlSpecimen.addDarwinTag(objectFactory.createLocality(specimen.getValue("Locality")));
+				.getValue(fields.getS_STATE_OR_PROVINCE())));
+		xmlSpecimen.addDarwinTag(objectFactory.createCounty(specimen.getValue(fields.getS_COUNTY())));
+		xmlSpecimen.addDarwinTag(objectFactory.createLocality(specimen.getValue(fields.getS_LOCALITY())));
 		xmlSpecimen.addDarwinTag(objectFactory.createInformationWithheld(specimen
-				.getValue("Information Withheld")));
+				.getValue(fields.getS_INFORMATION_WITHHELD())));
 		xmlSpecimen.addDarwinTag(objectFactory.createDecimalLatitude(getDouble(specimen
-				.getValue("Latitude"))));
+				.getValue(fields.getS_LATITUDE()))));
 		xmlSpecimen.addDarwinTag(objectFactory.createDecimalLongitude(getDouble(specimen
-				.getValue("Longitude"))));
+				.getValue(fields.getS_LONGITUDE()))));
 		// xmlSpecimen.addDarwinTag(objectFactory.createCoordinatePrecision(specimen
 		// .getValue("Coordinate Precision")));
 		xmlSpecimen.addDarwinTag(objectFactory.createMinimumElevationInMeters(getDouble(specimen
-				.getValue("Minimum Elevation"))));
+				.getValue(fields.getS_MINIMUM_ELEVATION()))));
 		xmlSpecimen.addDarwinTag(objectFactory.createMaximumElevationInMeters(getDouble(specimen
-				.getValue("Maximum Elevation"))));
+				.getValue(fields.getS_MAXIMUM_ELEVATION()))));
 
 		xmlSpecimen.addDarwinTag(objectFactory.createMinimumDepthInMeters(getDouble(specimen
-				.getValue("Minimum Depth"))));
+				.getValue(fields.getS_MINIMUM_DEPTH()))));
 		xmlSpecimen.addDarwinTag(objectFactory.createMaximumDepthInMeters(getDouble(specimen
-				.getValue("Maximum Depth"))));
-		xmlSpecimen.addUserProperty("Institution", specimen.getValue("Institution Name"));
-		xmlSpecimen.addUserProperty("LocalityDescription", specimen.getValue("Locality Description"));
+				.getValue(fields.getS_MAXIMUM_DEPTH()))));
+		xmlSpecimen.addUserProperty("Institution", specimen.getValue(fields.getS_INSTITUTION_NAME()));
+		xmlSpecimen.addUserProperty("LocalityDescription", specimen.getValue(fields.getS_LOCALITY_DESCRIPTION()));
 		Extref extref = MapSpreadsheetToXml.getExternalLink(specimen, "Specimen");
 		if (extref != null) xmlSpecimen.addExternalRef(extref);
 		if (userProperties != null && userProperties.length >= 1){
