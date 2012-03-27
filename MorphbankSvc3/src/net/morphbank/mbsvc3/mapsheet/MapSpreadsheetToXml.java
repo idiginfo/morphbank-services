@@ -40,6 +40,7 @@ public class MapSpreadsheetToXml {
 	protected Credentials contributor;
 	protected Request request;
 	FieldMapper fieldMapper;
+	Fields fields;
 	int localId = 0;
 	public static final String SPECIMEN_ID_FIELD = "Specimen External id";
 	public static final String IMAGE_ID_FIELD = "Image External id";
@@ -98,8 +99,16 @@ public class MapSpreadsheetToXml {
 			this.submitter = getSubmitter(submitter);
 			this.contributor = getContributor(owner);
 			fieldMapper = xlsFieldMapper;
-		} else {
+			fields = new SpreadsheetFields();
+		} else if ("csv".equals(extension)){
 			fieldMapper = new TextFieldMapper(fileName);
+		} else { //dwc-Archive folder. filename is the actual folder, not the zipped archive
+			DwcaFieldMapper dwcaFieldMapper = new DwcaFieldMapper(fileName);
+			getCredentials(dwcaFieldMapper);
+			this.submitter = getSubmitter(submitter);
+			this.contributor = getContributor(owner);
+			fieldMapper = dwcaFieldMapper;
+			fields = new DwcaFields();
 		}
 		fieldMapper.moveToLine(firstLine - 1);
 		request = new Request();
@@ -116,17 +125,31 @@ public class MapSpreadsheetToXml {
 			String origFileName = fieldMapper.getValue("Original File Name");
 			if (origFileName.length() > 0) {
 				if (fieldMapper.getValue(VIEW_MORPHBANK_ID_FIELD).equalsIgnoreCase("")){
-					XmlBaseObject xmlView = createXmlView(spreadSheetLineNumber);
+					XmlBaseObject xmlView;
+					if(fieldMapper instanceof XlsFieldMapper) xmlView = createXmlView(spreadSheetLineNumber);
+					else xmlView = createXmlViewFromDwca(spreadSheetLineNumber);
 					if (xmlView != null) {
 						xmlView.setOwner(this.contributor);
 						insert.getXmlObjectList().add(xmlView);
 					}
 				}
 				//switched image and specimen order
-				XmlBaseObject xmlImage = createXmlImage(spreadSheetLineNumber);
+				XmlBaseObject xmlImage;
+				if(fieldMapper instanceof XlsFieldMapper) {
+					xmlImage = createXmlImage(spreadSheetLineNumber);
+				}
+				else {
+					xmlImage = createXmlImageFromDwca(spreadSheetLineNumber);
+				}
 				xmlImage.setOwner(this.contributor);
 				insert.getXmlObjectList().add(xmlImage);
-				XmlBaseObject xmlSpecimen = createXmlSpecimen(spreadSheetLineNumber);
+				XmlBaseObject xmlSpecimen;
+				if(fieldMapper instanceof XlsFieldMapper) {
+					xmlSpecimen = createXmlSpecimen(spreadSheetLineNumber);
+				}
+				else {
+					xmlSpecimen = createXmlSpecimenFromDwca(spreadSheetLineNumber);
+				}
 				xmlSpecimen.setOwner(this.contributor);
 				insert.getXmlObjectList().add(xmlSpecimen);
 
@@ -142,6 +165,8 @@ public class MapSpreadsheetToXml {
 				+ " processed");
 		return request;
 	}
+
+	
 
 	private Credentials getContributor(Credentials owner) {
 		if (userId > 0 && groupId > 0) return new Credentials(userId, groupId);
@@ -181,6 +206,15 @@ public class MapSpreadsheetToXml {
 		groupId = getInteger(fieldMapper.getCredentialSheet().getCell(1, 6).getContents());
 	}
 
+	private void getCredentials(DwcaFieldMapper fieldMapper) {
+		userName = fieldMapper.getUserName();
+		userId = fieldMapper.getUserId();
+		submitterName = fieldMapper.getSubmitterName();
+		submitterId = fieldMapper.getSubmitterId();
+		groupName = fieldMapper.getGroupName();
+		groupId = fieldMapper.groupId();
+	}
+	
 	/**
 	 * Keep track of local id within spreadsheet
 	 * 
@@ -195,7 +229,7 @@ public class MapSpreadsheetToXml {
 
 
 	public XmlBaseObject createXmlSpecimen(int lineNumber) {
-		MapSheetSpecimen specimenMapper = new MapSheetSpecimen(fieldMapper);
+		MapSheetSpecimen specimenMapper = new MapSheetSpecimen(fieldMapper, fields);
 		XmlBaseObject xmlSpecimen = new XmlBaseObject("Specimen");
 		xmlSpecimen.addDescription("From spreadsheet line " + lineNumber);
 		xmlSpecimen.setDateToPublish(dateToPublish());
@@ -205,7 +239,7 @@ public class MapSpreadsheetToXml {
 	}
 
 	public XmlBaseObject createXmlImage(int lineNumber) {
-		MapSheetImage imageMapper = new MapSheetImage(fieldMapper);
+		MapSheetImage imageMapper = new MapSheetImage(fieldMapper, fields);
 		xmlImage = new XmlBaseObject("Image");
 		xmlImage.setDateToPublish(dateToPublish()); 
 		imageMapper.setXmlImageFields(xmlImage);
@@ -215,7 +249,7 @@ public class MapSpreadsheetToXml {
 	}
 
 	public XmlBaseObject createXmlView(int lineNumber) {
-		MapSheetView imageMapper = new MapSheetView(fieldMapper);
+		MapSheetView imageMapper = new MapSheetView(fieldMapper, fields);
 		xmlView = new XmlBaseObject("View");
 		imageMapper.setXmlViewFields(xmlView);
 		if (xmlView.getName().equalsIgnoreCase("//////")) return null;
@@ -225,6 +259,39 @@ public class MapSpreadsheetToXml {
 		return xmlView;
 	}
 
+	private XmlBaseObject createXmlSpecimenFromDwca(int lineNumber) {
+		MapSheetSpecimen specimenMapper = new MapSheetSpecimen(fieldMapper, fields);
+		XmlBaseObject xmlSpecimen = new XmlBaseObject("Specimen");
+		xmlSpecimen.addDescription("From Dwc Archive line " + lineNumber);
+		//xmlSpecimen.setDateToPublish(dateToPublish()); //TODO getDateToPublish from the extension or the eml file
+		specimenMapper.setXmlSpecimenFields(xmlSpecimen);
+		addLocalId(xmlSpecimen);
+		return xmlSpecimen;
+	}
+
+	private XmlBaseObject createXmlImageFromDwca(int lineNumber) {
+		MapSheetImage imageMapper = new MapSheetImage(fieldMapper, fields);
+		xmlImage = new XmlBaseObject("Image");
+		//xmlImage.setDateToPublish(dateToPublish()); //TODO getDateToPublish from the extension or the eml file
+		imageMapper.setXmlImageFields(xmlImage);
+		xmlImage.addDescription(" From Dwc Archive line " + lineNumber);
+		addLocalId(xmlImage);
+		return xmlImage;
+	}
+
+	private XmlBaseObject createXmlViewFromDwca(int lineNumber) {
+		MapSheetView imageMapper = new MapSheetView(fieldMapper, fields);
+		xmlView = new XmlBaseObject("View");
+		imageMapper.setXmlViewFields(xmlView);
+		if (xmlView.getName().equalsIgnoreCase("//////")) return null;
+		// xmlView.addDescription(xmlView.getDescription() +
+		// " From spreadsheet line " + lineNumber);
+		addLocalId(xmlView);
+		return xmlView;
+	}
+	
+	
+	
 	// constants used to create GUIDs for the fsuherb ATOL objects
 	// note: duplicated in MorphbankConfig
 	// TODO decide on prefixes

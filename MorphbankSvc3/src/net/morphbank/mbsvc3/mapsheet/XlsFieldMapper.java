@@ -34,7 +34,6 @@ public class XlsFieldMapper implements FieldMapper {
 	int currentLine;
 	String fileName;
 
-	// what is the use of this method
 	public XlsFieldMapper(String fileName) {
 		try {
 			this.fileName = fileName;
