@@ -67,7 +67,7 @@ public class TaxonData {
 	private String pages = null;
 	private String nameSource = null;
 	private String comments = null;
-//	private Date dateToPublish = null;
+	// private Date dateToPublish = null;
 	private String dateToPublish = "";
 	private String parentName = null;
 
@@ -81,7 +81,7 @@ public class TaxonData {
 		this.statement = LoadData.getStatement();
 		String selectTreeBySciName = "SELECT tsn,rank_id FROM Tree WHERE scientificName=?";
 		String insertQuery = "{call TreeInsert(?,?,?,?,?, ?,?,?,?,?,"
-			+ "?,?,?,?,?, ?,?,?)}";
+				+ "?,?,?,?,?, ?,?,?)}";
 		try {
 			getTaxaStmt = LoadData.getConnection().prepareStatement(
 					selectTreeBySciName);
@@ -89,7 +89,7 @@ public class TaxonData {
 
 		} catch (Exception e) {
 			e.printStackTrace();
-//			System.exit(-1);
+			// System.exit(-1);
 		}
 	}
 
@@ -101,23 +101,25 @@ public class TaxonData {
 
 			// for all initialized rows on the excel spreadsheet that are not
 			// empty
-			//			family = sheetReader.getEntry(MYTYPE, 0, j);
-			//			genus = sheetReader.getEntry(MYTYPE, 1, j);
-			//			subgenus = sheetReader.getEntry(MYTYPE, 2, j);
-			//			specificEpithet = sheetReader.getEntry(MYTYPE, 3, j);
-			//			subspecies = sheetReader.getEntry(MYTYPE, 4, j);
-			//			variety = sheetReader.getEntry(MYTYPE, 5, j);
-			//			forma = sheetReader.getEntry(MYTYPE, 6, j);
-			//			scientificName = sheetReader.getEntry(MYTYPE, 7, j);
+			// family = sheetReader.getEntry(MYTYPE, 0, j);
+			// genus = sheetReader.getEntry(MYTYPE, 1, j);
+			// subgenus = sheetReader.getEntry(MYTYPE, 2, j);
+			// specificEpithet = sheetReader.getEntry(MYTYPE, 3, j);
+			// subspecies = sheetReader.getEntry(MYTYPE, 4, j);
+			// variety = sheetReader.getEntry(MYTYPE, 5, j);
+			// forma = sheetReader.getEntry(MYTYPE, 6, j);
+			// scientificName = sheetReader.getEntry(MYTYPE, 7, j);
 			family = sheetReader.getValue(MYTYPE, ExcelTools.COL_FAMILY, j);
 			genus = sheetReader.getValue(MYTYPE, ExcelTools.COL_GENUS, j);
 			subgenus = sheetReader.getValue(MYTYPE, ExcelTools.COL_SUBGENUS, j);
-			specificEpithet = sheetReader.getValue(MYTYPE, ExcelTools.COL_SPECIFIC_EPITHET, j);
+			specificEpithet = sheetReader.getValue(MYTYPE,
+					ExcelTools.COL_SPECIFIC_EPITHET, j);
 			subspecies = sheetReader.getValue(MYTYPE, ExcelTools.COL_SSP, j);
 			variety = sheetReader.getValue(MYTYPE, ExcelTools.COL_VAR, j);
 			forma = sheetReader.getValue(MYTYPE, ExcelTools.COL_FORMA, j);
 			dateToPublish = sheetReader.getReleaseDate();
-			scientificName = sheetReader.getValue(MYTYPE, ExcelTools.COL_SCIENTIFICNAMESTRING, j);
+			scientificName = sheetReader.getValue(MYTYPE,
+					ExcelTools.COL_SCIENTIFICNAMESTRING, j);
 			if (scientificName.length() == 0) {
 				continue;
 			}
@@ -130,37 +132,45 @@ public class TaxonData {
 			} else {
 				letter = scientificName.substring(0, 1);
 				// System.out.println("family is " + family);
-				//				authorId = sheetReader.getEntry(MYTYPE, 8, j);
-				//				taxonAuthorId = findAuthor(authorId);
-				//				publicationId = sheetReader.getEntry(MYTYPE, 9, j);
-				//				pages = sheetReader.getEntry(MYTYPE, 10, j);
-				//				tradeName = sheetReader.getEntry(MYTYPE, 11, j);
-				//				code = sheetReader.getEntry(MYTYPE, 12, j);
-				authorId = sheetReader.getValue(MYTYPE, ExcelTools.COL_TAXON_AUTHOR_YEAR, j);
+				// authorId = sheetReader.getEntry(MYTYPE, 8, j);
+				// taxonAuthorId = findAuthor(authorId);
+				// publicationId = sheetReader.getEntry(MYTYPE, 9, j);
+				// pages = sheetReader.getEntry(MYTYPE, 10, j);
+				// tradeName = sheetReader.getEntry(MYTYPE, 11, j);
+				// code = sheetReader.getEntry(MYTYPE, 12, j);
+				authorId = sheetReader.getValue(MYTYPE,
+						ExcelTools.COL_TAXON_AUTHOR_YEAR, j);
 				taxonAuthorId = findAuthor(authorId);
-				publicationId = sheetReader.getValue(MYTYPE, ExcelTools.COL_MORPHBANK_PUBLICATION_ID, j);
-				pages = sheetReader.getValue(MYTYPE,ExcelTools.COL_PUBLICATION_PAGES, j);
-				tradeName = sheetReader.getValue(MYTYPE, ExcelTools.COL_TRADEDESIGNATIONNAMES, j);
-				code = sheetReader.getValue(MYTYPE, ExcelTools.COL_NOMENCLATURAL_CODE, j);
-				nameSource = sheetReader.getValue(MYTYPE, ExcelTools.COL_NAME_SOURCE, j);
-				comments = sheetReader.getValue(MYTYPE, ExcelTools.COL_COMMENTS, j);
+				publicationId = sheetReader.getValue(MYTYPE,
+						ExcelTools.COL_MORPHBANK_PUBLICATION_ID, j);
+				pages = sheetReader.getValue(MYTYPE,
+						ExcelTools.COL_PUBLICATION_PAGES, j);
+				tradeName = sheetReader.getValue(MYTYPE,
+						ExcelTools.COL_TRADEDESIGNATIONNAMES, j);
+				code = sheetReader.getValue(MYTYPE,
+						ExcelTools.COL_NOMENCLATURAL_CODE, j);
+				nameSource = sheetReader.getValue(MYTYPE,
+						ExcelTools.COL_NAME_SOURCE, j);
+				comments = sheetReader.getValue(MYTYPE,
+						ExcelTools.COL_COMMENTS, j);
 				if (code.equals("ICNCP")) { // it is a cultivar or hybrid
 					if (scientificName.indexOf("'") > 0) { // cultivar
 						typeName = "Cultivar name";
-						//						usage = "public";
+						// usage = "public";
 						this.setStatus();
 						parentTsn = findParent();
 						rankId = 280;
 					} else {
 						typeName = "Regular scientific name";
-						//						usage = "public";
+						// usage = "public";
 						this.setStatus();
 						parentTsn = findParent();
-						if (parentTsn < 1) continue;
+						if (parentTsn < 1)
+							continue;
 						rankId = FindRank();
 					}
 				} else { // regular scientificName
-					//					usage = "public";
+					// usage = "public";
 					this.setStatus();
 					typeName = "Regular scientific name";
 					parentTsn = findParent();
@@ -171,12 +181,13 @@ public class TaxonData {
 							+ " family '" + family + ": processing aborted");
 					LoadData.log("No parent found for " + scientificName
 							+ " family '" + family + ": processing aborted\n\r");
-//					System.exit(0);
+					// System.exit(0);
 					return false;
 				}
 				kingdomId = sheetReader.GetKingdom(parentTsn);
 				tsn = createTaxon();
-				if (tsn == -1) return false;
+				if (tsn == -1)
+					return false;
 				System.out.println("Taxon created for row " + j + " '"
 						+ scientificName + "' is " + tsn);
 				LoadData.log("Taxon created for row " + j + " '"
@@ -191,9 +202,10 @@ public class TaxonData {
 	public int findParent() {
 		int parentTsn = 0;
 		parentName = this.createParentName();
-		//		String parentName = ((genus + " " + subgenus).trim() + " "
-		//				+ specificEpithet + " " + subspecies).trim();
-		//		parentName = ((parentName + " " + variety).trim() + " " + forma).trim();
+		// String parentName = ((genus + " " + subgenus).trim() + " "
+		// + specificEpithet + " " + subspecies).trim();
+		// parentName = ((parentName + " " + variety).trim() + " " +
+		// forma).trim();
 		if (parentName.equals("")) {
 			if (!family.equals("")) {
 				parentName = family;
@@ -218,14 +230,17 @@ public class TaxonData {
 			while (result.next()) {
 				tsn = result.getInt(1);
 				rank = result.getInt(2);
-				if (rank <= 140) return tsn;
+				if (rank <= 140)
+					return tsn;
 				if (rank != 140) {
-					if (matchFamily(tsn, family)) { return tsn; }
+					if (matchFamily(tsn, family)) {
+						return tsn;
+					}
 				}
 			}
 		} catch (SQLException sql) {
 			sql.printStackTrace();
-//			System.exit(1);
+			// System.exit(1);
 		}
 		return 0;
 	}
@@ -235,21 +250,25 @@ public class TaxonData {
 		String scientificName = "";
 		while (true) {// go up the parents to family level
 			Taxon taxon = new Taxon(levelTsn);
-			if (taxon.getTsn() <= 0) return false;
+			if (taxon.getTsn() <= 0)
+				return false;
 			int rank = taxon.getRankId();
 			scientificName = taxon.getScientificName();
-			if (rank < 140) return false; // passed family!
-			if (rank == 140) break; // rank is 'family'
+			if (rank < 140)
+				return false; // passed family!
+			if (rank == 140)
+				break; // rank is 'family'
 			levelTsn = taxon.getParentTsn();
 		}
-		if (scientificName.equals(family)) return true;
+		if (scientificName.equals(family))
+			return true;
 		return false;
 	}
 
 	public boolean findFamilyInTree(int tsn) {
 		ResultSet result = null;
 		String familyQuery = "select tsn,scientificname from TaxonBranchNode where child="
-			+ tsn + " and rank='family'";
+				+ tsn + " and rank='family'";
 		try {
 			result = statement.executeQuery(familyQuery);
 			if (result.next()) {
@@ -263,7 +282,7 @@ public class TaxonData {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-//			System.exit(1);
+			// System.exit(1);
 		}
 		return false;
 	}// end of function FindFamily
@@ -293,8 +312,8 @@ public class TaxonData {
 
 	public Vector<Integer> getTsns(String scientificName) {
 		String temp = "SELECT tsn FROM Tree WHERE scientificName=\""
-			+ scientificName
-			+ "\" and `usage` not in ('not accepted','invalid')";
+				+ scientificName
+				+ "\" and `usage` not in ('not accepted','invalid')";
 		Integer tsn = null;
 		Vector<Integer> tsns = new Vector<Integer>();
 		// System.out.println(temp);
@@ -306,7 +325,7 @@ public class TaxonData {
 
 		} catch (SQLException sqle) {
 			sqle.printStackTrace();
-//			System.exit(1);
+			// System.exit(1);
 		}
 		return tsns;
 	}
@@ -331,16 +350,19 @@ public class TaxonData {
 			// IN iStatus VARCHAR(32),
 			// IN iSubBy INT,
 			insertStmt.setString(j++, status);
-			if (sheetReader.GetSubmitterId() == -1) return -1;
+			if (sheetReader.GetSubmitterId() == -1)
+				return -1;
 			insertStmt.setInt(j++, sheetReader.GetSubmitterId());
 			// IN iGroupId INT,
 			// IN iUserId INT,
-			if (sheetReader.GetGroupId() == -1) return -1;
+			if (sheetReader.GetGroupId() == -1)
+				return -1;
 			insertStmt.setInt(j++, sheetReader.GetGroupId());
-			if (sheetReader.GetUserId() == -1) return -1;
+			if (sheetReader.GetUserId() == -1)
+				return -1;
 			insertStmt.setInt(j++, sheetReader.GetUserId());
 			// IN iDateToPublish DATETIME,
-//			insertStmt.setDate(j++, dateToPublish);
+			// insertStmt.setDate(j++, dateToPublish);
 			insertStmt.setString(j++, dateToPublish);
 			// IN iUnacceptReason VARCHAR(50),
 			insertStmt.setNull(j++, java.sql.Types.VARCHAR);
@@ -380,10 +402,8 @@ public class TaxonData {
 			// IN iComments TEXT)
 			insertStmt.setString(j++, nameSource);
 			insertStmt.setString(j++, comments);
-			//			insertStmt.setNull(j++, java.sql.Types.VARCHAR);
-			//			insertStmt.setNull(j++, java.sql.Types.VARCHAR);
-
-
+			// insertStmt.setNull(j++, java.sql.Types.VARCHAR);
+			// insertStmt.setNull(j++, java.sql.Types.VARCHAR);
 
 			// System.out.println(j + " parameters on call");
 
@@ -391,18 +411,37 @@ public class TaxonData {
 			ResultSet result = insertStmt.getResultSet();
 			result.next();
 			tsn = result.getInt(1);
-			//this.updateMissingFields();
+			this.updateMissingFields(tsn);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return tsn;
 	}
 
+	/** Update the taxonomicNames
+	 * 
+	 */
+	private void updateMissingFields(int tsn) {
+		String taxonomicNames = getTaxonomicNamesFromBranch(tsn);
+		String sql = "Update Taxa set taxonomicNames = ? where tsn = ?";
+		PreparedStatement stmt;
+		try {
+			stmt = LoadData.getConnection().prepareStatement(sql);
+			stmt.setString(1, taxonomicNames);
+			stmt.setInt(2, tsn);
+			stmt.execute();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+	}
+
 	private Integer findAuthor(String authorName) {
 		int author = 0;
-		if (authorName == null || authorName.length() == 0) return null;
+		if (authorName == null || authorName.length() == 0)
+			return null;
 		String temp = "SELECT taxon_Author_Id FROM TaxonAuthors WHERE taxon_author='"
-			+ authorName + "'";
+				+ authorName + "'";
 		try {
 			result = statement.executeQuery(temp);
 			if (result.next()) {
@@ -414,29 +453,30 @@ public class TaxonData {
 					author = result.getInt(1);
 
 					temp = "INSERT INTO TaxonAuthors (taxon_Author_Id,taxon_author,update_date,kingdom_id)"
-						+ " VALUES("
-						+ author
-						+ ",'"
-						+ authorName
-						+ "',NOW()," + kingdomId + ")";
+							+ " VALUES("
+							+ author
+							+ ",'"
+							+ authorName
+							+ "',NOW()," + kingdomId + ")";
 					statement.executeUpdate(temp);
 				} else {
 					System.out.println("Problems querying the database");
 					LoadData.log("Problems querying the database");
-//					System.exit(1);
+					// System.exit(1);
 					return null;
 				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-//			System.exit(1);
+			// System.exit(1);
 		}
 		return author;
 	}
 
 	public static int getTaxon(String taxonRef) {
 		Integer taxonId = taxonIds.get(taxonRef);
-		if (taxonId == null) return 0;
+		if (taxonId == null)
+			return 0;
 		return taxonId;
 	}
 
@@ -450,18 +490,64 @@ public class TaxonData {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-//		releaseDate = Date.valueOf(format.format(datecell.getDate()));
+		// releaseDate = Date.valueOf(format.format(datecell.getDate()));
 		if (dateToPublishFormatted.before(new java.util.Date(now.getTime()))) {
 			status = "public";
 		}
 	}
 
 	private String createParentName() {
-		parentName = ((genus + " " + subgenus).trim() + " "
-				+ specificEpithet + " " + subspecies).trim();
+		parentName = ((genus + " " + subgenus).trim() + " " + specificEpithet
+				+ " " + subspecies).trim();
 		parentName = ((parentName + " " + variety).trim() + " " + forma).trim();
 		return parentName;
 	}
 
+	/**
+	 * Output the names in reverse order
+	 * @return
+	 */
+	private String getTaxonomicNamesFromBranch(int tsn) {
+		String taxonomicNames = "";
+		LinkedList<String> branches;
+		try {
+			branches = getTaxonBranchFromParent(tsn);
+			while (!branches.isEmpty()) {
+				taxonomicNames += branches.removeLast() + " ";
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return taxonomicNames;
+	}
+
+	/**
+	 * Get all the branches up to tsn = 0 as a Queue
+	 * @return
+	 * @throws SQLException
+	 */
 	
+	private LinkedList<String> getTaxonBranchFromParent(int tsn) throws SQLException{
+		LinkedList<String> taxonomicNames = new LinkedList<String>();
+		String sql = "select parent_tsn, t.rank_id, scientificName, rank_name from Tree tr join TaxonUnitTypes t" +
+				" on tr.rank_id=t.rank_id and tr.kingdom_id=t.kingdom_id where tsn=?";
+		String lock = "LOCK tables Tree tr WRITE, TaxonUnitTypes t WRITE";
+		PreparedStatement branchstmt = LoadData.getConnection().prepareStatement(sql);
+		branchstmt.setInt(1, tsn);
+		statement.executeQuery(lock);
+		int currentTsn = tsn; 
+		while (currentTsn != 0){
+			ResultSet result = branchstmt.executeQuery();
+			if (result.next()){
+				int parentTsn = result.getInt("parent_tsn");
+				String scientificName = result.getString("scientificName");
+				String rank = result.getString("rank_name");
+				taxonomicNames.add(scientificName); 
+				currentTsn = parentTsn;
+				branchstmt.setInt(1, currentTsn);
+			}
+		}
+		statement.executeQuery("UNLOCK TABLES");
+		return taxonomicNames;
+	}
 }
