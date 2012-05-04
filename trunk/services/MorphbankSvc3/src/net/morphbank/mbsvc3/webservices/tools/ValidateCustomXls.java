@@ -30,6 +30,7 @@ public class ValidateCustomXls {
 	private static final String DROP_DOWNS_SHEET_NAME = "Drop Downs";
 	private static final String DATA_SHEET_NAME = "Data";
 	private static final String CONTRIBUTOR_SHEET_NAME = "ContributorInfo";
+	private static final String USER_PROPERTIES_SHEET_NAME = "UserProperties";
 	private boolean isXlsValid = true;
 	private boolean versionInfo;
 	private String fileName;
@@ -37,8 +38,10 @@ public class ValidateCustomXls {
 	private Sheet dropDownsSheet;
 	private Sheet dataSheet;
 	private Sheet contributorSheet;
+	private Sheet userPropertiesSheet;
 	private String[] headersDropDowns;
 	private String[] headersData;
+	private String[] headersUserProp;
 	private EntityManager em;
 	
 	public ValidateCustomXls(String fileName, boolean versionInfo, String persistence) {
@@ -51,8 +54,8 @@ public class ValidateCustomXls {
 	}
 	
 	public static void main(String[] args) {
-		ValidateCustomXls test = new ValidateCustomXls("/home/gjimenez/Documents/tests/customWorkbook-testContinentWaterBody.xls"
-				, true, MorphbankConfig.PERSISTENCE_LOCALHOST);
+		ValidateCustomXls test = new ValidateCustomXls("/home/gjimenez/Morphbank/tests/test.xls"
+				, true, MorphbankConfig.PERSISTENCE_MBPROD);
 		boolean passed = test.checkEverything();
 		System.out.println(passed);
 	}
@@ -72,8 +75,14 @@ public class ValidateCustomXls {
 		dropDownsSheet = workbook.getSheet(DROP_DOWNS_SHEET_NAME);
 		dataSheet = workbook.getSheet(DATA_SHEET_NAME);
 		contributorSheet = workbook.getSheet(CONTRIBUTOR_SHEET_NAME);
+		userPropertiesSheet = workbook.getSheet(USER_PROPERTIES_SHEET_NAME);
 	}
 
+	/**
+	 * Entry point for all tests
+	 * Add more tests in this method
+	 * @return
+	 */
 	public boolean checkEverything() {
 		if (versionInfo) {
 			String message = "Version Info: " + getVersionNumber(); 
@@ -86,6 +95,7 @@ public class ValidateCustomXls {
 		isXlsValid &= this.checkUniqueImageExtId();
 		isXlsValid &= this.checkFormatDateColumns();
 		isXlsValid &= this.checkOriginalFileName();
+		isXlsValid &= this.checkUserProperties();
 		isXlsValid &= this.checkDBMatch();
 		isXlsValid &= this.checkMandatoryCellsNotEmpty();
 		return isXlsValid;
@@ -97,6 +107,10 @@ public class ValidateCustomXls {
 		return this.getEntry(DROP_DOWNS_SHEET_NAME, col, 1);
 	}
 
+	/**
+	 * Get headers for the following sheets:
+	 * Drop Downs, Data, UserProperties
+	 */
 	private void readHeaders() {
 		int numFields = dropDownsSheet.getColumns();
 		headersDropDowns = new String[numFields];
@@ -107,6 +121,11 @@ public class ValidateCustomXls {
 		headersData = new String[numFields];
 		for (int i = 0; i < numFields; i++) {
 			headersData[i] = dataSheet.getCell(i, 0).getContents().toLowerCase().trim();
+		}
+		numFields = userPropertiesSheet.getColumns();
+		headersUserProp = new String[numFields];
+		for (int i = 0; i < numFields; i++) {
+			headersUserProp[i] = userPropertiesSheet.getCell(i, 0).getContents().toLowerCase().trim();
 		}
 		
 	}
@@ -136,9 +155,15 @@ public class ValidateCustomXls {
 		return null;
 	}
 
+	/**
+	 * Get the appropriate header for the given sheet
+	 * @param sheet
+	 * @return 
+	 */
 	private String[] getHeaders(String sheet) {
 		if (sheet.equalsIgnoreCase(DROP_DOWNS_SHEET_NAME)) return headersDropDowns;
 		if (sheet.equalsIgnoreCase(DATA_SHEET_NAME)) return headersData;
+		if (sheet.equalsIgnoreCase(USER_PROPERTIES_SHEET_NAME)) return headersUserProp;
 		return null;
 	}
 	
@@ -165,10 +190,17 @@ public class ValidateCustomXls {
 		} 
 		if (DATA_SHEET_NAME.equals(sheetName)) {
 			return dataSheet;
-		} 
+		}
+		if (USER_PROPERTIES_SHEET_NAME.equals(sheetName)) {
+			return userPropertiesSheet;
+		}
 		return null;
 	}
 	
+	/**
+	 * No duplicate in the ImageExternalId column
+	 * @return true if no duplicate have been found
+	 */
 	private boolean checkUniqueImageExtId() {
 		HashMap<Integer, Integer> duplicates = new HashMap<Integer, Integer>();
 		Cell[] cells = dataSheet.getColumn(this.getColumnNumberByName(DATA_SHEET_NAME, "Image External id"));
@@ -199,6 +231,13 @@ public class ValidateCustomXls {
 		return true;
 	}
 	
+	/**
+	 * Checks if the cell type for a date field is text
+	 * Excel interprets the date entered in various formats and is not
+	 * a reliable format to manipulate a date.
+	 * Also checks if the format is yyyy-mm-dd 
+	 * @return
+	 */
 	private boolean checkFormatDateColumns() {
 		Integer columnNumber = this.getColumnNumberByName(DATA_SHEET_NAME, "Date Determined");
 		if (columnNumber == null) {
@@ -207,20 +246,45 @@ public class ValidateCustomXls {
 			this.messageToOuput(error);
 			return true;
 		}
-		Cell[] cells = dataSheet.getColumn(this.getColumnNumberByName(DATA_SHEET_NAME, "Date Determined"));
 		boolean correctFormat = true;
-		for (int i = 1; i < cells.length; i++) {
-			if (Tools.isEmpty(cells[i])) continue;
-			correctFormat = Tools.checkCellType(cells[i], CellType.LABEL);
-			if (!correctFormat) {
-				String error = "In column Date Determined, row " + (i+1) + " should be formatted as text.";
-				System.out.println(error);
-				this.messageToOuput(error);
-			}
+		String[] dateColumns = {"Date Determined", "Earliest Date Collected", "Latest Date Collected"};
+		for (String colName:dateColumns){
+			Cell[] cells = dataSheet.getColumn(this.getColumnNumberByName(DATA_SHEET_NAME, colName));
+			correctFormat &= checkFormatDate(cells, colName);
 		}
 		return correctFormat;
 	}
 	
+	private boolean checkFormatDate(Cell[] cells, String colName){
+		boolean isCorrectFormat = true;
+		boolean isRowCorrect = true;
+		for (int i = 1; i < cells.length; i++) {
+			if (Tools.isEmpty(cells[i])) continue;
+			isCorrectFormat = Tools.checkCellType(cells[i], CellType.LABEL);
+			if (!isCorrectFormat) {
+				isRowCorrect = false;
+				String error = "In column "+ colName +", row " + (i+1) + " should be formatted as text.";
+				System.out.println(error);
+				this.messageToOuput(error);
+			}
+			else {
+				isCorrectFormat = Tools.checkDateFormat(cells[i]);
+				if (!isCorrectFormat) {
+					isRowCorrect = false;
+					String error = "In column "+ colName +", row " + (i+1) + 
+							" should be formatted as yyyy-mm-dd instead of " + cells[i].getContents() +".";
+					System.out.println(error);
+					this.messageToOuput(error);
+				}
+			}
+		}
+		return isRowCorrect;
+	}
+	
+	/**
+	 * Compare Taxon and Credentials to the database
+	 * @return true if the data is a match
+	 */
 	private boolean checkDBMatch() {
 		boolean matchDB = true;
 		MorphbankConfig.setPersistenceUnit(PERSISTENCE);
@@ -233,6 +297,11 @@ public class ValidateCustomXls {
 		return matchDB;
 	}
 	
+	/**
+	 * Compares the scientific name with the TSN to see
+	 * if they match in the database
+	 * @return true is the whole column of scientific name found a TSN match
+	 */
 	private boolean checkTSN() {
 		boolean columnValid = true;
 		Cell[] cellsDetermination = dataSheet.getColumn(this.getColumnNumberByName(DATA_SHEET_NAME, "Determination Scientific Name"));
@@ -273,6 +342,12 @@ public class ValidateCustomXls {
 		return columnValid;
 	}
 	
+	/**
+	 * No extra space should be found in the TSN fields
+	 * @param content
+	 * @param row 
+	 * @return TSN trimmed
+	 */
 	private String safeCast(String content, int row) {
 		if (content.indexOf(' ') != -1) {
 			String error = "Extra space found for TSN " + content.trim() + " at row " + row + ".<br />";
@@ -283,23 +358,30 @@ public class ValidateCustomXls {
 		return content;
 	}
 
+	/**
+	 * Verifies that the data in the Contributor sheet
+	 * matches the database.
+	 * name and id cells cannot be both empty
+	 * Checks userName /UserId, groupName/ groupId, user belongs to the group
+	 * @return true if all the above is true
+	 */
 	private boolean checkCredentials() {
 		boolean credentialsOK = true;
 		boolean emptyCells = false;
 		String cName = contributorSheet.getCell(1, 1).getContents();
 		String cId = contributorSheet.getCell(1, 2).getContents();
 		emptyCells |= areCellsBothEmpty(contributorSheet.getCell(0, 1).getContents(), cName,
-				contributorSheet.getCell(1, 1).getContents(), cId);
+				contributorSheet.getCell(0, 2).getContents(), cId);
 
 		String sName = contributorSheet.getCell(1, 3).getContents();
 		String sId = contributorSheet.getCell(1, 4).getContents();
 		emptyCells |= areCellsBothEmpty(contributorSheet.getCell(0, 3).getContents(), sName,
-				contributorSheet.getCell(1, 3).getContents(), sId);
+				contributorSheet.getCell(0, 4).getContents(), sId);
 		
 		String gName = contributorSheet.getCell(1, 5).getContents();
 		String gId = contributorSheet.getCell(1, 6).getContents();
 		emptyCells |= areCellsBothEmpty(contributorSheet.getCell(0, 5).getContents(), gName,
-				contributorSheet.getCell(1, 6).getContents(), gId);
+				contributorSheet.getCell(0, 6).getContents(), gId);
 		
 		String date = contributorSheet.getCell(1, 7).getContents();
 		emptyCells |= isCellEmpty(contributorSheet.getCell(0, 7).getContents(), date);
@@ -344,6 +426,13 @@ public class ValidateCustomXls {
 		return false;
 	}
 	
+	/**
+	 * Checks that the name given matches the morphbank id
+	 * @param query
+	 * @param name
+	 * @param id
+	 * @return
+	 */
 	private boolean compareNameId(Query query, String name, String id) {
 		if(name == null || name.equals("") || id == null || id.equals("")) return true;
 		List names = query.getResultList();
@@ -371,6 +460,13 @@ public class ValidateCustomXls {
 		return matchFound;
 	}
 
+	/**
+	 * Checks if the user belongs to the given group
+	 * @param query
+	 * @param id
+	 * @param groupName
+	 * @return
+	 */
 	private boolean compareUserGroup(Query query, String id, String groupName) {
 		if(groupName == null || groupName.equals("") || id == null || id.equals("")) return true;
 		List names = query.getResultList();
@@ -404,7 +500,12 @@ public class ValidateCustomXls {
 	public StringBuffer getOutput() {
 		return output;
 	}
-
+	
+	/**
+	 * The file name should have the correct extension
+	 * and not space or more than one '.'
+	 * @return
+	 */
 	private boolean checkOriginalFileName() {
 		Cell[] cells = dataSheet.getColumn(this.getColumnNumberByName(DATA_SHEET_NAME, "Original File Name"));
 		boolean isValid = true;
@@ -434,6 +535,11 @@ public class ValidateCustomXls {
 		return isValid;
 	}
 
+	/**
+	 * Append messages to a StringBuffer that can be used to
+	 * display messages on a webpage.
+	 * @param message
+	 */
 	private void messageToOuput(String message) {
 		output.append(message);
 		output.append("<br />");
@@ -466,6 +572,12 @@ public class ValidateCustomXls {
 		return isValid;
 	}
 	
+	/**
+	 * All listed columns should have a value if one of the cell
+	 * is not empty
+	 * @param entireRow
+	 * @return entire row
+	 */
 	private String[] getMandatoryRow(Cell[] entireRow){
 
 			int colImgExtId = this.getColumnNumberByName(DATA_SHEET_NAME, "Image External id");
@@ -524,6 +636,37 @@ public class ValidateCustomXls {
 		String error = "In row " + (row + 1) + ", one or more mandatory cells are empty.";
 		System.out.println(error);
 		this.messageToOuput(error);
+	}
+	
+	/**
+	 * Check if all user properties are in
+	 * the Data sheet header.
+	 * Avoid common typos, extra spaces, etc.
+	 * @return true if check passed
+	 */
+	private boolean checkUserProperties() {
+		String errorMessagePart1 = "In " + USER_PROPERTIES_SHEET_NAME + " sheet, "; //insert userProperty here
+		String errorMessagePart2 = " does not match any column header in " + DATA_SHEET_NAME + " sheet. Please check for typos, extra spaces, etc.";
+		boolean matchAll = true;
+		boolean currentMatch = false;
+		String[] headers = getHeaders(DATA_SHEET_NAME);
+		Cell[] userProperties = userPropertiesSheet.getColumn(this.getColumnNumberByName(USER_PROPERTIES_SHEET_NAME, "<userProperty>"));
+		for (Cell userProp:userProperties) {
+			if (userProp.getContents().equals("<userProperty>")) continue;
+			for (String header:headers) {
+				if (userProp.getContents().toLowerCase().equals(header)) {
+					currentMatch = true;
+					break;
+				}
+			}
+			if (!currentMatch) {
+				String message = errorMessagePart1 + userProp.getContents() + errorMessagePart2;
+				System.out.println(message);
+				this.messageToOuput(message);
+				matchAll = false;
+			}
+		}
+		return matchAll;
 	}
 	
 }
