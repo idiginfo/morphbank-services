@@ -53,13 +53,6 @@ public class ValidateCustomXls {
 		PERSISTENCE = persistence;
 	}
 	
-	public static void main(String[] args) {
-		ValidateCustomXls test = new ValidateCustomXls("/home/gjimenez/Morphbank/tests/test.xls"
-				, true, MorphbankConfig.PERSISTENCE_MBPROD);
-		boolean passed = test.checkEverything();
-		System.out.println(passed);
-	}
-	
 	private Workbook createWorkbook() {
 		try {
 			return Workbook.getWorkbook(new File(fileName));
@@ -241,9 +234,9 @@ public class ValidateCustomXls {
 	private boolean checkFormatDateColumns() {
 		Integer columnNumber = this.getColumnNumberByName(DATA_SHEET_NAME, "Date Determined");
 		if (columnNumber == null) {
-			String error = "No Date Determined found. It could be due to an outdated spreadsheet. Check skipped on that.";
-			System.out.println(error);
-			this.messageToOuput(error);
+//			String error = "No Date Determined found. It could be due to an outdated spreadsheet. Check skipped on that.";
+//			System.out.println(error);
+//			this.messageToOuput(error);
 			return true;
 		}
 		boolean correctFormat = true;
