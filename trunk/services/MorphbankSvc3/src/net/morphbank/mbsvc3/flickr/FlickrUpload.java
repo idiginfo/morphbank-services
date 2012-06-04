@@ -16,7 +16,6 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
-import java.util.Vector;
 
 import net.morphbank.MorphbankConfig;
 import net.morphbank.object.BaseObject;
