@@ -73,14 +73,17 @@ public class Locality {
 			//			updater.addNumericMatchColumn(8, row, "maximumElevation");
 			//			updater.addNumericMatchColumn(9, row, "minimumDepth");
 			//			updater.addNumericMatchColumn(10, row, "maximumDepth");
-			if(sheetReader.getColumnNumberByName(MYTYPE, ExcelTools.COL_CONTINENT_OCEAN) != null) {
-				updater.addStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, ExcelTools.COL_CONTINENT_OCEAN), row, "continentOcean");
+			Integer col = sheetReader.getColumnNumberByName(MYTYPE, ExcelTools.COL_CONTINENT_OCEAN);
+			if(col != null && col != -1) {
+				updater.addStringMatchColumn(col, row, "continentOcean");
 			}
-			if(sheetReader.getColumnNumberByName(MYTYPE, ExcelTools.COL_CONTINENT) != null) {
-				updater.addStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, ExcelTools.COL_CONTINENT), row, "continent");
+			col = sheetReader.getColumnNumberByName(MYTYPE, ExcelTools.COL_CONTINENT);
+			if(col != null  && col != -1) {
+				updater.addStringMatchColumn(col, row, "continent");
 			}
-			if(sheetReader.getColumnNumberByName(MYTYPE, ExcelTools.COL_WATER_BODY) != null) {
-				updater.addStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, ExcelTools.COL_WATER_BODY), row, "ocean");
+			col = sheetReader.getColumnNumberByName(MYTYPE, ExcelTools.COL_WATER_BODY);
+			if(col != null  && col != -1) {
+				updater.addStringMatchColumn(col, row, "ocean");
 			}
 			updater.addViewLocalityStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, ExcelTools.COL_COUNTRY), row, "country");
 			updater.addViewLocalityStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, ExcelTools.COL_LOCALITY_DESCRIPTION), row, "locality");
