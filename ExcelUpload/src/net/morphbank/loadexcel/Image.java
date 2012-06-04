@@ -131,8 +131,8 @@ public class Image {
 			updater.addDateColumn("dateToPublish", dateToPublish);
 			if (specimenId != 0) {
 				updater.addIntColumn("specimenId", specimenId);
-				System.out.println("No specimen found for image row " + row);
-				LoadData.log("No specimen found for image row " + row);
+//				System.out.println("No specimen found for image row " + row);
+//				LoadData.log("No specimen found for image row " + row);
 			}
 			updater.addIntColumn("viewId", viewId);
 			updater.addNumericColumn("magnification", magnification, row);
