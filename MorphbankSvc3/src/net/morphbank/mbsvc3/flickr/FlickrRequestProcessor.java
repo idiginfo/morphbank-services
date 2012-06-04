@@ -12,9 +12,9 @@
 package net.morphbank.mbsvc3.flickr;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Vector;
 
 import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
@@ -163,7 +163,7 @@ public class FlickrRequestProcessor {
 	}
 
 	public Object doFlickrUpload(int id, FlickrRequestParams params, PrintWriter out) {
-		List<Integer> ids = new Vector<Integer>();
+		List<Integer> ids = new ArrayList<Integer>();
 		ids.add(id);
 		return doFlickrUpload(ids, params, out);
 	}
@@ -201,7 +201,7 @@ public class FlickrRequestProcessor {
 	}
 
 	public Object doFlickrQuery(int id, FlickrRequestParams params, PrintWriter out) {
-		List<Integer> ids = new Vector<Integer>();
+		List<Integer> ids = new ArrayList<Integer>();
 		ids.add(id);
 		return doFlickrQuery(ids, params, out);
 	}
