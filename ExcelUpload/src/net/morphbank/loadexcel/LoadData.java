@@ -50,6 +50,7 @@ public class LoadData {
 	protected static String dbName;
 	protected static String dbUserId;
 	protected static String dbPassword;
+	protected static String dbPort;
 	private String fileName;
 	private static String folderPath = "";
 	private static String imageDirectoryPath;
@@ -78,7 +79,7 @@ public class LoadData {
 	public String run() {
 		GetConnection newconnect = new GetConnection();
 		
-		conn = newconnect.openConnection(dbHost,dbName, dbUserId, dbPassword);
+		conn = newconnect.openConnection(dbHost,dbName, dbUserId, dbPassword, dbPort);
 		try {
 			statement = conn.createStatement();
 
@@ -302,6 +303,7 @@ public class LoadData {
 			dbName = prop.getProperty("dbname");
 			dbUserId = prop.getProperty("login");
 			dbPassword = prop.getProperty("password");
+			dbPort = prop.getProperty("dbport");
 		} catch (FileNotFoundException e) {
 			System.out.println(propertyFile);
 			e.printStackTrace();
