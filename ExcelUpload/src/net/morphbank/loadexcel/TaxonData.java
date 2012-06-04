@@ -177,10 +177,10 @@ public class TaxonData {
 					rankId = FindRank();
 				}
 				if (parentTsn <= 0) {
-					System.out.println("No parent found for " + scientificName
-							+ " family '" + family + ": processing aborted");
-					LoadData.log("No parent found for " + scientificName
-							+ " family '" + family + ": processing aborted\n\r");
+					String noParentMessage = "No parent found for " + scientificName
+							+ " family '" + family + "': processing aborted";
+					System.out.println(noParentMessage);
+					LoadData.log(noParentMessage + "\n\r");
 					// System.exit(0);
 					return false;
 				}
@@ -188,10 +188,10 @@ public class TaxonData {
 				tsn = createTaxon();
 				if (tsn == -1)
 					return false;
-				System.out.println("Taxon created for row " + j + " '"
-						+ scientificName + "' is " + tsn);
-				LoadData.log("Taxon created for row " + j + " '"
-						+ scientificName + "' is " + tsn);
+				String taxonCreatedMessage = "Taxon created for row " + j + " '"
+						+ scientificName + "' is " + tsn;
+				System.out.println(taxonCreatedMessage);
+				LoadData.log(taxonCreatedMessage);
 			}
 			taxonIds.put(scientificName, tsn);
 		}
