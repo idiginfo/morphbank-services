@@ -129,7 +129,7 @@ public class RestService extends javax.servlet.http.HttpServlet implements javax
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		if (!isIPAllowed(request.getRemoteAddr())) {
-			response.sendError(HttpServletResponse.SC_FORBIDDEN);
+			response.sendError(HttpServletResponse.SC_FORBIDDEN, "This IP is not allowed. Current IP used:" + request.getRemoteAddr());
 			return;
 		}
 		PrintWriter out = response.getWriter();
@@ -177,7 +177,7 @@ public class RestService extends javax.servlet.http.HttpServlet implements javax
 			}
 		}
 	}
-
+	
 	private boolean isIPAllowed(String ip) {
 		if (ipAddresses.contains(ip)) {
 			return true;
