@@ -46,10 +46,10 @@ public class LoadData {
 	private static SheetReader sheetReader;
 	private static CheckNameTable checkNames;
 	private static ExternalLinks externalLinks;
-	private static String dbHost;
-	private static String dbName;
-	private static String dbUserId;
-	private static String dbPassword;
+	protected static String dbHost;
+	protected static String dbName;
+	protected static String dbUserId;
+	protected static String dbPassword;
 	private String fileName;
 	private static String folderPath = "";
 	private static String imageDirectoryPath;
@@ -84,7 +84,7 @@ public class LoadData {
 
 			// reading from the excel sheet
 			sheetReader = new SheetReader(fileName, newconnect);
-			ValidateXls isvalid = new ValidateXls(sheetReader, true);
+			ValidateXls isvalid = new ValidateXls(sheetReader, true, propertyFile);
 			if (!isvalid.checkEverything()) {
 				System.err.println("Error(s) in SpreadSheet. Program interrupted.");
 				log("Error(s) in SpreadSheet. Program interrupted.");
@@ -207,7 +207,7 @@ public class LoadData {
 		System.out.println("default charset: " + charSet.displayName());
 		String filename = "";
 		
-		filename = "/home/gjimenez/Documents/tests/Alejandro/PLATY-PBI_ATS_howardi/avalerio_PLATYPBI_ATS_howardi.xls";
+		filename = "/home/gjimenez/palearticTestmb3a-1.xls";
 		folderPath = "/home/gjimenez/Downloads/";
 		propertyFile = "loadData.properties";
 
@@ -293,9 +293,26 @@ public class LoadData {
 		}
 		
 	}
+	
+	public static void setProperties(String propertyFile) {
+		Properties prop = new Properties();
+		try {
+			prop.load(new FileInputStream(propertyFile));
+			dbHost = prop.getProperty("dbhost");
+			dbName = prop.getProperty("dbname");
+			dbUserId = prop.getProperty("login");
+			dbPassword = prop.getProperty("password");
+		} catch (FileNotFoundException e) {
+			System.out.println(propertyFile);
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 
 	public static String getLogFile() {
 		return logFile;
 	}
+	
 
 }
