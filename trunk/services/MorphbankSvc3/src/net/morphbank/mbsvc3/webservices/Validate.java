@@ -40,6 +40,7 @@ public class Validate extends javax.servlet.http.HttpServlet implements javax.se
 	private static final String MB3AP_BOOK = "mb3ap";
 	private static final String CUSTOM_BOOK = "custom";
 	//private String folderPath = "";
+	private static String propertyFile;
 
 	/*
 	 * (non-Java-doc)
@@ -52,6 +53,7 @@ public class Validate extends javax.servlet.http.HttpServlet implements javax.se
 
 	public void init(ServletConfig config) throws ServletException {
 		super.init(config);
+		propertyFile = config.getInitParameter("propertyFile");
 		// setup persistence unit from parameter, if available
 		RequestParams.initService(config);
 	}
@@ -170,7 +172,7 @@ public class Validate extends javax.servlet.http.HttpServlet implements javax.se
 			try {
 				if (fileType.equalsIgnoreCase(MB3AP_BOOK)){ //Animalia or Plantae
 					SheetReader sheetReader = new SheetReader(folderPath + fileName, null);
-					ValidateXls isvalid = new ValidateXls(sheetReader, versionInfo);
+					ValidateXls isvalid = new ValidateXls(sheetReader, versionInfo, propertyFile);
 
 					if (!isvalid.checkEverything()) {
 						output.append("<b>Testing file: " + fileName + "</b><br />");
