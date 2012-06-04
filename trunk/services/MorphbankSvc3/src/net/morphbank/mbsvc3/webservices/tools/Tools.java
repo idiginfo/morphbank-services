@@ -45,6 +45,11 @@ public class Tools {
 		return false;
 	}
 
+	/**
+	 * The file's extension belongs to the provided list
+	 * @param fileName
+	 * @return
+	 */
 	public static boolean fileExtensionOk(String fileName) {
 		int dot = fileName.lastIndexOf('.');
 		if (dot == -1) return false;
@@ -58,6 +63,33 @@ public class Tools {
 	public static boolean checkCellType(Cell cell, CellType type) {
 		if (cell.getType() != type) return false;
 		return true;
+	}
+	
+	/**
+	 * Inforce yyyy-mm-dd format to a cell
+	 * Split the date and check each part individually
+	 * @param cell
+	 * @return true if the format is correct
+	 */
+	public static boolean checkDateFormat(Cell cell) {
+		String content = cell.getContents();
+		boolean result = true;
+		String[] parts = content.split("-");
+		if (parts.length != 3) 
+			return false;
+		else {
+				try {
+					int year = Integer.parseInt(parts[0]);
+					int month = Integer.parseInt(parts[1]);
+					int day = Integer.parseInt(parts[2]);
+					result &= (year > 999 && year < 2150);
+					result &= (month >= 00 && month <= 12);
+					result &= (day >= 00 && day <= 31);
+				} catch (Exception e){
+					return false;
+			}
+		}
+		return result;
 	}
 	
 	public static boolean isEmpty(Cell cell) {
