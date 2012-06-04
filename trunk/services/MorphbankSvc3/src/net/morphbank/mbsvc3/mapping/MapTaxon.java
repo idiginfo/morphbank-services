@@ -135,8 +135,21 @@ public class MapTaxon extends MapObjectBase {
 		Iterator<String> extIds = id.getExternal().iterator();
 		while (extIds.hasNext()) {
 			String extId = extIds.next();
+			if (extId.startsWith(XmlUtils.ITIS_PREFIX)) {
+				String tsnStr = extId.substring(XmlUtils.ITIS_PREFIX.length());
+				if (tsnStr != null) {
+					try {
+						taxon = Taxon.getTaxon(Integer.valueOf(tsnStr));
+						if (taxon != null) {
+							return taxon;
+						}
+					} catch (Exception e) {
+						// no taxon for this extId!
+					}
+				}
+			}
 			// Check for scientific name as external id
-			if (extId.startsWith(XmlUtils.SCI_NAME_AUTHOR_PREFIX)) {
+			else if (extId.startsWith(XmlUtils.SCI_NAME_AUTHOR_PREFIX)) {
 				String sciNameAuthor = extId.substring(XmlUtils.SCI_NAME_AUTHOR_PREFIX
 						.length());
 				String[] fields = sciNameAuthor.split(XmlUtils.SCI_NAME_AUTHOR_SPLIT);
@@ -151,7 +164,7 @@ public class MapTaxon extends MapObjectBase {
 					}
 				}
 			}
-			if (extId.startsWith(XmlUtils.SCI_NAME_PREFIX)) {
+			else if (extId.startsWith(XmlUtils.SCI_NAME_PREFIX)) {
 				String scientificName = extId.substring(XmlUtils.SCI_NAME_PREFIX.length());
 				taxon = Taxon.getTaxon(scientificName);// TODO add kingdom
 				if (taxon != null) {
@@ -159,19 +172,7 @@ public class MapTaxon extends MapObjectBase {
 				}
 			}
 
-			if (extId.startsWith(XmlUtils.ITIS_PREFIX)) {
-				String tsnStr = extId.substring(XmlUtils.ITIS_PREFIX.length());
-				if (tsnStr != null) {
-					try {
-						taxon = Taxon.getTaxon(Integer.valueOf(tsnStr));
-						if (taxon != null) {
-							return taxon;
-						}
-					} catch (Exception e) {
-						// no taxon for this extId!
-					}
-				}
-			} else { // try to find taxon concept by external id
+			else { // try to find taxon concept by external id
 				obj = BaseObject.getObjectByExternalId(extId);
 				if (obj != null && obj instanceof TaxonConcept) {
 					taxon = ((TaxonConcept) obj).getTaxon();
