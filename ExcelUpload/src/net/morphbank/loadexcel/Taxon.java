@@ -20,6 +20,7 @@ package net.morphbank.loadexcel;
 //This file finds the tsn for Given family       /                                                                                          
 //genus or species provided for a given Specimen /                                                                                           //                                               /                                                                                           //created by: Karolina Maneva-Jakimoska          /                                                                                           // date:      March 5th 2006                     /
 //upadated:   April 2nd 2007                     /                                                                                           //////////////////////////////////////////////////                                                                                            
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -30,6 +31,7 @@ public class Taxon {
 	private int kingdomId = 0;
 	private int rankId = 0;
 	String scientificName = "";
+	private Connection conn;
 
 	// constructor for FindTSN
 	public Taxon(String scientificName) {
@@ -39,6 +41,10 @@ public class Taxon {
 	}
 
 	public Taxon(int tsn) {
+		loadFromDatabase(tsn);
+	}
+	public Taxon(int tsn, Connection conn) {
+		this.conn = conn;
 		loadFromDatabase(tsn);
 	}
 
@@ -68,7 +74,9 @@ public class Taxon {
 	private boolean init(String whereClause) {
 		try {
 			Statement statement = LoadData.getStatement();
-			;
+			if (statement == null) { //comes from validation instead of upload
+				statement = conn.createStatement();
+			}
 			String query = "SELECT tsn,parent_tsn,kingdom_id,rank_id, scientificName FROM Tree WHERE "
 					+ whereClause;
 			ResultSet result = statement.executeQuery(query);
