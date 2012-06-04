@@ -141,17 +141,17 @@ public class ExternalLinks {
 		}
 		link.extLinkTypeId = names.get(0);
 		if (checkForLink(link)) {
-			System.out.println("Extern link row " + link + " matches");
-			LoadData.log("Extern link row " + link + " matches");
+			System.out.println("Extern link row " + link.row + " matches");
+			LoadData.log("Extern link row " + link.row + " matches");
 			return true;
 		}
 		if (insertLink(link)) {
-			System.out.println("Extern link row " + link + " added");
-			LoadData.log("Extern link row " + link + " added");
+			System.out.println("Extern link row " + link.row + " added");
+			LoadData.log("Extern link row " + link.row + " added");
 			return true;
 		}
-		System.out.println("Extern link row " + link + " not added ");
-		LoadData.log("Extern link row " + link + " not added ");
+		System.out.println("Extern link row " + link.row + " not added ");
+		LoadData.log("Extern link row " + link.row + " not added ");
 		return false;
 	}
 
