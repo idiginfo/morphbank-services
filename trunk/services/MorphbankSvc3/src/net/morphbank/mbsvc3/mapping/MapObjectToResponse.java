@@ -79,7 +79,11 @@ public class MapObjectToResponse {
 			submitter = new Credentials();
 			if (credentials.getUser() != null) {
 				submitter.setUserId(credentials.getUser().getId());
-				submitter.setGroupId(credentials.getGroup().getGroupId());
+				submitter.
+				setGroupId(
+						credentials.
+						getGroup().
+						getGroupId());
 			}
 			reqSummary.setSubmitter(submitter);
 		}
