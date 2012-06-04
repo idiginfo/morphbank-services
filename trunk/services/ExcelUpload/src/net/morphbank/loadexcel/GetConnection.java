@@ -37,11 +37,33 @@ public class GetConnection {
 	public GetConnection() {
 	}
 
-	public Connection openConnection(String dbHost, String dbName, String userId, String password) {
+//	public Connection openConnection(String dbHost, String dbName, String userId, String password) {
+//		try {
+//			Class.forName("com.mysql.jdbc.Driver").newInstance();
+//			//System.out.println("The Driver has been loaded");
+//			String connString = "jdbc:mysql://" + dbHost + ":3306/" + dbName
+//					+ "?noAccessToProcedureBodies=true"
+//					+ "&useUnicode=true&characterEncoding=UTF-8";
+//			// obtaining credential from authorised user
+//			conn = DriverManager
+//					.getConnection(connString, userId, password);
+//			
+//			System.out.println("Connection was established to "+dbName+" on "+dbHost);
+//			LoadData.log("Connection was established to "+dbName+" on "+dbHost);
+//		} catch (Exception e) {
+//			e.printStackTrace();
+////			System.exit(1);
+//		}
+//		return conn;
+//	}
+	
+	//Alternative constructor using port as a variable. Default to 3306 if not found.
+	public Connection openConnection(String dbHost, String dbName, String userId, String password, String port) {
 		try {
+			if (port == null || port.equals("")) port = "3306";
 			Class.forName("com.mysql.jdbc.Driver").newInstance();
 			//System.out.println("The Driver has been loaded");
-			String connString = "jdbc:mysql://" + dbHost + ":3306/" + dbName
+			String connString = "jdbc:mysql://" + dbHost + ":" + port + "/" + dbName
 					+ "?noAccessToProcedureBodies=true"
 					+ "&useUnicode=true&characterEncoding=UTF-8";
 			// obtaining credential from authorised user

@@ -25,7 +25,7 @@ public class ValidateAgainstDatabase {
 		LoadData.setProperties(propertyFile);
 		GetConnection newconnect = new GetConnection();
 		return newconnect.openConnection(LoadData.dbHost, LoadData.dbName,
-				LoadData.dbUserId, LoadData.dbPassword);
+				LoadData.dbUserId, LoadData.dbPassword, LoadData.dbPort);
 	}
 
 	public ValidateAgainstDatabase(SheetReader sheetReader, StringBuffer output, String propertyFile) {
