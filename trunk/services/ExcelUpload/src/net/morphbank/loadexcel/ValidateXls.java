@@ -1,12 +1,11 @@
 package net.morphbank.loadexcel;
 
-import java.text.DateFormat;
-
+import java.util.ArrayList;
 import jxl.Cell;
-import jxl.DateCell;
-import jxl.LabelCell;
+import jxl.CellType;
 import jxl.Sheet;
-import jxl.format.CellFormat;
+import jxl.StringFormulaCell;
+
 
 /**
  * Set of methods to try to check the excel workbook before using its data
@@ -20,16 +19,18 @@ public class ValidateXls {
 	private boolean isXlsValid = true;
 	private boolean versionInfo;
 	StringBuffer output = new StringBuffer();
+	private boolean repeatErrorMessage = true; 
+	private static String propertyFile;
 
-	public static void main(String[] args) {
-		SheetReader sheetReader = new SheetReader("/home/gjimenez/Documents/tests/test_mb3a.xls", null);
-		ValidateXls test = new ValidateXls(sheetReader, true);
-		System.out.println(test.checkEverything());
-	}
+//	public ValidateXls(SheetReader sheetReader, boolean versionInfo) {
+//		this.sheetReader = sheetReader;
+//		this.versionInfo = versionInfo;
+//	}
 	
-	public ValidateXls(SheetReader sheetReader, boolean versionInfo) {
+	public ValidateXls(SheetReader sheetReader, boolean versionInfo, String propertyFile) {
 		this.sheetReader = sheetReader;
 		this.versionInfo = versionInfo;
+		this.propertyFile = propertyFile;
 	}
 	
 	public boolean checkEverything() {
@@ -44,6 +45,9 @@ public class ValidateXls {
 			System.out.println(version);
 			this.messageToOuput(version);
 		}
+		String beginTesting = "Let's see what the file looks like...";
+		System.out.println(beginTesting);
+		this.messageToOuput("<b>" + beginTesting + "</b>");
 		isXlsValid &= checkCredentials();
 		isXlsValid &= isSpecimenVSLocalityOk();
 		isXlsValid &= isImageVSSpecimenOk();
@@ -53,9 +57,16 @@ public class ValidateXls {
 		isXlsValid &= checkLatLong();
 		isXlsValid &= isViewTSNOk();
 		isXlsValid &= checkMandatoryCellsNotEmpty(); 
+		isXlsValid &= checkAgainstDB();
 		return isXlsValid;
 	}
 	
+	/**
+	 * The selected value from the dropdown menu needs to match the list
+	 * provided in the Locality sheet.
+	 * Checks that values for locality in the Specimen sheet are listed in the Locality sheet.
+	 * @return
+	 */
 	public boolean isSpecimenVSLocalityOk() {
 		Sheet specimenSheet = sheetReader.getSheet("Specimen");
 		Sheet localitySheet = sheetReader.getSheet("Locality");
@@ -69,6 +80,12 @@ public class ValidateXls {
 		return this.testColumns(localityNamesSpecimen, localityNamesLocality, "Specimen", "Locality");
 	}
 	
+	/**
+	 * The selected value from the dropdown menu needs to match the list
+	 * provided in the Specimen sheet.
+	 * Checks that values for specimen in the Image sheet are listed in the Specimen sheet.
+	 * @return
+	 */
 	public boolean isImageVSSpecimenOk() {
 		Sheet specimenSheet = sheetReader.getSheet("Specimen");
 		Sheet imageSheet = sheetReader.getSheet("Image");
@@ -82,6 +99,12 @@ public class ValidateXls {
 		return this.testColumns(specimenNamesImage, specimenNamesSpecimen, "Image", "Specimen");
 	}
 	
+	/**
+	 * The selected value from the dropdown menu needs to match the list
+	 * provided in the View sheet.
+	 * Checks that values for view in the Image sheet are listed in the View sheet.
+	 * @return
+	 */
 	public boolean isImageVSViewOk() {
 		Sheet viewSheet = sheetReader.getSheet("View");
 		Sheet imageSheet = sheetReader.getSheet("Image");
@@ -96,6 +119,11 @@ public class ValidateXls {
 	}
 	
 	
+	/**
+	 * If a view name is not empty it needs to have
+	 * a Taxon to be applied to.
+	 * @return
+	 */
 	public boolean isViewTSNOk() {
 		boolean isValid = true;
 		Sheet viewSheet = sheetReader.getSheet("View");
@@ -116,6 +144,11 @@ public class ValidateXls {
 		return isValid;
 	}
 	
+	/**
+	 * Find where the Custom Views start
+	 * @param cells
+	 * @return the first row if found otherwise -1
+	 */
 	private int findCustomView(Cell[] cells) {
 		for (int i = 1; i < cells.length; i++) {
 			if (cells[i].getContents().equalsIgnoreCase(ExcelTools.VIEW_APPLICABLE_TO_TAXON))
@@ -165,7 +198,7 @@ public class ValidateXls {
 	
 	private String getVersionNumber() {
 		Integer col = sheetReader.getColumnNumberByName("SupportData", "Version Info");
-		if (col == null) return "no version for this file. (that's ok, this is not an error. It means there is a more recent version available online.)";
+		if (col == -1) return "no version for this file. (that's ok, this is not an error. It means there is a more recent version available online.)";
 		return sheetReader.getEntry("SupportData", col, 1);
 	}
 	
@@ -266,6 +299,11 @@ public class ValidateXls {
 		return false;
 	}
 
+	/**
+	 * The file's extension belongs to the provided list
+	 * @param fileName
+	 * @return
+	 */
 	public static boolean fileExtensionOk(String fileName) {
 		int dot = fileName.lastIndexOf('.');
 		if (dot == -1) return false;
@@ -280,6 +318,11 @@ public class ValidateXls {
 		return cell.getContents().equalsIgnoreCase("");
 	}
 	
+	/**
+	 * Append messages to a StringBuffer that can be used to
+	 * display messages on a webpage.
+	 * @param message
+	 */
 	private void messageToOuput(String message) {
 		output.append(message);
 		output.append("<br />");
@@ -298,6 +341,10 @@ public class ValidateXls {
 		
 	}
 	
+	/**
+	 * Both latitute and longitude need to be decimal numbers.
+	 * @return true is the format is correct
+	 */
 	private boolean checkLatLong() {
 		Cell[] latitude = sheetReader.getSheet("Locality").getColumn(sheetReader.getColumnNumberByName("Locality", "Latitude"));
 		Cell[] longitude = sheetReader.getSheet("Locality").getColumn(sheetReader.getColumnNumberByName("Locality", "Longitude"));
@@ -325,16 +372,34 @@ public class ValidateXls {
 	private boolean checkMandatoryCellsNotEmpty() {
 		boolean isValid = true;
 		//either all cells empty or all full
+		ArrayList<String> sheetsNames = new ArrayList<String>();
+		sheetsNames.add("Image");
+		sheetsNames.add("Specimen");
+		sheetsNames.add("Taxon");
+		
+		for(String sheetName:sheetsNames) {
+			Sheet sheet = sheetReader.getSheet(sheetName);
+			int maxRows = sheet.getRows();
+			for (int i = 1; i < maxRows; i++) {
+				String[] row = this.getMandatoryRow(sheetName, sheet.getRow(i));
+				isValid &= this.checkMandatoryRow(row, sheetName, i);
+			}
+		}
+		
 		Sheet imagesSheet = sheetReader.getSheet("Image");
 		int maxRows = imagesSheet.getRows();
 		for (int i = 1; i < maxRows; i++) {
 			String[] row = this.getMandatoryRow("Images", imagesSheet.getRow(i));
-			isValid &= this.checkMandatoryRow(row, "Images", i);
+			if (row==null) continue;
+			if(! this.checkMandatoryRow(row, "Images", i)){
+				isValid = false;
+			}
 		}
 		Sheet specimenSheet = sheetReader.getSheet("Specimen");
 		maxRows = specimenSheet.getRows();
 		for (int i = 2; i < maxRows; i++) {
 			String[] row = this.getMandatoryRow("Specimen", specimenSheet.getRow(i));
+			if (row==null) continue;
 			isValid &= this.checkMandatoryRow(row, "Specimen", i);
 		}
 		
@@ -342,28 +407,54 @@ public class ValidateXls {
 	}
 	
 	private String[] getMandatoryRow(String type, Cell[] entireRow){
-		if (type.equals("Images")) {
-			int colISpecimenDescription= sheetReader.getColumnNumberByName("Image", "Specimen Description");
-			int colIMyViewName = sheetReader.getColumnNumberByName("Image", "My View Name");
-			int colICopyright= sheetReader.getColumnNumberByName("Image", "Copyright Info");
-			int colIImageFileName = sheetReader.getColumnNumberByName("Image", "Image file name");
-			int colICreativeCommons = sheetReader.getColumnNumberByName("Image", "Creative Commons");
+		String message = "Some columns are missing. Please use an updated spreadsheet from http://www.morphbank.net.";
+		if (repeatErrorMessage) {
+			if ((entireRow == null || entireRow.length < 2)) {
+				System.out.println(message);
+				messageToOuput(message);
+				repeatErrorMessage = false;
+				return null;
+			}
+		}
+		if (type.equals("Image")) {
+			int colISpecimenDescription= sheetReader.getColumnNumberByName(type, "Specimen Description");
+			int colIMyViewName = sheetReader.getColumnNumberByName(type, "My View Name");
+			int colICopyright= sheetReader.getColumnNumberByName(type, "Copyright Info");
+			int colIImageFileName = sheetReader.getColumnNumberByName(type, "Image file name");
+			int colICreativeCommons = sheetReader.getColumnNumberByName(type, "Creative Commons");
+			if (colISpecimenDescription < 0 || colIMyViewName < 0 || colICopyright < 0 || colIImageFileName < 0 || colICreativeCommons < 0) {
+				if (repeatErrorMessage) {
+					System.out.println(message);
+					messageToOuput(message);
+					repeatErrorMessage = false;
+				}
+				return null;
+			}
+			int[] colNumbers = {colISpecimenDescription, colIMyViewName, colICopyright, colIImageFileName, colICreativeCommons};
+			if (getMaxFromTable(colNumbers) > (entireRow.length - 1)) return null;
 			String[] row = new String[5];
 			row[0] = entireRow[colISpecimenDescription].getContents(); 
 			row[1] = entireRow[colIMyViewName].getContents(); 
 			row[2] = entireRow[colICopyright].getContents(); 
-			row[3] = entireRow[colIImageFileName].getContents(); 
-			row[4] = entireRow[colICreativeCommons].getContents();
+			row[3] = entireRow[colIImageFileName].getContents();
+			if (entireRow[colICreativeCommons].getType().equals(CellType.STRING_FORMULA)) {
+				row[4] = ((StringFormulaCell) entireRow[colICreativeCommons]).getContents();
+			}
+			else {
+				row[4] = "";
+			}
 			return row;
 		}
 		if (type.equals("Specimen")) {
-			int colSScientificName = sheetReader.getColumnNumberByName("Specimen", "Scientific Name");
-			int colSBasisOfRecord = sheetReader.getColumnNumberByName("Specimen", "Basis of Record");
-			int colSSex = sheetReader.getColumnNumberByName("Specimen", "Sex");
-			int colSDevelopmentalStage = sheetReader.getColumnNumberByName("Specimen", "Developmental Stage");
-			int colSForm = sheetReader.getColumnNumberByName("Specimen", "Form");
-			int colSTypeStatus = sheetReader.getColumnNumberByName("Specimen", "Type Status");
-			int colSLocality = sheetReader.getColumnNumberByName("Specimen", "Locality");
+			int colSScientificName = sheetReader.getColumnNumberByName(type, "Scientific Name");
+			int colSBasisOfRecord = sheetReader.getColumnNumberByName(type, "Basis of Record");
+			int colSSex = sheetReader.getColumnNumberByName(type, "Sex");
+			int colSDevelopmentalStage = sheetReader.getColumnNumberByName(type, "Developmental Stage");
+			int colSForm = sheetReader.getColumnNumberByName(type, "Form");
+			int colSTypeStatus = sheetReader.getColumnNumberByName(type, "Type Status");
+			int colSLocality = sheetReader.getColumnNumberByName(type, "Locality");
+			int[] colNumbers = {colSScientificName, colSBasisOfRecord, colSSex, colSDevelopmentalStage, colSForm, colSTypeStatus, colSLocality};
+			if (getMaxFromTable(colNumbers) > (entireRow.length - 1)) return null;
 			String[] row = new String[7];
 			row[0] = entireRow[colSScientificName].getContents(); 
 			row[1] = entireRow[colSBasisOfRecord].getContents(); 
@@ -374,11 +465,24 @@ public class ValidateXls {
 			row[6] = entireRow[colSLocality].getContents();
 			return row;
 		}
+		
+		if (type.equals("Taxon")) {
+			int colTaxonFamily = sheetReader.getColumnNumberByName(type, "Family");
+			int colTaxonScNameString = sheetReader.getColumnNumberByName(type, "ScientificNameString");
+			if (Math.max(colTaxonFamily, colTaxonScNameString) > (entireRow.length - 1)) return null;
+			int test = entireRow.length;
+			String[] row = new String[2];
+			row[0] = entireRow[colTaxonFamily].getContents(); 
+			row[1] = entireRow[colTaxonScNameString].getContents(); 
+			return row;
+		}
+		
 		return null;
 	}
 	
 	
 	private boolean checkMandatoryRow(String[] row, String sheetName, int rowNumber) {
+		if (row == null) return false;
 		boolean hasContent = true;
 		boolean isEmpty = true;
 		for (String cell:row) {
@@ -402,4 +506,25 @@ public class ValidateXls {
 		System.out.println(error);
 		this.messageToOuput(error);
 	}
+	
+	public static int getMaxFromTable(int[] table) {
+		if (table == null) return -1;
+		int max = -1;
+		max = table[0];
+		for (int current:table) {
+			if (current > max) {
+				max = current;
+			}
+		}
+		return max;
+	}
+	
+	private boolean checkAgainstDB() {
+		ValidateAgainstDatabase checkDB = new ValidateAgainstDatabase(sheetReader, output, propertyFile);
+		return checkDB.checkTaxa();
+		
+	}
+	
+/*					
+					*/
 }
