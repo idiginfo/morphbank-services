@@ -88,4 +88,17 @@ public class ExcelTools {
 	public static final String COL_MY_VIEW_NAME_AUTO = "My ViewName[ Auto generated, do not change this field!]";
 	public static final String VIEW_APPLICABLE_TO_TAXON = "View Applicable to Taxon";
 	
+	//Sheets
+	public static final String SPECIMEN_TAXON_DATA_SHEET = "Taxon";
+	
+	/**
+	 * Append messages to a StringBuffer that can be used to
+	 * display messages on a webpage.
+	 * @param message
+	 */
+	public static void messageToOuput(String message, StringBuffer output) {
+		output.append(message);
+		output.append("<br />");
+	}
+	
 }
