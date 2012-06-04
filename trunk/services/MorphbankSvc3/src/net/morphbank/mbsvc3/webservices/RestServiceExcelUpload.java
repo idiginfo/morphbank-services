@@ -107,7 +107,7 @@ public class RestServiceExcelUpload extends javax.servlet.http.HttpServlet imple
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		ArrayList<String> listOfXmlFiles = new ArrayList<String>();
+		ArrayList<String> reportContent = new ArrayList<String>();
 		response.setContentType("text/xml");
 		boolean isMultipart = ServletFileUpload.isMultipartContent(request);
 		
@@ -120,13 +120,12 @@ public class RestServiceExcelUpload extends javax.servlet.http.HttpServlet imple
 			Iterator<?> iter = items.iterator();
 			while (iter.hasNext()) {
 				FileItem item = (FileItem) iter.next();
-
 				if (item.isFormField()) {
 					// processFormField(item);
 				} else {
 					String report = this.processUploadedFile(item);
-					this.outputReport(report, listOfXmlFiles);
-					htmlPresentation(request, response, null, listOfXmlFiles);
+					reportContent = this.outputReport(report, reportContent);
+					htmlPresentation(request, response, folderPath, reportContent);
 				}
 			}
 		} catch (FileUploadException e) {
@@ -135,7 +134,7 @@ public class RestServiceExcelUpload extends javax.servlet.http.HttpServlet imple
 
 	}
 
-	private void outputReport(String report, ArrayList<String> listOfXmlFiles) {
+	private ArrayList<String> outputReport(String report, ArrayList<String> reportContent) {
 		File file = new File(folderPath + report);
 		FileInputStream input;
 		BufferedReader reader;
@@ -147,7 +146,7 @@ public class RestServiceExcelUpload extends javax.servlet.http.HttpServlet imple
 			reader = new BufferedReader(new InputStreamReader(dis));
 			while((line = reader.readLine()) != null) {
 				System.out.println(line);
-				listOfXmlFiles.add(line);
+				reportContent.add(line);
 			}
 			input.close();
 			dis.close();
@@ -158,6 +157,7 @@ public class RestServiceExcelUpload extends javax.servlet.http.HttpServlet imple
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		return reportContent;
 	}
 
 	private String processUploadedFile(FileItem item) {
@@ -186,16 +186,16 @@ public class RestServiceExcelUpload extends javax.servlet.http.HttpServlet imple
 		return null;
 	}
 	
-	private void htmlPresentation(HttpServletRequest request, HttpServletResponse response, String folderPath, ArrayList<String> listOfXmlFiles) {
+	private void htmlPresentation(HttpServletRequest request, HttpServletResponse response, String folderPath, ArrayList<String> reportContent) {
 		StringBuffer listOfFiles = new StringBuffer();
-		Iterator<String> iter = listOfXmlFiles.iterator();
+		Iterator<String> iter = reportContent.iterator();
 		while (iter.hasNext()) {
 			String next = iter.next();
 			listOfFiles.append(next + "<br />");
 			
 		}
 		if (listOfFiles.length() == 0) {
-			listOfFiles.append("No file selected.");
+			listOfFiles.append("No report file found. The upload probably stopped before creating a report.");
 		}
 		request.setAttribute("listOfFiles", listOfFiles.toString());
 		try {
