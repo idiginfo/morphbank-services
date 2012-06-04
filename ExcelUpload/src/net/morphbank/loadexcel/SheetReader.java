@@ -224,7 +224,7 @@ public class SheetReader {
 				return i;
 			}
 		}
-		return null;
+		return -1;
 	}
 	
 	/**
@@ -280,6 +280,7 @@ public class SheetReader {
 	 * @return
 	 */
 	public int GetUserId() {
+		String errorMessage = "The contributor is not a valid user in the Morphbank database";
 		int userId = 0;
 		String user = getEntry("ImageCollection", 1, 4);
 		if ((getEntry("ImageCollection", 0, 4).equals("Contributor (morphbank username):"))
@@ -301,8 +302,8 @@ public class SheetReader {
 					userId = result.getInt(1);
 				} else {
 					System.out
-							.println("The contributor is not a valid user in the Morphbank Data Base");
-					LoadData.log("The contributor is not a valid user in the Morphbank Data Base");
+							.println(errorMessage);
+					LoadData.log(errorMessage);
 //					System.exit(1);
 					return -1;
 				}
@@ -332,8 +333,8 @@ public class SheetReader {
 						userId = result.getInt(1);
 					} else {
 						System.out
-								.println("The contributor is not a valid user in the Morphbank Data Base");
-						LoadData.log("The contributor is not a valid user in the Morphbank Data Base");
+								.println(errorMessage);
+						LoadData.log(errorMessage);
 //						System.exit(1);
 						return -1;
 					}
@@ -357,6 +358,9 @@ public class SheetReader {
 	 * @return
 	 */
 	public int GetGroupId() {
+		String existGroupMessage = "The group specified by the contributor does not exist in the data base";
+		String belongGroupMessage = "The contributor does not belong to the specified group.";
+		String personalGroupMessage = "The contributor does not have a personal group";
 		int groupId = 0;
 		String temp = "";
 		String group = imageCollectionSheet.getCell(1, 7).getContents();
@@ -372,8 +376,8 @@ public class SheetReader {
 					// System.out.println("Group id is: " + groupId);
 				} else {
 					System.out
-							.println("The group specified by the contributor does not exist in the data base");
-					LoadData.log("The group specified by the contributor does not exist in the data base");
+							.println(existGroupMessage);
+					LoadData.log(existGroupMessage);
 //					System.exit(1);
 					return -1;
 				}
@@ -387,8 +391,8 @@ public class SheetReader {
 			try {
 				result = statement.executeQuery(temp);
 				if (!result.next()) {
-					System.out.println("The contributor does not belong to the specified group.");
-					LoadData.log("The contributor does not belong to the specified group.\n\r");
+					System.out.println(belongGroupMessage);
+					LoadData.log(belongGroupMessage);
 					return -1;
 //					System.exit(1);
 				}
@@ -406,8 +410,8 @@ public class SheetReader {
 				// System.out.println(temp);
 				ResultSet newResult = statement.executeQuery(temp);
 				if (!result.next()) {
-					System.out.println("The contributor does not have a personal group");
-					LoadData.log("The contributor does not have a personal group");
+					System.out.println(personalGroupMessage);
+					LoadData.log(personalGroupMessage);
 					// System.exit(1);
 					groupId = 2;
 				} else {
@@ -428,6 +432,7 @@ public class SheetReader {
 	 * @return
 	 */
 	public int GetSubmitterId() {
+		String errorMessage = "The submitter is not a valid user in the Morphbank database";
 		int submitterId = 0;
 		String submitter = getEntry("ImageCollection", 1, 5);
 		String c = getEntry("ImageCollection", 0, 5);
@@ -450,8 +455,8 @@ public class SheetReader {
 					submitterId = result.getInt(1);
 				} else {
 					System.out
-							.println("The submitter is not a valid user in the Morphbank Data Base");
-					LoadData.log("The submitter is not a valid user in the Morphbank Data Base");
+							.println(errorMessage);
+					LoadData.log(errorMessage);
 //					System.exit(1);
 					return -1;
 				}
