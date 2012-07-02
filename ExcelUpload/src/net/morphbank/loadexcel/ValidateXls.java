@@ -276,6 +276,12 @@ public class ValidateXls {
 				System.out.println(message);
 				this.messageToOuput(message);
 			}
+			if (cells[i].getContents().indexOf("'") > 0) {
+				isValid = false;
+				String message = error + (i+1) + " should not contain simple quotes.";
+				System.out.println(message);
+				this.messageToOuput(message);
+			}
 			if (!fileExtensionOk(cells[i].getContents())) {
 				isValid = false;
 				String message = error + (i+1) + " file extension should be " + outputListOfExtensions();
