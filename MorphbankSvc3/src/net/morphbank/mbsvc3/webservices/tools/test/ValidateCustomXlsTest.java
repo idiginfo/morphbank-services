@@ -10,7 +10,7 @@ public class ValidateCustomXlsTest {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		ValidateCustomXls test = new ValidateCustomXls("/home/gjimenez/Morphbank/tests/test.xls"
+		ValidateCustomXls test = new ValidateCustomXls("/home/gjimenez/Morphbank/uploads/Rebecca/Aptostichus_mb_customWorkbook.xls"
 				, true, MorphbankConfig.PERSISTENCE_MBPROD);
 		boolean passed = test.checkEverything();
 		System.out.println(passed);
