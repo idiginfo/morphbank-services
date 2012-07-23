@@ -242,8 +242,11 @@ public class ValidateCustomXls {
 		boolean correctFormat = true;
 		String[] dateColumns = {"Date Determined", "Earliest Date Collected", "Latest Date Collected"};
 		for (String colName:dateColumns){
-			Cell[] cells = dataSheet.getColumn(this.getColumnNumberByName(DATA_SHEET_NAME, colName));
-			correctFormat &= checkFormatDate(cells, colName);
+			Integer col = this.getColumnNumberByName(DATA_SHEET_NAME, colName);
+			if (col != null) {
+				Cell[] cells = dataSheet.getColumn(col);
+				correctFormat &= checkFormatDate(cells, colName);
+			}
 		}
 		return correctFormat;
 	}
