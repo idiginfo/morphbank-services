@@ -411,10 +411,29 @@ public class ValidateCustomXls {
 		return false;
 	}
 
+	/**
+	 * Check if both cells are empty.
+	 * Output a warning if id is empty. It should not stop the conversion to XML
+	 * but Morphbank admin should add the id manually before upload.
+	 * @param label1 title of Cell Name (ex: MB Contributor Name)
+	 * @param cell1 value of cell
+	 * @param label2 title of Cell ID (ex:MB Contributor id)
+	 * @param cell2 value of cell
+	 * @return true if either cell has content
+	 */
 	private boolean areCellsBothEmpty(String label1, String cell1, String label2, String cell2) {
-		if (cell1.length() < 1 && cell2.length() < 1) {
-			String error = label1.replaceFirst(":", "") + " cannot be empty if " +
-					label2.replaceFirst(":", "") + " is also empty.";
+		String label1Short = label1.replaceFirst(":", "");
+		String label2Short = label2.replaceFirst(":", "");
+		int size1 = cell1.length();
+		int size2 = cell2.length();
+		if (size2 < 1) {
+			String warning = label2Short + " is empty. If you don't know the " + label2Short + " that's ok, but contact Morphbank to let them know.";
+			System.out.println(warning);
+			this.messageToOuput(warning);
+		}
+		if (size1 < 1 && size2 < 1) {
+			String error = label1Short + " cannot be empty if " +
+					label2Short + " is also empty.";
 			System.out.println(error);
 			this.messageToOuput(error);
 			return true;
