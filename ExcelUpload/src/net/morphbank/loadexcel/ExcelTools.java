@@ -60,6 +60,7 @@ public class ExcelTools {
 	public static final String COL_EARLIEST_DATE_COLLECTED = "Earliest Date Collected";
 	public static final String COL_LATEST_DATE_COLLECTED = "Latest Date Collected";
 	public static final String COL_NOTES = "Notes";
+	public static final String COL_LOCALITY = "Locality";
 	//TaxonData
 	public static final String COL_FAMILY = "Family";
 	public static final String COL_GENUS = "Genus";
@@ -89,14 +90,23 @@ public class ExcelTools {
 	public static final String VIEW_APPLICABLE_TO_TAXON = "View Applicable to Taxon";
 	
 	//Sheets
-	public static final String SPECIMEN_TAXON_DATA_SHEET = "Taxon";
+	public static final String SPECIMEN_TAXON_DATA_SHEET = "SpecimenTaxonData";
+	public static String SPECIMEN_SHEET = "Specimen";
+	public static String LOCALITY_SHEET = "Locality";
+	public static String IMAGE_SHEET = "Images";
+	public static String VIEW_SHEET = "MyView";
+	public static String SUPPORTING_DATA_SHEET = "SupportingData";
+	public static String EXT_LINK_SHEET = "ExternalLinks";
+	public static String IMAGE_COLLECTION_SHEET = "ImageCollection";
+	public static String PROTECTED_DATA_SHEET = "ProtectedData";
+
 	
 	/**
 	 * Append messages to a StringBuffer that can be used to
 	 * display messages on a webpage.
 	 * @param message
 	 */
-	public static void messageToOuput(String message, StringBuffer output) {
+	public static void messageToOutput(String message, StringBuffer output) {
 		output.append(message);
 		output.append("<br />");
 	}

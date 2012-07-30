@@ -27,10 +27,10 @@ public class ValidateXls {
 //		this.versionInfo = versionInfo;
 //	}
 	
-	public ValidateXls(SheetReader sheetReader, boolean versionInfo, String propertyFile) {
+	public ValidateXls(SheetReader sheetReader, boolean versionInfo, String propFile) {
 		this.sheetReader = sheetReader;
 		this.versionInfo = versionInfo;
-		this.propertyFile = propertyFile;
+		propertyFile = propFile;
 	}
 	
 	public boolean checkEverything() {
@@ -43,15 +43,14 @@ public class ValidateXls {
 		if (versionInfo) {
 			String version = "Version Info: " + getVersionNumber();
 			System.out.println(version);
-			this.messageToOuput(version);
+			this.messageToOutput(version);
 		}
 		String beginTesting = "Let's see what the file looks like...";
 		System.out.println(beginTesting);
-		this.messageToOuput("<b>" + beginTesting + "</b>");
+		ExcelTools.messageToOutput("<b>" + beginTesting + "</b>", output);
 		isXlsValid &= checkCredentials();
-		isXlsValid &= isSpecimenVSLocalityOk();
-		isXlsValid &= isImageVSSpecimenOk();
-		isXlsValid &= isImageVSViewOk();
+		DropDownCheck dropDownCheck = new DropDownCheck(sheetReader, output);
+		isXlsValid &= dropDownCheck.checkAll();
 		isXlsValid &= checkDateFormat();
 		isXlsValid &= checkOriginalFileName();
 		isXlsValid &= checkLatLong();
@@ -60,64 +59,6 @@ public class ValidateXls {
 		isXlsValid &= checkAgainstDB();
 		return isXlsValid;
 	}
-	
-	/**
-	 * The selected value from the dropdown menu needs to match the list
-	 * provided in the Locality sheet.
-	 * Checks that values for locality in the Specimen sheet are listed in the Locality sheet.
-	 * @return
-	 */
-	public boolean isSpecimenVSLocalityOk() {
-		Sheet specimenSheet = sheetReader.getSheet("Specimen");
-		Sheet localitySheet = sheetReader.getSheet("Locality");
-		//build a list of localities in Locality
-		int colLocalityName = sheetReader.getColumnNumberByName("Locality", "Locality Name [Auto generated--Do not change!]");
-		Cell[] localityNamesLocality = localitySheet.getColumn(colLocalityName);
-		//build a list of localities in Specimen
-		int colSpecimenLocality = sheetReader.getColumnNumberByName("Specimen", "Locality");
-		Cell[] localityNamesSpecimen = specimenSheet.getColumn(colSpecimenLocality);
-			
-		return this.testColumns(localityNamesSpecimen, localityNamesLocality, "Specimen", "Locality");
-	}
-	
-	/**
-	 * The selected value from the dropdown menu needs to match the list
-	 * provided in the Specimen sheet.
-	 * Checks that values for specimen in the Image sheet are listed in the Specimen sheet.
-	 * @return
-	 */
-	public boolean isImageVSSpecimenOk() {
-		Sheet specimenSheet = sheetReader.getSheet("Specimen");
-		Sheet imageSheet = sheetReader.getSheet("Image");
-		//build a list of specimens in Specimen
-		int colSpecimenName = sheetReader.getColumnNumberByName("Specimen", ExcelTools.COL_SPECIMEN_DESCRIPTION);
-		Cell[] specimenNamesSpecimen = specimenSheet.getColumn(colSpecimenName);
-		//build a list of specimen in Images
-		int colImageSpecimen = sheetReader.getColumnNumberByName("Image", ExcelTools.COL_IMAGE_SPECIMEN_DESCRIPTION);
-		Cell[] specimenNamesImage = imageSheet.getColumn(colImageSpecimen);
-			
-		return this.testColumns(specimenNamesImage, specimenNamesSpecimen, "Image", "Specimen");
-	}
-	
-	/**
-	 * The selected value from the dropdown menu needs to match the list
-	 * provided in the View sheet.
-	 * Checks that values for view in the Image sheet are listed in the View sheet.
-	 * @return
-	 */
-	public boolean isImageVSViewOk() {
-		Sheet viewSheet = sheetReader.getSheet("View");
-		Sheet imageSheet = sheetReader.getSheet("Image");
-		//build a list of views in MyView
-		int colViewName = sheetReader.getColumnNumberByName("View", "My View Name");
-		Cell[] viewNamesView = viewSheet.getColumn(colViewName);
-		//build a list of views in Images
-		int colImageView = sheetReader.getColumnNumberByName("Image", "My View Name");
-		Cell[] viewNamesImage = imageSheet.getColumn(colImageView);
-			
-		return this.testColumns(viewNamesImage, viewNamesView, "Image", "View");
-	}
-	
 	
 	/**
 	 * If a view name is not empty it needs to have
@@ -137,7 +78,7 @@ public class ValidateXls {
 			if (!viewNameEmpty(viewNames[i].getContents()) && isEmpty(cells[i])){
 				String error = "In MyView sheet, row " + (i+1) + " cannot have " + ExcelTools.VIEW_APPLICABLE_TO_TAXON + " empty.";
 				System.out.println(error);
-				this.messageToOuput(error);
+				this.messageToOutput(error);
 				isValid = false;
 			}
 		}
@@ -162,39 +103,7 @@ public class ValidateXls {
 		return false;
 	}
 	
-	/**
-	 * Checks if the selected item from a drop down list 
-	 * actually belongs to the list. An error in the spreadsheet may happen
-	 * if the user modified the drop down list entries without updating the 
-	 * item selected.
-	 * @param col1 column from the drop down list
-	 * @param col2 column with values generating the drop down list
-	 * @param col1Sheet name of the spreadsheet (used for error message)
-	 * @param col2Sheet name of the spreadsheet (used for error message)
-	 * @return false is there is at least one error (no match found), true otherwise
-	 */
-	private boolean testColumns(Cell[] col1, Cell[] col2, String col1Sheet, String col2Sheet){
-		boolean noErrorInColumn = true;
-		for (int i=1; i < col1.length; i++) {
-			boolean test = false;
-			for (int j=1; j < col2.length; j++) {
-				test |= col1[i].getContents().equals(col2[j].getContents());
-				if(col1[i].getContents().length() < 1 || test) {
-					test = true;
-					break;
-				}
-			}
-			if (!test) {
-				String error = "The " + col1Sheet + "'s " + col2Sheet.toLowerCase() +" row " + (i+1) +
-						" does not match any " + col2Sheet.toLowerCase() +
-						" in the " + col2Sheet + " spreadsheet.";
-				System.out.println(error);
-				this.messageToOuput(error);
-				noErrorInColumn &= false;
-			}
-		}
-		return noErrorInColumn;
-	}
+	
 	
 	private String getVersionNumber() {
 		Integer col = sheetReader.getColumnNumberByName("SupportData", "Version Info");
@@ -218,7 +127,7 @@ public class ValidateXls {
 			if (credentials.getCell(1, i) == null || credentials.getCell(1, i).getContents().equalsIgnoreCase("")) {
 				String error = credentials.getCell(0, i).getContents().replaceAll(":", "") + " cannot be empty.";
 				System.out.println(error);
-				this.messageToOuput(error + "<br />");
+				this.messageToOutput(error + "<br />");
 				anyEmpty = true;
 			}
 				
@@ -239,7 +148,7 @@ public class ValidateXls {
 			if (date.equalsIgnoreCase("#VALUE!") || !this.dateOnSpecimenDescription(date, datePresent)) {
 				String error = "Date Collected row " + (i + 1)  + " does not have the format yyyy-mm-dd";
 				System.out.println(error);
-				this.messageToOuput(error);
+				this.messageToOutput(error);
 				correctFormat = false;
 			}
 			
@@ -274,19 +183,19 @@ public class ValidateXls {
 				isValid = false;
 				String message = error + (i+1) + " should not contain spaces.";
 				System.out.println(message);
-				this.messageToOuput(message);
+				this.messageToOutput(message);
 			}
 			if (cells[i].getContents().indexOf("'") > 0) {
 				isValid = false;
 				String message = error + (i+1) + " should not contain simple quotes.";
 				System.out.println(message);
-				this.messageToOuput(message);
+				this.messageToOutput(message);
 			}
 			if (!fileExtensionOk(cells[i].getContents())) {
 				isValid = false;
 				String message = error + (i+1) + " file extension should be " + outputListOfExtensions();
 				System.out.println(message);
-				this.messageToOuput(message);
+				this.messageToOutput(message);
 			}
 //			if (!fileNameFormattedOk(cells[i].getContents())) {
 //				isValid = false;
@@ -324,14 +233,8 @@ public class ValidateXls {
 		return cell.getContents().equalsIgnoreCase("");
 	}
 	
-	/**
-	 * Append messages to a StringBuffer that can be used to
-	 * display messages on a webpage.
-	 * @param message
-	 */
-	private void messageToOuput(String message) {
-		output.append(message);
-		output.append("<br />");
+	private void messageToOutput(String message) {
+		ExcelTools.messageToOutput(message, output);
 	}
 	
 	public static String outputListOfExtensions() {
@@ -352,8 +255,8 @@ public class ValidateXls {
 	 * @return true is the format is correct
 	 */
 	private boolean checkLatLong() {
-		Cell[] latitude = sheetReader.getSheet("Locality").getColumn(sheetReader.getColumnNumberByName("Locality", "Latitude"));
-		Cell[] longitude = sheetReader.getSheet("Locality").getColumn(sheetReader.getColumnNumberByName("Locality", "Longitude"));
+		Cell[] latitude = sheetReader.getSheet(ExcelTools.LOCALITY_SHEET).getColumn(sheetReader.getColumnNumberByName(ExcelTools.LOCALITY_SHEET, ExcelTools.COL_LATITUDE));
+		Cell[] longitude = sheetReader.getSheet(ExcelTools.LOCALITY_SHEET).getColumn(sheetReader.getColumnNumberByName(ExcelTools.LOCALITY_SHEET, ExcelTools.COL_LONGITUDE));
 		boolean formatting = true;
 		for (int i = 1; i < Math.min(latitude.length, longitude.length); i++) {
 			try {
@@ -364,7 +267,7 @@ public class ValidateXls {
 			} catch (Exception e) {
 				String error = "In Locality sheet, row " + (i+1) + " longitude and latitude have to be a decimal value.";
 				System.out.println(error);
-				this.messageToOuput(error);
+				this.messageToOutput(error);
 				formatting = false;
 			}
 		}
@@ -379,37 +282,34 @@ public class ValidateXls {
 		boolean isValid = true;
 		//either all cells empty or all full
 		ArrayList<String> sheetsNames = new ArrayList<String>();
-		sheetsNames.add("Image");
-		sheetsNames.add("Specimen");
-		sheetsNames.add("Taxon");
+		sheetsNames.add(ExcelTools.IMAGE_SHEET);
+		sheetsNames.add(ExcelTools.SPECIMEN_SHEET);
+		sheetsNames.add(ExcelTools.SPECIMEN_TAXON_DATA_SHEET);
 		
 		for(String sheetName:sheetsNames) {
 			Sheet sheet = sheetReader.getSheet(sheetName);
 			int maxRows = sheet.getRows();
 			for (int i = 1; i < maxRows; i++) {
-				if (i == 258) {
-					System.out.println("stop here");
-				}
 				String[] row = this.getMandatoryRow(sheetName, sheet.getRow(i));
 				isValid &= this.checkMandatoryRow(row, sheetName, i);
 			}
 		}
 		
-		Sheet imagesSheet = sheetReader.getSheet("Image");
+		Sheet imagesSheet = sheetReader.getSheet(ExcelTools.IMAGE_SHEET);
 		int maxRows = imagesSheet.getRows();
 		for (int i = 1; i < maxRows; i++) {
-			String[] row = this.getMandatoryRow("Images", imagesSheet.getRow(i));
+			String[] row = this.getMandatoryRow(ExcelTools.IMAGE_SHEET, imagesSheet.getRow(i));
 			if (row==null) continue;
-			if(! this.checkMandatoryRow(row, "Images", i)){
+			if(! this.checkMandatoryRow(row, ExcelTools.IMAGE_SHEET, i)){
 				isValid = false;
 			}
 		}
-		Sheet specimenSheet = sheetReader.getSheet("Specimen");
+		Sheet specimenSheet = sheetReader.getSheet(ExcelTools.SPECIMEN_SHEET);
 		maxRows = specimenSheet.getRows();
 		for (int i = 2; i < maxRows; i++) {
-			String[] row = this.getMandatoryRow("Specimen", specimenSheet.getRow(i));
+			String[] row = this.getMandatoryRow(ExcelTools.SPECIMEN_SHEET, specimenSheet.getRow(i));
 			if (row==null) continue;
-			isValid &= this.checkMandatoryRow(row, "Specimen", i);
+			isValid &= this.checkMandatoryRow(row, ExcelTools.SPECIMEN_SHEET, i);
 		}
 		
 		return isValid;
@@ -420,21 +320,21 @@ public class ValidateXls {
 		if (repeatErrorMessage) {
 			if ((entireRow == null || entireRow.length < 2)) {
 				System.out.println(message);
-				messageToOuput(message);
+				messageToOutput(message);
 				repeatErrorMessage = false;
 				return null;
 			}
 		}
-		if (type.equals("Image")) {
-			int colISpecimenDescription= sheetReader.getColumnNumberByName(type, "Specimen Description");
-			int colIMyViewName = sheetReader.getColumnNumberByName(type, "My View Name");
-			int colICopyright= sheetReader.getColumnNumberByName(type, "Copyright Info");
-			int colIImageFileName = sheetReader.getColumnNumberByName(type, "Image file name");
-			int colICreativeCommons = sheetReader.getColumnNumberByName(type, "Creative Commons");
+		if (type.equals(ExcelTools.IMAGE_SHEET)) {
+			int colISpecimenDescription= sheetReader.getColumnNumberByName(type, ExcelTools.COL_IMAGE_SPECIMEN_DESCRIPTION);
+			int colIMyViewName = sheetReader.getColumnNumberByName(type, ExcelTools.COL_MY_VIEW_NAME);
+			int colICopyright= sheetReader.getColumnNumberByName(type, ExcelTools.COL_COPYRIGHT_INFO);
+			int colIImageFileName = sheetReader.getColumnNumberByName(type, ExcelTools.COL_IMAGE_FILE_NAME);
+			int colICreativeCommons = sheetReader.getColumnNumberByName(type, ExcelTools.COL_CREATIVE_COMMONS);
 			if (colISpecimenDescription < 0 || colIMyViewName < 0 || colICopyright < 0 || colIImageFileName < 0 || colICreativeCommons < 0) {
 				if (repeatErrorMessage) {
 					System.out.println(message);
-					messageToOuput(message);
+					messageToOutput(message);
 					repeatErrorMessage = false;
 				}
 				return null;
@@ -454,14 +354,14 @@ public class ValidateXls {
 			}
 			return row;
 		}
-		if (type.equals("Specimen")) {
-			int colSScientificName = sheetReader.getColumnNumberByName(type, "Scientific Name");
-			int colSBasisOfRecord = sheetReader.getColumnNumberByName(type, "Basis of Record");
-			int colSSex = sheetReader.getColumnNumberByName(type, "Sex");
-			int colSDevelopmentalStage = sheetReader.getColumnNumberByName(type, "Developmental Stage");
-			int colSForm = sheetReader.getColumnNumberByName(type, "Form");
-			int colSTypeStatus = sheetReader.getColumnNumberByName(type, "Type Status");
-			int colSLocality = sheetReader.getColumnNumberByName(type, "Locality");
+		if (type.equals(ExcelTools.SPECIMEN_SHEET)) {
+			int colSScientificName = sheetReader.getColumnNumberByName(type, ExcelTools.COL_SCIENTIFIC_NAME);
+			int colSBasisOfRecord = sheetReader.getColumnNumberByName(type, ExcelTools.COL_BASIS_OF_RECORD);
+			int colSSex = sheetReader.getColumnNumberByName(type, ExcelTools.COL_SEX);
+			int colSDevelopmentalStage = sheetReader.getColumnNumberByName(type, ExcelTools.COL_DEVELOPMENTAL_STAGE);
+			int colSForm = sheetReader.getColumnNumberByName(type, ExcelTools.COL_FORM);
+			int colSTypeStatus = sheetReader.getColumnNumberByName(type, ExcelTools.COL_TYPE_STATUS);
+			int colSLocality = sheetReader.getColumnNumberByName(type, ExcelTools.COL_LOCALITY);
 			int[] colNumbers = {colSScientificName, colSBasisOfRecord, colSSex, colSDevelopmentalStage, colSForm, colSTypeStatus, colSLocality};
 			if (getMaxFromTable(colNumbers) > (entireRow.length - 1)) return null;
 			String[] row = new String[7];
@@ -475,11 +375,10 @@ public class ValidateXls {
 			return row;
 		}
 		
-		if (type.equals("Taxon")) {
-			int colTaxonFamily = sheetReader.getColumnNumberByName(type, "Family");
-			int colTaxonScNameString = sheetReader.getColumnNumberByName(type, "ScientificNameString");
+		if (type.equals(ExcelTools.SPECIMEN_TAXON_DATA_SHEET)) {
+			int colTaxonFamily = sheetReader.getColumnNumberByName(type, ExcelTools.COL_FAMILY);
+			int colTaxonScNameString = sheetReader.getColumnNumberByName(type, ExcelTools.COL_SCIENTIFICNAMESTRING);
 			if (Math.max(colTaxonFamily, colTaxonScNameString) > (entireRow.length - 1)) return null;
-			int test = entireRow.length;
 			String[] row = new String[2];
 			row[0] = entireRow[colTaxonFamily].getContents(); 
 			row[1] = entireRow[colTaxonScNameString].getContents(); 
@@ -513,7 +412,7 @@ public class ValidateXls {
 	private void printMandatoryCellError(String sheet, int row) {
 		String error = "In " + sheet + " sheet, row " + (row + 1) + ", one or more mandatory cells are empty.";
 		System.out.println(error);
-		this.messageToOuput(error);
+		this.messageToOutput(error);
 	}
 	
 	public static int getMaxFromTable(int[] table) {
@@ -536,7 +435,4 @@ public class ValidateXls {
 		return testPassed;
 		
 	}
-	
-/*					
-					*/
 }

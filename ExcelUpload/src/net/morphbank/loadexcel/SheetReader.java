@@ -26,26 +26,18 @@ package net.morphbank.loadexcel;
 //modified : September 29 2006                                 /
 ////////////////////////////////////////////////////////////////
 
-import java.awt.font.NumericShaper;
 import java.io.File;
-import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.TimeZone;
-
 import jxl.Cell;
-import jxl.CellType;
 import jxl.DateCell;
-import jxl.NumberFormulaCell;
 import jxl.Sheet;
 import jxl.StringFormulaCell;
 import jxl.Workbook;
-import jxl.biff.formula.FormulaException;
 
 // start of public class SheetReader                               
 public class SheetReader {
@@ -58,7 +50,8 @@ public class SheetReader {
 	private Sheet supportDataSheet;
 	private Sheet extLinkSheet;
 	private Sheet imageCollectionSheet;
-
+	private Sheet protectedDataSheet;
+	
 	private String fname;
 	private GetConnection connect = null;
 	private ResultSet result;
@@ -74,6 +67,7 @@ public class SheetReader {
 	protected String[] headersTaxon = null;
 	protected String[] headersExtLink = null;
 	protected String[] headersSupportData = null;
+	protected String[] headersProtectedData = null;
 	int numFields;
 	
 	// constructor for the class SheetReader;
@@ -97,6 +91,7 @@ public class SheetReader {
 			localitySheet = workbook.getSheet(5);
 			extLinkSheet = workbook.getSheet(6);
 			supportDataSheet = workbook.getSheet(7);
+			protectedDataSheet = workbook.getSheet(9);
 			readHeaders();
 			setReleaseDate();
 
@@ -109,7 +104,6 @@ public class SheetReader {
 		Sheet sheet = getSheet(sheetName);
 		if (sheet == null) return "";
 		Cell cell = sheet.getCell(col, row);
-		String cellTest = cell.getType().toString();
 		if (cell.getType().toString().equalsIgnoreCase("Date")) 
 		{
 			DateCell datecell = (DateCell) cell;
@@ -124,22 +118,24 @@ public class SheetReader {
 	}
 
 	public Sheet getSheet(String sheetName) {
-		if ("View".equals(sheetName)) {
+		if ("View".equals(sheetName) || sheetName.equals(ExcelTools.VIEW_SHEET)) {
 			return viewSheet;
-		} else if ("Specimen".equals(sheetName)) {
+		} else if ("Specimen".equals(sheetName) || sheetName.equals(ExcelTools.SPECIMEN_SHEET)) {
 			return specimenSheet;
-		} else if ("Image".equals(sheetName)) {
+		} else if ("Image".equals(sheetName) || sheetName.equals(ExcelTools.IMAGE_SHEET)) {
 			return imageSheet;
-		} else if ("Locality".equals(sheetName)) {
+		} else if ("Locality".equals(sheetName) || sheetName.equals(ExcelTools.LOCALITY_SHEET)) {
 			return localitySheet;
-		} else if ("SupportData".equals(sheetName)) {
+		} else if ("SupportData".equals(sheetName) || sheetName.equals(ExcelTools.SUPPORTING_DATA_SHEET)) {
 			return supportDataSheet;
-		} else if ("ImageCollection".equals(sheetName)) {
+		} else if ("ImageCollection".equals(sheetName) || sheetName.equals(ExcelTools.IMAGE_COLLECTION_SHEET)) {
 			return imageCollectionSheet;
-		} else if ("Taxon".equals(sheetName)) {
+		} else if ("Taxon".equals(sheetName) || sheetName.equals(ExcelTools.SPECIMEN_TAXON_DATA_SHEET)) {
 			return taxonSheet;
-		} else if ("ExternalLinks".equals(sheetName)) {
+		} else if ("ExternalLinks".equals(sheetName) || sheetName.equals(ExcelTools.EXT_LINK_SHEET)) {
 			return extLinkSheet;
+		} else if (sheetName.equals(ExcelTools.PROTECTED_DATA_SHEET)) {
+			return protectedDataSheet;
 		}
 		return null;
 	}
@@ -181,25 +177,36 @@ public class SheetReader {
 		for (int i = 0; i < numFields; i++) {
 			headersSupportData[i] = supportDataSheet.getCell(i, 0).getContents().toLowerCase().trim();
 		}
+		numFields = protectedDataSheet.getColumns();
+		headersProtectedData = new String[numFields];
+		for (int i = 0; i < numFields; i++) {
+			headersProtectedData[i] = protectedDataSheet.getCell(i, 0).getContents().toLowerCase().trim();
+		}
+	}
+	
+	private String[] getHeaders(String sheet) {
+		if (sheet.equalsIgnoreCase("View") || sheet.equalsIgnoreCase(ExcelTools.VIEW_SHEET)) 
+			return headersView;
+		if (sheet.equalsIgnoreCase("Image") || sheet.equalsIgnoreCase(ExcelTools.IMAGE_SHEET)) 
+			return headersImage;
+		if (sheet.equalsIgnoreCase("Specimen") || sheet.equalsIgnoreCase(ExcelTools.SPECIMEN_SHEET)) 
+			return headersSpecimen;
+		if (sheet.equalsIgnoreCase("Locality") || sheet.equalsIgnoreCase(ExcelTools.LOCALITY_SHEET)) 
+			return headersLocality;
+		if (sheet.equalsIgnoreCase("Taxon") || sheet.equalsIgnoreCase(ExcelTools.SPECIMEN_TAXON_DATA_SHEET)) 
+			return headersTaxon;
+		if (sheet.equalsIgnoreCase("ExternalLinks") || sheet.equalsIgnoreCase(ExcelTools.EXT_LINK_SHEET)) 
+			return headersExtLink;
+		if (sheet.equalsIgnoreCase("SupportData") || sheet.equalsIgnoreCase(ExcelTools.SUPPORTING_DATA_SHEET)) 
+			return headersSupportData;
+		if (sheet.equalsIgnoreCase(ExcelTools.PROTECTED_DATA_SHEET)) 
+			return headersProtectedData;
+		else return null;
 	}
 	
 	public String getValue(String sheet, String fieldName, int row) {
 		fieldName = fieldName.toLowerCase().trim();
-		String[] headers = null;
-		if (sheet.equalsIgnoreCase("View")) 
-			headers = headersView;
-		if (sheet.equalsIgnoreCase("Image")) 
-			headers = headersImage;
-		if (sheet.equalsIgnoreCase("Specimen")) 
-			headers = headersSpecimen;
-		if (sheet.equalsIgnoreCase("Locality")) 
-			headers = headersLocality;
-		if (sheet.equalsIgnoreCase("Taxon")) 
-			headers = headersTaxon;
-		if (sheet.equalsIgnoreCase("ExternalLinks")) 
-			headers = headersExtLink;
-		if (sheet.equalsIgnoreCase("SupportData")) 
-			headers = headersSupportData;
+		String[] headers = getHeaders(sheet);
 		
 		for (int i = 0; i < headers.length; i++) {
 			if (headers != null && fieldName.equals(headers[i])) {
@@ -211,14 +218,7 @@ public class SheetReader {
 	
 	public Integer getColumnNumberByName(String sheet, String fieldName) {
 		fieldName = fieldName.toLowerCase().trim();
-		String[] headers = null;
-		if (sheet.equalsIgnoreCase("View")) headers = headersView;
-		if (sheet.equalsIgnoreCase("Image")) headers = headersImage;
-		if (sheet.equalsIgnoreCase("Specimen")) headers = headersSpecimen;
-		if (sheet.equalsIgnoreCase("Locality")) headers = headersLocality;
-		if (sheet.equalsIgnoreCase("Taxon")) headers = headersTaxon;
-		if (sheet.equalsIgnoreCase("ExternalLinks")) headers = headersExtLink;
-		if (sheet.equalsIgnoreCase("SupportData")) headers = headersSupportData;
+		String[] headers = getHeaders(sheet);
 		for (int i = 0; i < headers.length; i++) {
 			if (headers != null && fieldName.equalsIgnoreCase(headers[i])) {
 				return i;
@@ -282,8 +282,8 @@ public class SheetReader {
 	public int GetUserId() {
 		String errorMessage = "The contributor is not a valid user in the Morphbank database";
 		int userId = 0;
-		String user = getEntry("ImageCollection", 1, 4);
-		if ((getEntry("ImageCollection", 0, 4).equals("Contributor (morphbank username):"))
+		String user = getEntry(ExcelTools.IMAGE_COLLECTION_SHEET, 1, 4);
+		if ((getEntry(ExcelTools.IMAGE_COLLECTION_SHEET, 0, 4).equals("Contributor (morphbank username):"))
 				&& (!user.equals(""))) {
 			try {
 				statement = connect.getConnect().createStatement();
@@ -312,8 +312,8 @@ public class SheetReader {
 //				System.exit(1);
 			}
 		} else {
-			user = getEntry("ImageCollection", 1, 3);
-			if ((getEntry("ImageCollection", 0, 3)
+			user = getEntry(ExcelTools.IMAGE_COLLECTION_SHEET, 1, 3);
+			if ((getEntry(ExcelTools.IMAGE_COLLECTION_SHEET, 0, 3)
 					.equals("Contributor (first_name last_name only):"))
 					&& (!user.equals(""))) {
 				try {
@@ -358,7 +358,7 @@ public class SheetReader {
 	 * @return
 	 */
 	public int GetGroupId() {
-		String existGroupMessage = "The group specified by the contributor does not exist in the data base";
+		String existGroupMessage = "The group specified by the contributor does not exist in the database";
 		String belongGroupMessage = "The contributor does not belong to the specified group.";
 		String personalGroupMessage = "The contributor does not have a personal group";
 		int groupId = 0;
@@ -434,9 +434,8 @@ public class SheetReader {
 	public int GetSubmitterId() {
 		String errorMessage = "The submitter is not a valid user in the Morphbank database";
 		int submitterId = 0;
-		String submitter = getEntry("ImageCollection", 1, 5);
-		String c = getEntry("ImageCollection", 0, 5);
-		if ((getEntry("ImageCollection", 0, 5).equals("Submitter (first_name last_name only):"))
+		String submitter = getEntry(ExcelTools.IMAGE_COLLECTION_SHEET, 1, 5);
+		if ((getEntry(ExcelTools.IMAGE_COLLECTION_SHEET, 0, 5).equals("Submitter (first_name last_name only):"))
 				&& (!submitter.equals(""))) {
 			try {
 				statement = connect.getConnect().createStatement();

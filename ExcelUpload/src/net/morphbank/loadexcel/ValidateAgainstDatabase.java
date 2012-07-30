@@ -75,7 +75,7 @@ public class ValidateAgainstDatabase {
 							+ scientificName + " family '" + family + "'.";
 					rowsToFix.add(new String[]{String.valueOf(j), family, genus});
 					System.out.println(noParentMessage);
-					ExcelTools.messageToOuput(noParentMessage, output);
+					ExcelTools.messageToOutput(noParentMessage, output);
 					taxaIsOk = false;
 				}
 			}
@@ -103,7 +103,7 @@ public class ValidateAgainstDatabase {
 						+ line[2];
 				genusDone.add(line[2]);
 				System.out.println(message);
-				ExcelTools.messageToOuput(message, output);
+				ExcelTools.messageToOutput(message, output);
 			}
 		}
 	}
@@ -214,6 +214,33 @@ public class ValidateAgainstDatabase {
 		if (scientificName.equals(family))
 			return true;
 		return false;
+	}
+	
+	/**
+	 * Checks if the group name is in the database
+	 * @return false is any of the above is not true
+	 */
+	public boolean checkGroup(){
+		Sheet imageCollection = sheetReader.getSheet(ExcelTools.IMAGE_COLLECTION_SHEET);
+		String groupName = imageCollection.getCell(1, 7).getContents();
+		try {
+			String selectIdByGroupName = "SELECT id FROM Groups WHERE groupName=?";;
+			PreparedStatement getGroupStmt = conn
+					.prepareStatement(selectIdByGroupName);
+			getGroupStmt.setString(1, groupName);
+			getGroupStmt.execute();
+			ResultSet result = getGroupStmt.getResultSet();
+			if (!result.next()) {
+				String message = "In ImageCollection sheet, Morphbank group name "
+						+ groupName + " is not in the database. Please contact Morphbank if you want to add a new group.";
+				System.out.println(message);
+				ExcelTools.messageToOutput(message, output);
+				return false;
+			}
+		} catch (SQLException sql) {
+			sql.printStackTrace();
+		}
+		return true;
 	}
 
 }
