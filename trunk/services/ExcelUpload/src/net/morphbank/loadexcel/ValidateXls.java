@@ -387,6 +387,9 @@ public class ValidateXls {
 			Sheet sheet = sheetReader.getSheet(sheetName);
 			int maxRows = sheet.getRows();
 			for (int i = 1; i < maxRows; i++) {
+				if (i == 258) {
+					System.out.println("stop here");
+				}
 				String[] row = this.getMandatoryRow(sheetName, sheet.getRow(i));
 				isValid &= this.checkMandatoryRow(row, sheetName, i);
 			}
@@ -488,7 +491,7 @@ public class ValidateXls {
 	
 	
 	private boolean checkMandatoryRow(String[] row, String sheetName, int rowNumber) {
-		if (row == null) return false;
+		if (row == null) return true;
 		boolean hasContent = true;
 		boolean isEmpty = true;
 		for (String cell:row) {
@@ -527,7 +530,10 @@ public class ValidateXls {
 	
 	private boolean checkAgainstDB() {
 		ValidateAgainstDatabase checkDB = new ValidateAgainstDatabase(sheetReader, output, propertyFile);
-		return checkDB.checkTaxa();
+		boolean testPassed = true;
+//		testPassed &= checkDB.checkTaxa();
+		testPassed &= checkDB.checkGroup();
+		return testPassed;
 		
 	}
 	
