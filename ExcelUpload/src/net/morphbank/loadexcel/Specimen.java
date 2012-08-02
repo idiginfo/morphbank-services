@@ -126,10 +126,10 @@ public class Specimen {
 			updater.addStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, ExcelTools.COL_COLLECTION_NUMBER), row, "collectionNumber");
 			updater.addStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, ExcelTools.COL_COLLECTOR_NAME), row, "collectorName");
 			updater.addStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, ExcelTools.COL_DATE_COLLECTED), row, "dateCollected");
-			if (sheetReader.getColumnNumberByName(MYTYPE, ExcelTools.COL_EARLIEST_DATE_COLLECTED) < 0) {
+			if (sheetReader.getColumnNumberByName(MYTYPE, ExcelTools.COL_EARLIEST_DATE_COLLECTED) > -1) {
 				updater.addStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, ExcelTools.COL_EARLIEST_DATE_COLLECTED), row, "earliestDateCollected");
 			}
-			if (sheetReader.getColumnNumberByName(MYTYPE, ExcelTools.COL_LATEST_DATE_COLLECTED) < 0) {
+			if (sheetReader.getColumnNumberByName(MYTYPE, ExcelTools.COL_LATEST_DATE_COLLECTED) > -1 ) {
 				updater.addStringMatchColumn(sheetReader.getColumnNumberByName(MYTYPE, ExcelTools.COL_LATEST_DATE_COLLECTED), row, "latestDateCollected");
 			}
 			//			String localityDesc = sheetReader.getValue(MYTYPE, 23, row);
