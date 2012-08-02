@@ -490,7 +490,7 @@ public class ValidateXls {
 			String content = col[i].getContents();
 			if(content.startsWith(" ") || content.endsWith(" ")) {
 				noSpaceFound = false;
-				String error = message + colName + " row " + i+1 + ".";
+				String error = message + colName + " row " + (i+1) + ".";
 				System.out.println(error);
 				this.messageToOutput(error);
 			}
