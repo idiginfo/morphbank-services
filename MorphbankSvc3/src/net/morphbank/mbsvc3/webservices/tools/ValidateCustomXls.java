@@ -3,10 +3,13 @@ package net.morphbank.mbsvc3.webservices.tools;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -14,6 +17,7 @@ import javax.persistence.Persistence;
 import javax.persistence.Query;
 
 import net.morphbank.MorphbankConfig;
+import net.morphbank.mbsvc3.mapsheet.SpreadsheetFields;
 
 import jxl.Cell;
 import jxl.CellType;
@@ -80,17 +84,18 @@ public class ValidateCustomXls {
 		if (versionInfo) {
 			String message = "Version Info: " + getVersionNumber(); 
 			System.out.println(message);
-			this.messageToOuput(message);
+			this.messageToOutput(message);
 		}
 		String beginTesting = "Let's see what the file looks like...";
 		System.out.println(beginTesting);
-		this.messageToOuput("<b>" + beginTesting + "</b>");
+		this.messageToOutput("<b>" + beginTesting + "</b>");
 		isXlsValid &= this.checkUniqueImageExtId();
 		isXlsValid &= this.checkFormatDateColumns();
 		isXlsValid &= this.checkOriginalFileName();
 		isXlsValid &= this.checkUserProperties();
 		isXlsValid &= this.checkDBMatch();
 		isXlsValid &= this.checkMandatoryCellsNotEmpty();
+		isXlsValid &= this.checkSpecimenIdHasUniqueName();
 		return isXlsValid;
 	}
 
@@ -218,7 +223,7 @@ public class ValidateCustomXls {
 			}
 			error += list.toString() + "have duplicate entries.";
 			System.out.println(error);
-			this.messageToOuput(error);
+			this.messageToOutput(error);
 			return false;
 		}
 		return true;
@@ -261,7 +266,7 @@ public class ValidateCustomXls {
 				isRowCorrect = false;
 				String error = "In column "+ colName +", row " + (i+1) + " should be formatted as text.";
 				System.out.println(error);
-				this.messageToOuput(error);
+				this.messageToOutput(error);
 			}
 			else {
 				isCorrectFormat = Tools.checkDateFormat(cells[i]);
@@ -270,7 +275,7 @@ public class ValidateCustomXls {
 					String error = "In column "+ colName +", row " + (i+1) + 
 							" should be formatted as yyyy-mm-dd instead of " + cells[i].getContents() +".";
 					System.out.println(error);
-					this.messageToOuput(error);
+					this.messageToOutput(error);
 				}
 			}
 		}
@@ -313,7 +318,7 @@ public class ValidateCustomXls {
 			if (tsns == null) {
 				String error = "Scientific name " + cellsDetermination[i] + " at row " + (i+1) + " is not in Morphbank.";
 				System.out.println(error);
-				this.messageToOuput(error);
+				this.messageToOutput(error);
 			}
 			if (Tools.isEmpty(cellsTSN[i])) continue;
 			else {
@@ -329,7 +334,7 @@ public class ValidateCustomXls {
 				if (!matchFound) {
 					String error = "Scientific name " + cellsDetermination[i].getContents() + " does not match TSN " + cellsTSN[i].getContents() + " at row " + (i+1) + ".";
 					System.out.println(error);
-					this.messageToOuput(error);
+					this.messageToOutput(error);
 				}
 				columnValid &= matchFound;
 			}
@@ -348,7 +353,7 @@ public class ValidateCustomXls {
 		if (content.indexOf(' ') != -1) {
 			String error = "Extra space found for TSN " + content.trim() + " at row " + row + ".<br />";
 			System.out.println(error);
-			this.messageToOuput(error);
+			this.messageToOutput(error);
 			return content.trim();
 		}
 		return content;
@@ -405,7 +410,7 @@ public class ValidateCustomXls {
 		if (cell.length() < 1) {
 			String error = label.replaceFirst(":", "") + " cannot be empty.";
 			System.out.println(error);
-			this.messageToOuput(error);
+			this.messageToOutput(error);
 			return true;
 		}
 		return false;
@@ -429,13 +434,13 @@ public class ValidateCustomXls {
 		if (size2 < 1) {
 			String warning = label2Short + " is empty. If you don't know the " + label2Short + " that's ok, but contact Morphbank to let them know.";
 			System.out.println(warning);
-			this.messageToOuput(warning);
+			this.messageToOutput(warning);
 		}
 		if (size1 < 1 && size2 < 1) {
 			String error = label1Short + " cannot be empty if " +
 					label2Short + " is also empty.";
 			System.out.println(error);
-			this.messageToOuput(error);
+			this.messageToOutput(error);
 			return true;
 		}
 		return false;
@@ -454,7 +459,7 @@ public class ValidateCustomXls {
 		if (names.isEmpty()) {
 			String error = name + " is not in Morphbank.";
 			System.out.println(error);
-			this.messageToOuput(error);
+			this.messageToOutput(error);
 			return false;
 		}
 		Iterator it = names.iterator();
@@ -467,7 +472,7 @@ public class ValidateCustomXls {
 				if (uid != Integer.valueOf(id)) {
 					String error = name + " and " + id + " do not match. One of them must be misstyped.";
 					System.out.println(error);
-					this.messageToOuput(error);
+					this.messageToOutput(error);
 					matchFound = false;
 				}
 			}
@@ -488,7 +493,7 @@ public class ValidateCustomXls {
 		if (names.isEmpty()) {
 			String error = "Id:" + id + " is not in the group " + groupName + ".";
 			System.out.println(error);
-			this.messageToOuput(error);
+			this.messageToOutput(error);
 			return false;
 		}
 		Iterator it = names.iterator();
@@ -507,7 +512,7 @@ public class ValidateCustomXls {
 		if (!matchFound) {
 			String error = "Id:" + id + " is not in the group " + groupName + ".";
 			System.out.println();
-			this.messageToOuput(error);
+			this.messageToOutput(error);
 		}
 		return matchFound;
 	}
@@ -531,20 +536,20 @@ public class ValidateCustomXls {
 				isValid = false;
 				String message = error + (i+1) + " should not contain spaces.";
 				System.out.println(message);
-				this.messageToOuput(message);
+				this.messageToOutput(message);
 			}
 			if (!Tools.fileExtensionOk(cells[i].getContents())) {
 				isValid = false;
 				String message = error + (i+1) 
 				+ " file extension should be " + Tools.outputListOfExtensions();
 				System.out.println(message);
-				this.messageToOuput(message);
+				this.messageToOutput(message);
 			}
 			if (!Tools.fileNameFormattedOk(cells[i].getContents())) {
 				isValid = false;
 				String message = error + (i+1) + " cannot use '.' in the file name.";
 				System.out.println(message);
-				this.messageToOuput(message);
+				this.messageToOutput(message);
 			}
 		}
 		return isValid;
@@ -555,7 +560,7 @@ public class ValidateCustomXls {
 	 * display messages on a webpage.
 	 * @param message
 	 */
-	private void messageToOuput(String message) {
+	private void messageToOutput(String message) {
 		output.append(message);
 		output.append("<br />");
 	}
@@ -583,7 +588,7 @@ public class ValidateCustomXls {
 				+ "Specimen External id, Specimen External id Prefix, Determination Scientific Name, "
 				+ "Determination TSN, Basis of Record, Type Status, View Applicable to Taxon.";
 		System.out.println(listMandatoryCells);
-		this.messageToOuput(listMandatoryCells);
+		this.messageToOutput(listMandatoryCells);
 		return isValid;
 	}
 	
@@ -594,18 +599,39 @@ public class ValidateCustomXls {
 	 * @return entire row
 	 */
 	private String[] getMandatoryRow(Cell[] entireRow){
+			
+			Integer colImgExtId = this.getColumnNumberByName(DATA_SHEET_NAME, "Image External id");
+			Integer colImgExtIdPrfx = this.getColumnNumberByName(DATA_SHEET_NAME, "Image External id Prefix");
+			Integer colOriglFileName = this.getColumnNumberByName(DATA_SHEET_NAME, "Original File Name");
+			Integer colCreativeCommons = this.getColumnNumberByName(DATA_SHEET_NAME, "Creative Commons");
+			Integer colSpExtId = this.getColumnNumberByName(DATA_SHEET_NAME, "Specimen External id");
+			Integer colSpExtIdPrfx = this.getColumnNumberByName(DATA_SHEET_NAME, "Specimen External id Prefix");
+			Integer colDetScName = this.getColumnNumberByName(DATA_SHEET_NAME, "Determination Scientific Name");
+			Integer colDetTSN = this.getColumnNumberByName(DATA_SHEET_NAME, "Determination TSN");
+			Integer colBasisOfRecord = this.getColumnNumberByName(DATA_SHEET_NAME, "Basis of Record");
+			Integer colTypeStatus = this.getColumnNumberByName(DATA_SHEET_NAME, "Type Status");
+			Integer colViewAppTaxon = this.getColumnNumberByName(DATA_SHEET_NAME, "View Applicable to Taxon");
+			
+			HashMap<String, Integer> columns = new HashMap<String, Integer>();
+			columns.put("Image External id", colImgExtId);
+			columns.put("Image External id Prefix", colImgExtIdPrfx);
+			columns.put("Original File Name", colOriglFileName);
+			columns.put("Creative Commons", colCreativeCommons);
+			columns.put("Specimen External id", colSpExtId);
+			columns.put("Specimen External id Prefix", colSpExtIdPrfx);
+			columns.put("Determination Scientific Name", colDetScName);
+			columns.put("Determination TSN", colDetTSN);
+			columns.put("Basis of Record", colBasisOfRecord);
+			columns.put("Type Status", colTypeStatus);
+			columns.put("View Applicable to Taxon", colViewAppTaxon);
 
-			int colImgExtId = this.getColumnNumberByName(DATA_SHEET_NAME, "Image External id");
-			int colImgExtIdPrfx = this.getColumnNumberByName(DATA_SHEET_NAME, "Image External id Prefix");
-			int colOriglFileName = this.getColumnNumberByName(DATA_SHEET_NAME, "Original File Name");
-			int colCreativeCommons = this.getColumnNumberByName(DATA_SHEET_NAME, "Creative Commons");
-			int colSpExtId = this.getColumnNumberByName(DATA_SHEET_NAME, "Specimen External id");
-			int colSpExtIdPrfx = this.getColumnNumberByName(DATA_SHEET_NAME, "Specimen External id Prefix");
-			int colDetScName = this.getColumnNumberByName(DATA_SHEET_NAME, "Determination Scientific Name");
-			int colDetTSN = this.getColumnNumberByName(DATA_SHEET_NAME, "Determination TSN");
-			int colBasisOfRecord = this.getColumnNumberByName(DATA_SHEET_NAME, "Basis of Record");
-			int colTypeStatus = this.getColumnNumberByName(DATA_SHEET_NAME, "Type Status");
-			int colViewAppTaxon = this.getColumnNumberByName(DATA_SHEET_NAME, "View Applicable to Taxon");
+			
+			if(missingColumn(columns)) {
+				String message = "The spreadsheet is missing some columns. Please fix it or download a clean version.";
+				System.out.println(message);
+				this.messageToOutput(message);
+				return null;
+			}
 			
 			if (colViewAppTaxon > entireRow.length - 1) {
 				return null;
@@ -625,6 +651,23 @@ public class ValidateCustomXls {
 			row[10] = entireRow[colViewAppTaxon].getContents(); 
 			
 			return row;
+	}
+	
+	private boolean missingColumn(HashMap<String,Integer> columns) {
+		boolean isMissing = false;
+		Set<String> headers = columns.keySet();
+		Iterator<String> it = headers.iterator();
+		while (it.hasNext()) {
+			String header = it.next();
+			Integer colNumber = columns.get(header);
+			if (colNumber == null) {
+				String message = "Column " + header + " is missing.";
+				System.out.println(message);
+				this.messageToOutput(message);
+				isMissing = true;
+			}
+		}
+		return isMissing;
 	}
 	
 	
@@ -650,7 +693,7 @@ public class ValidateCustomXls {
 	private void printMandatoryCellError(int row) {
 		String error = "In row " + (row + 1) + ", one or more mandatory cells are empty.";
 		System.out.println(error);
-		this.messageToOuput(error);
+		this.messageToOutput(error);
 	}
 	
 	/**
@@ -677,11 +720,43 @@ public class ValidateCustomXls {
 			if (!currentMatch) {
 				String message = errorMessagePart1 + userProp.getContents() + errorMessagePart2;
 				System.out.println(message);
-				this.messageToOuput(message);
+				this.messageToOutput(message);
 				matchAll = false;
 			}
 		}
 		return matchAll;
+	}
+	
+	/**
+	 * Check if a Specimen External id has only one Taxon name.
+	 * If not it not an error but Morphbank should be aware of it.
+	 * @return true if all Specimen ids have a unique name
+	 */
+	private boolean checkSpecimenIdHasUniqueName() {
+		boolean uniqueName = true;
+		Cell[] specimenExtIds = dataSheet.getColumn(this.getColumnNumberByName(DATA_SHEET_NAME, "Specimen External id"));
+		Cell[] sciNames = dataSheet.getColumn(this.getColumnNumberByName(DATA_SHEET_NAME, "Determination Scientific Name"));
+
+		for (int i = 1; i < specimenExtIds.length; i++) {
+			String sciName = sciNames[i].getContents();
+			String extId = specimenExtIds[i].getContents();
+			for (int j = i; j < specimenExtIds.length; j++) {
+				String sciNameDup = sciNames[j].getContents();
+				String extIdDup = specimenExtIds[j].getContents();
+				if (extId.equals(extIdDup)) {
+					if (!sciName.equals(sciNameDup)){
+						String error = "Row " + (i+1) + ": " + extId + " has name " + sciName
+								+ " but row " + (j+1) + " has name " + sciNameDup;
+						System.out.println(error);
+						this.messageToOutput(error);
+					}
+				}
+			}
+		}
+		String message = "The above indicates that you applied the same Specimen External Id to more than one Taxon name.";
+		System.out.println(message);
+		this.messageToOutput(message);
+		return true;
 	}
 	
 }
