@@ -3,8 +3,6 @@ package net.morphbank.mbsvc3.webservices.tools;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -17,7 +15,6 @@ import javax.persistence.Persistence;
 import javax.persistence.Query;
 
 import net.morphbank.MorphbankConfig;
-import net.morphbank.mbsvc3.mapsheet.SpreadsheetFields;
 
 import jxl.Cell;
 import jxl.CellType;
@@ -729,7 +726,7 @@ public class ValidateCustomXls {
 	
 	/**
 	 * Check if a Specimen External id has only one Taxon name.
-	 * If not it not an error but Morphbank should be aware of it.
+	 * Morphbank should be aware of it.
 	 * @return true if all Specimen ids have a unique name
 	 */
 	private boolean checkSpecimenIdHasUniqueName() {
@@ -745,6 +742,7 @@ public class ValidateCustomXls {
 				String extIdDup = specimenExtIds[j].getContents();
 				if (extId.equals(extIdDup)) {
 					if (!sciName.equals(sciNameDup)){
+						uniqueName = false;
 						String error = "Row " + (i+1) + ": " + extId + " has name " + sciName
 								+ " but row " + (j+1) + " has name " + sciNameDup;
 						System.out.println(error);
@@ -753,9 +751,11 @@ public class ValidateCustomXls {
 				}
 			}
 		}
-		String message = "The above indicates that you applied the same Specimen External Id to more than one Taxon name.";
-		System.out.println(message);
-		this.messageToOutput(message);
+		if (!uniqueName) {
+			String message = "The above indicates that you applied the same Specimen External Id to more than one Taxon name.";
+			System.out.println(message);
+			this.messageToOutput(message);
+		}
 		return true;
 	}
 	
