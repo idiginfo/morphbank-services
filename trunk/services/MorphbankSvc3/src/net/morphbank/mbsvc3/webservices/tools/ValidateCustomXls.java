@@ -756,7 +756,7 @@ public class ValidateCustomXls {
 			System.out.println(message);
 			this.messageToOutput(message);
 		}
-		return true;
+		return uniqueName;
 	}
 	
 }
