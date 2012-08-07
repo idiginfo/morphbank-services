@@ -217,22 +217,42 @@ public class ValidateAgainstDatabase {
 	}
 	
 	/**
-	 * Checks if the group name is in the database
+	 * Checks if the group name and user name are in the database
 	 * @return false is any of the above is not true
 	 */
-	public boolean checkGroup(){
+	public boolean checkCredentials(){
+		boolean credentialsOK = true;
 		Sheet imageCollection = sheetReader.getSheet(ExcelTools.IMAGE_COLLECTION_SHEET);
 		String groupName = imageCollection.getCell(1, 7).getContents();
+		String userName = imageCollection.getCell(1, 4).getContents();
+		String grpStmt = "SELECT id FROM Groups WHERE groupName=?";
+		String userStmt = "SELECT id FROM User WHERE uin=?";
+		credentialsOK &= execStmt(grpStmt, "group name", groupName);
+		credentialsOK &= execStmt(userStmt, "Contributor (morphbank username)", userName);
+		return credentialsOK;
+	}
+	
+	/**
+	 * Create a statement and execute it. 
+	 * If a row is returned, the value in the spreadsheet is correct
+	 * @param stmt
+	 * @param field the title of the cell in the spreadsheet (userd for error message)
+	 * @param value corresponding value in the spreadsheet
+	 * @return false is the value is not in the corresponding table
+	 */
+	public boolean execStmt(String stmt, String field, String value) {
 		try {
-			String selectIdByGroupName = "SELECT id FROM Groups WHERE groupName=?";;
-			PreparedStatement getGroupStmt = conn
-					.prepareStatement(selectIdByGroupName);
-			getGroupStmt.setString(1, groupName);
-			getGroupStmt.execute();
-			ResultSet result = getGroupStmt.getResultSet();
+			PreparedStatement getStmt = conn
+					.prepareStatement(stmt);
+			getStmt.setString(1, value);
+			getStmt.execute();
+			ResultSet result = getStmt.getResultSet();
 			if (!result.next()) {
-				String message = "In ImageCollection sheet, Morphbank group name "
-						+ groupName + " is not in the database. Please contact Morphbank if you want to add a new group.";
+				String message = "In ImageCollection sheet, Morphbank " + field + " "
+						+ value + " is not in the database.";
+				if (field.equalsIgnoreCase("group name")) {
+					message += "Please contact Morphbank if you want to add a new group.";
+				}
 				System.out.println(message);
 				ExcelTools.messageToOutput(message, output);
 				return false;
