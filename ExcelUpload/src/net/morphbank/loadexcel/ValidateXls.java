@@ -367,7 +367,7 @@ public class ValidateXls {
 				row[4] = ((StringFormulaCell) entireRow[colICreativeCommons]).getContents();
 			}
 			else {
-				row[4] = "";
+				row[4] = entireRow[colICreativeCommons].getContents();
 			}
 			return row;
 		}
@@ -448,7 +448,7 @@ public class ValidateXls {
 		ValidateAgainstDatabase checkDB = new ValidateAgainstDatabase(sheetReader, output, propertyFile);
 		boolean testPassed = true;
 //		testPassed &= checkDB.checkTaxa();
-		testPassed &= checkDB.checkGroup();
+		testPassed &= checkDB.checkCredentials();
 		return testPassed;
 		
 	}
@@ -475,10 +475,12 @@ public class ValidateXls {
 		Iterator<String> it = headers.iterator();
 		while(it.hasNext()) {
 			String header = it.next();
-			noSpaceFound = checkExtraSpaceByColumn(columnsAndNames.get(header), header);
+			noSpaceFound &= checkExtraSpaceByColumn(columnsAndNames.get(header), header);
 		}
 		if(!noSpaceFound) {
-			System.out.println("Please inform Morphbank if you want to keep those spaces.");
+			String warning = "Please inform Morphbank if you want to keep those spaces.";
+			System.out.println(warning);
+			this.messageToOutput("<b>" + warning + "</b>");
 		}
 		return noSpaceFound;
 	}
