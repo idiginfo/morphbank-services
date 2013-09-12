@@ -62,7 +62,7 @@ public class FixTaxonomicNames {
 	public void run() {
 		GetConnection newconnect = new GetConnection();
 		
-		conn = newconnect.openConnection(dbHost,dbName, dbUserId, dbPassword);
+		conn = newconnect.openConnection(dbHost,dbName, dbUserId, dbPassword, null);
 		try {
 			statement = conn.createStatement();
 
