@@ -388,4 +388,9 @@ public class MorphbankConfig {
 	public static void setFILEPATH(String fILEPATH) {
 		FILEPATH = fILEPATH;
 	}
+
+	public static String getIpAllowed() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }
