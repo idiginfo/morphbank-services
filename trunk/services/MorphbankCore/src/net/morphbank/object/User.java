@@ -29,7 +29,7 @@ import net.morphbank.MorphbankConfig;
 @Entity
 @Table(name = "User")
 @DiscriminatorValue("User")
-@AttributeOverride(column = @Column(name = "name"), name = "name")
+//@AttributeOverride(column = @Column(name = "name"), name = "name")
 // @XStreamConverter(net.morphbank.object.converter.UserConverter.class)
 public class User extends BaseObject implements Serializable {
 	static final long serialVersionUID = 1;
