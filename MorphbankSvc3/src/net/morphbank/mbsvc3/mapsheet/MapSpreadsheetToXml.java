@@ -23,8 +23,9 @@ import java.util.Set;
 import jxl.Cell;
 import jxl.DateCell;
 import jxl.Sheet;
-
 import net.morphbank.MorphbankConfig;
+import net.morphbank.mbsvc3.mapdwca.DwcaFieldMapper;
+import net.morphbank.mbsvc3.mapdwca.DwcaFields;
 import net.morphbank.mbsvc3.xml.Credentials;
 import net.morphbank.mbsvc3.xml.Extref;
 import net.morphbank.mbsvc3.xml.Insert;
