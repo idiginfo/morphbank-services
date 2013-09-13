@@ -1,95 +1,98 @@
-<!--
-  Copyright (c) 2011 Greg Riccardi, Guillaume Jimenez.
-   All rights reserved. This program and the accompanying materials
-   are made available under the terms of the GNU Public License v2.0
-   which accompanies this distribution, and is available at
-   http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
-   
-   Contributors:
-   	Greg Riccardi - initial API and implementation
-  	Guillaume Jimenez - initial API and implementation
--->
+<!-- Copyright (c) 2011 Greg Riccardi, Guillaume Jimenez. All rights reserved. 
+	This program and the accompanying materials are made available under the 
+	terms of the GNU Public License v2.0 which accompanies this distribution, 
+	and is available at http://www.gnu.org/licenses/old-licenses/gpl-2.0.html 
+	Contributors: Greg Riccardi - initial API and implementation Guillaume Jimenez 
+	- initial API and implementation -->
 <persistence xmlns="http://java.sun.com/xml/ns/persistence"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_1_0.xsd"
 	version="1.0">
-	
+
 	<persistence-unit name="morphbank">
 		<provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
 		<exclude-unlisted-classes>false</exclude-unlisted-classes>
 		<properties>
 			<!-- Provider-specific connection properties -->
-			<property name="javax.persistence.jdbc.driver" value="com.mysql.jdbc.Driver"/>
+			<property name="javax.persistence.jdbc.driver" value="com.mysql.jdbc.Driver" />
 			<!-- MB 32 on morphbank -->
 			<property name="javax.persistence.jdbc.url"
-				value="jdbc:mysql://morphbank.sc.fsu.edu:3306/MB32?zeroDateTimeBehavior=convertToNull&amp;useUnicode=true&amp;characterEncoding=UTF-8"/>
-			<property name="javax.persistence.jdbc.user" value="****"/>
-			<property name="javax.persistence.jdbc.password" value="****"/>
+				value="jdbc:mysql://10.145.254.16:3306/MB32?zeroDateTimeBehavior=convertToNull&amp;useUnicode=true&amp;characterEncoding=UTF-8" />
+			<property name="javax.persistence.jdbc.user" value="mbscripts" />
+			<property name="javax.persistence.jdbc.password" value="bTQH2UCjhxDLpU7S" />
 			<!-- -->
 			<!-- specific settings -->
-			<property name="eclipselink.logging.level" value="info"/>
-			<property name="eclipselink.jdbc.read-connections.min" value="2"/>
-			<property name="eclipselink.jdbc.read-connections.max" value="2"/>
-			<property name="eclipselink.jdbc.write-connections.min" value="5"/>
-			<property name="eclipselink.jdbc.write-connections.max" value="10"/>
+			<property name="eclipselink.logging.level" value="info" />
+			<property name="eclipselink.jdbc.read-connections.min"
+				value="2" />
+			<property name="eclipselink.jdbc.read-connections.max"
+				value="2" />
+			<property name="eclipselink.jdbc.write-connections.min"
+				value="5" />
+			<property name="eclipselink.jdbc.write-connections.max"
+				value="10" />
 			<property name="eclipselink.descriptor.customizer.BaseObject"
-				value="net.morphbank.object.MbDescriptorCustomizer"/>
-			<property name="eclipselink.id-validation" value="NULL"/>
+				value="net.morphbank.object.MbDescriptorCustomizer" />
+			<property name="eclipselink.id-validation" value="NULL" />
 		</properties>
 	</persistence-unit>
-	
+
 	<persistence-unit name="localhost">
 		<provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
-		
+
 		<class>net.morphbank.object.BaseObject</class>
-                <class>net.morphbank.object.Specimen</class>
-                <class>net.morphbank.object.Image</class>
-                <class>net.morphbank.object.View</class>
-                <class>net.morphbank.object.Locality</class>
-                <class>net.morphbank.object.Taxon</class>
-                <class>net.morphbank.object.TaxonAuthor</class>
-                <class>net.morphbank.object.TaxonConcept</class>
-                <class>net.morphbank.object.TaxonBranchNode</class>
-                <class>net.morphbank.object.User</class>
-                <class>net.morphbank.object.Group</class>
-                <class>net.morphbank.object.Collection</class>
-                <class>net.morphbank.object.CollectionObject</class>
-                <class>net.morphbank.object.Annotation</class>
-                <class>net.morphbank.object.DeterminationAnnotation</class>
-                <class>net.morphbank.object.BasisOfRecord</class>
-                <class>net.morphbank.object.Publication</class>
-                <class>net.morphbank.object.News</class>
-                <class>net.morphbank.object.Otu</class>
-                <class>net.morphbank.object.Matrix</class>
-                <class>net.morphbank.object.MatrixCell</class>
-                <class>net.morphbank.object.MatrixCellValue</class>
-                <class>net.morphbank.object.CharacterState</class>
-                <class>net.morphbank.object.MbCharacter</class>
-                <class>net.morphbank.object.ExternalLinkObject</class>
-                <class>net.morphbank.object.ExternalLinkType</class>
-                <class>net.morphbank.object.UserProperty</class>
-                <class>net.morphbank.object.UserGroupKey</class>
-		
+		<class>net.morphbank.object.Specimen</class>
+		<class>net.morphbank.object.Image</class>
+		<class>net.morphbank.object.View</class>
+		<class>net.morphbank.object.Locality</class>
+		<class>net.morphbank.object.Taxon</class>
+		<class>net.morphbank.object.TaxonAuthor</class>
+		<class>net.morphbank.object.TaxonConcept</class>
+		<class>net.morphbank.object.TaxonBranchNode</class>
+		<class>net.morphbank.object.User</class>
+		<class>net.morphbank.object.Group</class>
+		<class>net.morphbank.object.Collection</class>
+		<class>net.morphbank.object.CollectionObject</class>
+		<class>net.morphbank.object.Annotation</class>
+		<class>net.morphbank.object.DeterminationAnnotation</class>
+		<class>net.morphbank.object.BasisOfRecord</class>
+		<class>net.morphbank.object.Publication</class>
+		<class>net.morphbank.object.News</class>
+		<class>net.morphbank.object.Otu</class>
+		<class>net.morphbank.object.Matrix</class>
+		<class>net.morphbank.object.MatrixCell</class>
+		<class>net.morphbank.object.MatrixCellValue</class>
+		<class>net.morphbank.object.CharacterState</class>
+		<class>net.morphbank.object.MbCharacter</class>
+		<class>net.morphbank.object.ExternalLinkObject</class>
+		<class>net.morphbank.object.ExternalLinkType</class>
+		<class>net.morphbank.object.UserProperty</class>
+		<class>net.morphbank.object.UserGroupKey</class>
+
 		<exclude-unlisted-classes>false</exclude-unlisted-classes>
 
 		<properties>
 			<!-- Provider-specific connection properties -->
-			<property name="javax.persistence.jdbc.driver" value="com.mysql.jdbc.Driver"/>
+			<property name="javax.persistence.jdbc.driver" value="com.mysql.jdbc.Driver" />
 			<!-- MB 32 on localhost -->
 			<property name="javax.persistence.jdbc.url"
-				value="jdbc:mysql://localhost:3306/MB32?zeroDateTimeBehavior=convertToNull&amp;useUnicode=true&amp;characterEncoding=UTF-8"/>
-			<property name="javax.persistence.jdbc.user" value="****"/>
-			<property name="javax.persistence.jdbc.password" value="****"/>
+				value="jdbc:mysql://localhost:3306/MB32?zeroDateTimeBehavior=convertToNull&amp;useUnicode=true&amp;characterEncoding=UTF-8" />
+			<property name="javax.persistence.jdbc.user" value="****" />
+			<property name="javax.persistence.jdbc.password" value="****" />
 			<!-- -->
 			<!-- specific settings -->
-			<property name="eclipselink.logging.level" value="info"/>
-			<property name="eclipselink.jdbc.read-connections.min" value="2"/>
-			<property name="eclipselink.jdbc.read-connections.max" value="2"/>
-			<property name="eclipselink.jdbc.write-connections.min" value="5"/>
-			<property name="eclipselink.jdbc.write-connections.max" value="10"/>
+			<property name="eclipselink.logging.level" value="info" />
+			<property name="eclipselink.jdbc.read-connections.min"
+				value="2" />
+			<property name="eclipselink.jdbc.read-connections.max"
+				value="2" />
+			<property name="eclipselink.jdbc.write-connections.min"
+				value="5" />
+			<property name="eclipselink.jdbc.write-connections.max"
+				value="10" />
 			<property name="eclipselink.descriptor.customizer.BaseObject"
-				value="net.morphbank.object.MbDescriptorCustomizer"/>
-			<property name="eclipselink.id-validation" value="NULL"/>
+				value="net.morphbank.object.MbDescriptorCustomizer" />
+			<property name="eclipselink.id-validation" value="NULL" />
 		</properties>
 	</persistence-unit>
 
