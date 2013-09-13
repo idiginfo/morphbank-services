@@ -1,0 +1,183 @@
+<!DOCTYPE web-app
+    PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.2//EN"
+    "http://java.sun.com/j2ee/dtds/web-app_2_2.dtd">
+
+<web-app>
+	<display-name>Morphbank Object Service</display-name>
+	<description>This application provides access to Morphbank objects</description>
+
+	<servlet>
+		<servlet-name> request </servlet-name>
+		<servlet-class> net.morphbank.mbsvc3.request.RequestServlet </servlet-class>
+		<init-param>
+			<param-name>persistence</param-name>
+			<param-value>morphbank</param-value>
+		</init-param>
+		<init-param>
+			<param-name>logfile</param-name>
+			<param-value>/var/lib/tomcat6/webapps/mb3/mbdrequest.log</param-value>
+		</init-param>
+		<init-param>
+			<param-name>filepath</param-name>
+			<param-value>/var/lib/tomcat6/webapps/mb3/xmlfiles/</param-value>
+		</init-param>
+		<init-param>
+			<param-name>serviceprefix</param-name>
+			<param-value>http://services.morphbank.net/mb3/request?</param-value>
+		</init-param>
+		<init-param>
+			<param-name>webserver</param-name>
+			<param-value>http://www.morphbank.net/</param-value>
+		</init-param>
+		<init-param>
+			<param-name>remoteserver</param-name>
+			<param-value>http://services.morphbank.net/mb3/request?</param-value>
+		</init-param>
+	</servlet>
+	<servlet>
+		<servlet-name> flickr </servlet-name>
+		<servlet-class> net.morphbank.mbsvc3.request.FlickrServlet </servlet-class>
+		<init-param>
+			<param-name>persistence</param-name>
+			<param-value>morphbank</param-value>
+		</init-param>
+		<init-param>
+			<param-name>filepath</param-name>
+			<param-value>/var/lib/tomcat6/webapps/mb3/xmlfiles/</param-value>
+		</init-param>
+		<init-param>
+			<param-name>serviceprefix</param-name>
+			<param-value>http://services.morphbank.net/mb3/flickr?</param-value>
+		</init-param>
+	</servlet>
+	<servlet>
+		<servlet-name> restful </servlet-name>
+		<servlet-class> net.morphbank.mbsvc3.webservices.RestService </servlet-class>
+		<init-param>
+			<param-name>persistence</param-name>
+			<param-value>morphbank</param-value>
+		</init-param>
+		<init-param>
+			<param-name>filepath</param-name>
+			<param-value>/var/lib/tomcat6/webapps/mb3/xmlfiles/</param-value>
+		</init-param>
+		<init-param>
+			<param-name>serviceprefix</param-name>
+			<param-value>http://services.morphbank.net/mb3/request?</param-value>
+		</init-param>
+		<init-param>
+			<param-name>ip_allowed</param-name>
+			<param-value>/var/lib/tomcat6/webapps/mb3/listIPs.properties</param-value>
+		</init-param>
+	</servlet>
+
+
+	<servlet>
+		<servlet-name> restfulexcel </servlet-name>
+		<servlet-class>
+			net.morphbank.mbsvc3.webservices.RestServiceExcelUpload </servlet-class>
+		<init-param>
+			<param-name>persistence</param-name>
+			<param-value>morphbank</param-value>
+		</init-param>
+		<init-param>
+			<param-name>filepath</param-name>
+			<param-value>/var/lib/tomcat6/webapps/mb3/xmlfiles/</param-value>
+		</init-param>
+		<init-param>
+			<param-name>propertyFile</param-name>
+			<param-value>/var/lib/tomcat6/webapps/mb3/loadData.properties</param-value>
+		</init-param>
+	</servlet>
+
+	<servlet>
+		<servlet-name> convert </servlet-name>
+		<servlet-class> net.morphbank.mbsvc3.webservices.Uploader </servlet-class>
+		<init-param>
+			<param-name>persistence</param-name>
+			<param-value>morphbank</param-value>
+		</init-param>
+		<init-param>
+			<param-name>filepath</param-name>
+			<param-value>/var/lib/tomcat6/webapps/mb3/xmlfiles/</param-value>
+		</init-param>
+
+
+	</servlet>
+
+	<servlet>
+		<servlet-name>validateXls</servlet-name>
+		<servlet-class>net.morphbank.mbsvc3.webservices.Validate</servlet-class>
+		<init-param>
+			<param-name>persistence</param-name>
+			<param-value>morphbank</param-value>
+		</init-param>
+		<init-param>
+			<param-name>propertyFile</param-name>
+			<param-value>/var/lib/tomcat6/webapps/mb3/loadData.properties</param-value>
+		</init-param>
+		<init-param>
+			<param-name>filepath</param-name>
+			<param-value>/var/lib/tomcat6/webapps/mb3/xmlfiles/</param-value>
+		</init-param>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name> request </servlet-name>
+		<url-pattern> /request </url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name> flickr </servlet-name>
+		<url-pattern> /flickr </url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+
+		<servlet-name> restful </servlet-name>
+		<url-pattern> /restful </url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+
+		<servlet-name> restfulexcel </servlet-name>
+		<url-pattern> /restfulexcel </url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+
+		<servlet-name> convert </servlet-name>
+		<url-pattern> /convert </url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>validateXls</servlet-name>
+		<url-pattern>/validateXls</url-pattern>
+	</servlet-mapping>
+	<session-config>
+		<session-timeout> 3000 </session-timeout>
+	</session-config>
+
+	<security-constraint>
+		<web-resource-collection>
+			<web-resource-name>restrict by URL</web-resource-name>
+			<url-pattern>/xlsToXml.jsp</url-pattern>
+			<url-pattern>/uploadXml.jsp</url-pattern>
+			<url-pattern>/morphbanktools.jsp</url-pattern>
+			<url-pattern>/loadData.properties</url-pattern>
+			<url-pattern>/listIPs.properties</url-pattern>
+			<url-pattern>/uploadXml.jsp</url-pattern>
+		</web-resource-collection>
+		<auth-constraint>
+			<role-name>manager</role-name>
+		</auth-constraint>
+	</security-constraint>
+
+
+	<login-config>
+		<auth-method>BASIC</auth-method>
+		<realm-name>Please, enter your login credentials!</realm-name>
+	</login-config>
+	<security-role>
+		<role-name>manager</role-name>
+	</security-role>
+
+
+
+
+</web-app>
