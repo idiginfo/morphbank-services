@@ -27,7 +27,7 @@
 					<dependentWarExcludes>WEB-INF/web.xml,**/**.class</dependentWarExcludes>
 					<webResources>
 						<resource>
-							<directory>src/main/java/META-INF</directory>
+							<directory>../MorphbankCore/src/META-INF</directory>
 							<!-- override the destination directory for this resource -->
 							<targetPath>WEB-INF/classes/META-INF</targetPath>
 							<includes>
