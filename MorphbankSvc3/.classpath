@@ -6,6 +6,7 @@
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="src" path="webapp"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/MorphbankCore"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/MorphbankRdfCore"/>
 	<classpathentry kind="con" path="org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER">

@@ -25,10 +25,15 @@
 					<dependentWarExcludes>WEB-INF/web.xml,**/**.class</dependentWarExcludes>
 					<webResources>
 						<resource>
-							<!-- change if necessary -->
-							<directory>src/WEB-INF</directory>
-							<filtering>true</filtering>
-							<targetPath>WEB-INF</targetPath>
+							<directory>src/META-INF</directory>
+							<!-- override the destination directory for this resource -->
+							<targetPath>META-INF</targetPath>
+							<includes>
+								<include>persistence.xml</include>
+							</includes>
+						</resource>
+						<resource>
+							<directory>webapp</directory>
 						</resource>
 					</webResources>
 				</configuration>
