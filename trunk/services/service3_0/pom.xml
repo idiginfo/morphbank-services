@@ -27,9 +27,9 @@
 					<dependentWarExcludes>WEB-INF/web.xml,**/**.class</dependentWarExcludes>
 					<webResources>
 						<resource>
-							<directory>src/main/webapp/META-INF</directory>
+							<directory>src/main/java/META-INF</directory>
 							<!-- override the destination directory for this resource -->
-							<targetPath>META-INF</targetPath>
+							<targetPath>WEB-INF/classes/META-INF</targetPath>
 							<includes>
 								<include>persistence.xml</include>
 							</includes>
