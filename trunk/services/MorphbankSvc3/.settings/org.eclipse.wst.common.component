@@ -2,6 +2,7 @@
     <wb-module deploy-name="MorphbankSvc3">
         <wb-resource deploy-path="/" source-path="/target/m2e-wtp/web-resources"/>
         <wb-resource deploy-path="/" source-path="/src/main/webapp" tag="defaultRootSource"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/webapp"/>
         <dependent-module archiveName="ExcelUpload-1.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/ExcelUpload/ExcelUpload">
             <dependency-type>uses</dependency-type>
         </dependent-module>
