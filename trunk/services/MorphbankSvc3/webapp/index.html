@@ -1,0 +1,177 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"> </meta>
+	<meta name="keywords" content="DBI-0446224,Morphbank,NSF,BDI,ATOL,biology,digital,images,web,services,taxonomy" />
+	<title>Morphbank Sample Service Interface Version 3</title>
+	<link rel="stylesheet" title="Default" href="http://www.morphbank.net/style/morphbank2.css" type="text/css" media="screen">
+	</link>
+	<link rel="shortcut icon" href="http://www.morphbank.net/style/webImages/mLogo16.ico" />
+	<link href="http://services.morphbank.net/mbd/request?method=xml&keywords=geranium&objecttype=Image&limit=10&firstResult=05&format=rss"
+            rel="alternate" type="application/rss+xml" title="Morphbank RSS Feed"  id="gallery" />
+
+	<script type="text/javascript" src="http://www.morphbank.net/js/head.js"></script>
+			
+	<script language="javascript" type="text/javascript" src="http://www.morphbank.net/js/spry/SpryData.js"></script>
+	<script language="javascript" type="text/javascript" src="http://www.morphbank.net/js/spry/SpryEffects.js"></script>
+
+			
+	<script type="text/javascript">
+		window.name="main";
+		var jsDomainName = "http://www.morphbank.net/";
+		
+		function getWindowHeight() {
+			var windowHeight = 0;
+			if (typeof(window.innerHeight) == 'number') {
+				windowHeight = window.innerHeight;
+			}
+			else {
+				if (document.documentElement && document.documentElement.clientHeight) {
+					windowHeight = document.documentElement.clientHeight;
+				}
+				else {
+					if (document.body && document.body.clientHeight) {
+						windowHeight = document.body.clientHeight;
+					}
+				}
+			}
+			return windowHeight;
+		}
+		function setFooter() {
+			if (document.getElementById) {
+				var windowHeight = getWindowHeight();
+				if (windowHeight > 0) {
+					var contentHeight = document.getElementById('main').offsetHeight;
+					var footerElement = document.getElementById('footer');
+					var footerHeight  = footerElement.offsetHeight;
+					if (windowHeight - (contentHeight + footerHeight) >= 0) {
+						footerElement.style.position = 'relative';
+						footerElement.style.top = ((windowHeight - (contentHeight + footerHeight)) -0) + 'px';
+					}
+					else {
+						footerElement.style.position = 'static';
+					}
+				}
+				footerElement.style.visibility = 'visible';
+			}
+		}
+		window.onload = function() {
+			setFooter();
+		}
+		window.onresize = function() {
+			setFooter();
+		}
+	</script>
+</head>
+<body>
+<div id="main">
+  <div class="mainHeader">
+    <div class="mainHeaderLogo"> 
+        <a href="http://www.morphbank.net/index.php">
+           <img border="0" src="http://www.morphbank.net/style/webImages/mbLogoHeader.png" alt="logo" />
+        </a>&nbsp; 
+    </div>
+    <div class="mainHeaderTitle">
+Sample service interface, V. 3 with new, flattened XML schema mbsvc3.xsd
+    </div>
+    
+  </div>
+  <div class="mainRibbon"></div>
+  
+  <div class="mainGenericContainer" style="width:760px">
+         <form action="request">
+     <div>
+         <h1 align="center">
+         Select a search method and fill in the appropriate parameters
+         </h1><br/>
+         <h3>Choose a search method</h3><br/>
+         <br/><input type="radio" name="method" value="search" checked>Keyword search </input>
+         <br/><input type="radio" name="method" value="remote" >Remote search </input>
+         <br/><input type="radio" name="method" value="id" >Find an object by its morphbank identifier</input>
+         <br/><input type="radio" name="method" value="taxon" >Taxonomic name search </input>
+         <br/><input type="radio" name="method" value="changes" >Recently changed objects </input>
+         <br/><input type="radio" name="method" value="externalId" >Find an object by its external identifier </input><br/>
+     </div>
+     <div>
+         <p><h3>Select object type(s). Leave unchecked for all types</h3><br/>
+         <table border="0">
+         <tr>
+         <td><input type="checkbox" name="objecttype" value="Image" > Image </input> 
+         <td><input type="checkbox" name="objecttype" value="Specimen" checked> Specimen </input> 
+         <td><input type="checkbox" name="objecttype" value="Locality"> Locality </input> 
+         </tr><tr>
+         <td><input type="checkbox" name="objecttype" value="Taxon"> Taxon </input> 
+         <td><input type="checkbox" name="objecttype" value="View"> View </input> 
+         <td><input type="checkbox" name="objecttype" value="Collection"> Collection </input> 
+         </tr><tr>
+         <td><input type="checkbox" name="objecttype" value="Character"> Character </input> 
+         <td><input type="checkbox" name="objecttype" value="Matrix"> Matrix </input> 
+         <td><input type="checkbox" name="objecttype" value="OTU"> OTU </input> 
+         </tr>
+         </table></p>
+     </div>
+     <div>
+        <p><h3> Other parameters </h3>
+         <br/>Keywords <input type="text" name="keywords" value="Alaska" />
+         <br/>Geolocated items only <input type="checkbox" name="geolocated" value="true"checked />
+         <br/>Maximum number of results <input type="text" name="limit" value="10" title="-1 for unlimited"/>
+         <br/>Offset to first result <input type="text" name="firstResult" value="0"/>
+         <br/>User id <input type="text" name="user" />
+         <br/>Group id <input type="text" name="group" />
+         <br/>Beginning change date as mm/dd/yyyy <input type="text" name="change" />
+         <br/>End change date as mm/dd/yyyy <input type="text" name="lastDateChanged" />
+         <br/>Leave beginning date blank for most recent changes, enter number of days 
+              <input type="text" name="numChangeDays" value = "1"/>
+         <br/>Morphbank or external id <input type="text" name="id" />
+         <br/>Taxonomic name <input type="text" name="taxonName" /></p>
+     </div>
+     <div>
+         <p><h3>Choose an output format</h3>
+         <br/><input type="radio" name="format" value="id" >IDs only in XML</input>
+         <br/><input type="radio" name="format" value="svc" >XML using schema 
+               <a href="http://morphbank.net/schema/mbsvc3.xsd">http://morphbank.net/schema/mbsvc3.xsd</a></input>
+         <br/><input type="radio" name="format" value="thumb" >Thumbnail page <span style="color:red">Now featuring Google maps for geolocation</span>
+         </input>
+         <br/><input type="radio" name="format" value="rss" checked >RSS feed  <span style="color:red">new option</span> </input>
+         <br/><input type="radio" name="format" value="rdf">Detailed information in RDF</input>
+         </p>
+         <p><input type="submit" /> <input type="reset" /></p>
+     </div>
+         </form>
+</div>
+  <div class="mainGenericContainer" style="width:760px">
+     <div>
+       <a href="ocr.html">Click here for Herbis analysis page</a>
+       <br/><a href="taxon.html">Click here for Taxonomic names search</a>
+       <br/><a href="validateXls.jsp">Click here to test your Excel files</a>
+     </div>
+  </div>
+<div style="clear:both;">&nbsp;</div>
+</div> <!-- end div main -->
+<div id="footer">
+	<div id="footerRibbon">&nbsp;</div>
+	<div style="float:left;">
+            <a href="http://www.nsf.gov">
+                <img src="http://www.morphbank.net/style/webImages/nsf-trans.png" width="50" height="50" alt="NSF" title="NSF" />
+            </a>
+        </div>
+	<div style="float:right;">
+            <a href="http://www.fsu.edu">
+                <img src="http://www.morphbank.net/style/webImages/fsu-trans.png" width="50" height="50" alt="FSU" title="FSU" />
+            </a>
+        </div>
+	<div class="footerContent">
+            <a href="mailto://riccardi@ci.fsu.edu?subject="Contact about Sample Web Site">Maintained by G. Riccardi: riccardi@ci.fsu.edu</a>
+            <br />
+	    <a href="http://www.morphbank.net/About/Copyright">Copyright Policy</a> - 
+            <a href="http://www.morphbank.net/About/Team">Contact</a> - 
+            <a href="http://www.morphbank.net/About/Introduction/">About Morphbank</a>
+            <br />
+            <a href="javascript:openPopup('http://www.morphbank.net/About/Manual/');">Online User Manual</a> - 
+            <a href="http://www.morphbank.net/Help/Documents">Documents</a> - 
+            <a href="http://www.morphbank.net/Help/feedback">Feedback</a>		
+	</div>	
+   </div>
+
+</body>
+</html>
