@@ -33,7 +33,7 @@ public class AlaMappingTest {
 //		static final String INPUT_FILE = "/usr/local/dev/morphbank/upload/TTRS_v8.xls";
 //	static final String INPUT_FILE =  "/usr/local/dev/morphbank/upload/CinclosomaV4.xls";
 //	static final String INPUT_FILE =  "/usr/local/dev/morphbank/upload/USMSTest.xls";
-	static final String INPUT_FILE =  "/usr/local/dev/morphbank/upload/USMS/test/testbis.xls";
+	static final String INPUT_FILE =  "/usr/local/dev/morphbank/upload/customWorkbook_TTRS_Birds-0213.xls";
 //	static final String INPUT_FILE =  "/usr/local/dev/morphbank/upload/TTRS_testCharset.xls";
 	static final String FILE_PATH = "/usr/local/dev/morphbank/upload/";
 	//	static final String XML_OUTPUT_FILE = "/usr/local/dev/morphbank/upload/CinclosomaV3.xml";
