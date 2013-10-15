@@ -54,10 +54,6 @@ public class MapSheetImage {
 		xmlImage.setOriginalFileName(originalFileName);
 		xmlImage.addUserProperty("imageUrl", image.getValue(fields.getI_IMAGEURL()));
 		xmlImage.setImageType(getImageType(originalFileName));
-		
-		//Oct 10, 2013 :: 3:18:28 PM :: sg11x
-		//xmlImage.setCreativeCommons(image.getValueFormula(fields.getI_CREATIVE_COMMONS()));
-				
 		xmlImage.setCreativeCommons(image.getValue(fields.getI_CREATIVE_COMMONS()));
 		xmlImage.setPhotographer(image.getValue(fields.getI_PHOTOGRAPHER()));
 		xmlImage.setCopyrightText(image.getValue(fields.getI_COPYRIGHT()));
