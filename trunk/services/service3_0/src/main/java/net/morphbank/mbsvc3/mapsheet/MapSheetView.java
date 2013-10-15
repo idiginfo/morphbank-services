@@ -11,8 +11,10 @@
  ******************************************************************************/
 package net.morphbank.mbsvc3.mapsheet;
 
-import jxl.Cell;
-import jxl.Sheet;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Sheet;
+
 import net.morphbank.mbsvc3.xml.Extref;
 import net.morphbank.mbsvc3.xml.XmlBaseObject;
 
@@ -92,15 +94,19 @@ public class MapSheetView {
 		if (this.view instanceof XlsFieldMapper)
 		{
 			Sheet links = ((XlsFieldMapper) this.view).getLinks();
-			int c = links.getColumns();
-			int r = links.getRows();
-			userProperties = new String[r][c];
-			for (int i = 0; i < links.getColumns(); i++){
-				Cell[] cells = links.getColumn(i);
-				for (int j = 0; j < cells.length; j++){
-					userProperties[j][i] = cells[j].getContents();
-				}
-			}
+			int cols = links.getRow(0).getLastCellNum();
+			int rows = links.getLastRowNum();
+			userProperties = new String[rows+1][cols+1];
+			int i = 0;
+			int j  = 0;
+			  for (Row row : links) {
+				  j = 0;
+			      for (Cell cell : row) {
+			    	  userProperties[i][j] = cell.getStringCellValue();
+			    	  j++;
+			      }
+				  i++;
+			  }
 			return userProperties;
 		}
 		return null;
