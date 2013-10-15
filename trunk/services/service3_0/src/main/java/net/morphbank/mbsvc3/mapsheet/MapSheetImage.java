@@ -10,9 +10,10 @@
  * 	Guillaume Jimenez - initial API and implementation
  ******************************************************************************/
 package net.morphbank.mbsvc3.mapsheet;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Sheet;
 
-import jxl.Cell;
-import jxl.Sheet;
 import net.morphbank.mbsvc3.xml.Extref;
 import net.morphbank.mbsvc3.xml.ObjectFactory;
 import net.morphbank.mbsvc3.xml.XmlBaseObject;
@@ -53,7 +54,11 @@ public class MapSheetImage {
 		xmlImage.setOriginalFileName(originalFileName);
 		xmlImage.addUserProperty("imageUrl", image.getValue(fields.getI_IMAGEURL()));
 		xmlImage.setImageType(getImageType(originalFileName));
-		xmlImage.setCreativeCommons(image.getValueFormula(fields.getI_CREATIVE_COMMONS()));
+		
+		//Oct 10, 2013 :: 3:18:28 PM :: sg11x
+		//xmlImage.setCreativeCommons(image.getValueFormula(fields.getI_CREATIVE_COMMONS()));
+				
+		xmlImage.setCreativeCommons(image.getValue(fields.getI_CREATIVE_COMMONS()));
 		xmlImage.setPhotographer(image.getValue(fields.getI_PHOTOGRAPHER()));
 		xmlImage.setCopyrightText(image.getValue(fields.getI_COPYRIGHT()));
 		if (image.getValue(fields.getI_ENCYCLOPEDIA_OF_LIFE()).equalsIgnoreCase("yes")) {
@@ -111,14 +116,19 @@ public class MapSheetImage {
 		if (this.image instanceof XlsFieldMapper)
 		{
 			Sheet links = ((XlsFieldMapper) this.image).getLinks();
-			int c = links.getColumns();
-			int r = links.getRows();
-			userProperties = new String[r][c];
-			for (int i = 0; i < links.getColumns(); i++){
-				Cell[] cells = links.getColumn(i);
-				for (int j = 0; j < cells.length; j++){
-					userProperties[j][i] = cells[j].getContents();
+			int cols = links.getRow(0).getLastCellNum();
+			int rows = links.getLastRowNum();
+			userProperties = new String[rows+1][cols+1];
+			
+			int i, j;
+			i = j = 0;
+			for (Row row : links) {
+				j = 0;
+				for (Cell cell : row) {
+					userProperties[i][j] = cell.getStringCellValue();
+					j++;
 				}
+				i++;
 			}
 			return userProperties;
 		}
