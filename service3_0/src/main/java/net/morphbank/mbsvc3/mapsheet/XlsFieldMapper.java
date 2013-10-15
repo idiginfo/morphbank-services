@@ -13,16 +13,23 @@ package net.morphbank.mbsvc3.mapsheet;
 
 import java.io.File;
 
-import jxl.Cell;
-import jxl.Sheet;
-import jxl.StringFormulaCell;
-import jxl.Workbook;
+import java.io.FileInputStream;
+import java.io.InputStream;
+
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.DateUtil;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
+
+
 
 public class XlsFieldMapper implements FieldMapper {
 
 	protected String[] headers = null; // is this right? declaring as public
 	protected String[] values = null; // to allow access to CsvTest.java
-	// String[] fieldNames = null;
+
 	private boolean stripQuotes = true;
 	private static final String SPLITTER = "\t";
 	private String splitter = SPLITTER;
@@ -36,14 +43,16 @@ public class XlsFieldMapper implements FieldMapper {
 
 	public XlsFieldMapper(String fileName) {
 		try {
+
 			this.fileName = fileName;
-			File file = new File(fileName);
-			Workbook workbook = Workbook.getWorkbook(file);
-			views = workbook.getSheet(0);
-			credentialSheet = workbook.getSheet(2);
-			links = workbook.getSheet(1);
+			InputStream inp = new FileInputStream(fileName);
+			Workbook workbook = WorkbookFactory.create(inp);
+			views = workbook.getSheetAt(0);
+			credentialSheet = workbook.getSheetAt(2);
+			links = workbook.getSheetAt(1);
 			readHeaders();
-			lastLine = views.getRows() - 1;
+			lastLine = views.getLastRowNum() - 1;
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -54,11 +63,30 @@ public class XlsFieldMapper implements FieldMapper {
 	}
 
 	public void readHeaders() {
-		numFields = views.getColumns();
+		
+		Row row = views.getRow(0); 
+		
+		numFields = views.getRow(0).getLastCellNum();
 		headers = new String[numFields];
-		for (int i = 0; i < numFields; i++) {
-			headers[i] = views.getCell(i, 0).getContents().toLowerCase();
+		
+		for (Cell cell : row) {
+			int index = cell.getColumnIndex();
+			switch(cell.getCellType())
+			{
+			case Cell.CELL_TYPE_STRING:
+				headers[index] = cell.getStringCellValue().toLowerCase();
+				break;
+			case Cell.CELL_TYPE_NUMERIC:
+				if (DateUtil.isCellDateFormatted(cell)) {
+					headers[index] = cell.getDateCellValue().toString();
+				}
+				else
+				{
+					headers[index] = Integer.toString((int)cell.getNumericCellValue());
+				}
+			}
 		}
+		
 		currentLine = 0;
 	}
 
@@ -73,7 +101,30 @@ public class XlsFieldMapper implements FieldMapper {
 	}
 
 	public String getValue(int index) {
-		return views.getCell(index, currentLine).getContents();
+		Cell cell = views.getRow(currentLine).getCell(index);
+		String retValue = "";
+		
+		switch(views.getRow(currentLine).getCell(index).getCellType())
+		{
+			case Cell.CELL_TYPE_NUMERIC:
+				if (DateUtil.isCellDateFormatted(cell)) {
+					retValue = cell.getDateCellValue().toString();
+				}
+				else
+				{
+					retValue =  Integer.toString((int) cell.getNumericCellValue());
+				}
+				break;
+				
+			case Cell.CELL_TYPE_STRING:
+				retValue = cell.getStringCellValue();
+				break;
+				
+			case Cell.CELL_TYPE_FORMULA:
+				retValue = cell.getCellFormula();
+				break;
+		}
+		return retValue;
 	}
 
 	public String getValue(String fieldName) {
@@ -91,14 +142,15 @@ public class XlsFieldMapper implements FieldMapper {
 		fieldName = fieldName.toLowerCase();
 		for (int i = 0; i < headers.length; i++) {
 			if (fieldName.equals(headers[i])) {
-				String test = views.getCell(i, currentLine).getType().toString();
-				if (views.getCell(i, currentLine).getType().toString().equalsIgnoreCase("String Formula")) {
-					StringFormulaCell formulaCell = (StringFormulaCell) views.getCell(i, currentLine);
-					return formulaCell.getContents();
+				
+				if(views.getRow(currentLine).getCell(i).getCellType() == Cell.CELL_TYPE_FORMULA)
+				{
+					return views.getRow(currentLine).getCell(i).getCellFormula();
 				}
+			}
+			
 				return getValue(i);
 			}
-		}
 		return "";
 	}
 
@@ -106,9 +158,11 @@ public class XlsFieldMapper implements FieldMapper {
 		fieldName = fieldName.toLowerCase();
 		for (int i = 0; i < headers.length; i++) {
 			if (fieldName.equals(headers[i])) {
-				Cell date = views.getCell(i, currentLine);
-				if (!date.getContents().equalsIgnoreCase("")) {
-					return views.getCell(i, currentLine);
+
+				Cell date = views.getRow(currentLine).getCell(i);
+				if(!date.getStringCellValue().equalsIgnoreCase(""))
+				{
+					return date;
 				}
 			}
 		}
