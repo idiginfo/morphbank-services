@@ -20,9 +20,9 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
-import jxl.Cell;
-import jxl.DateCell;
-import jxl.Sheet;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Sheet;
+
 import net.morphbank.MorphbankConfig;
 import net.morphbank.mbsvc3.mapdwca.DwcaFieldMapper;
 import net.morphbank.mbsvc3.mapdwca.DwcaFields;
@@ -77,9 +77,8 @@ public class MapSpreadsheetToXml {
 	private Date dateToPublish() {
 		if (fieldMapper instanceof XlsFieldMapper) {
 			Sheet credentials = ((XlsFieldMapper) fieldMapper).getCredentialSheet();
-			Cell date = credentials.getCell(1, 7);
-			DateCell dateCell = (DateCell) date; //get GMT time so there is a 5 hours difference with the excel file
-			return dateCell.getDate();
+			
+			return credentials.getRow(7).getCell(1).getDateCellValue();
 		}
 		Calendar nextYear = Calendar.getInstance();
 		nextYear.add(Calendar.DAY_OF_YEAR, DAYS_TO_PUBLISH);
@@ -199,12 +198,13 @@ public class MapSpreadsheetToXml {
 	}
 
 	private void getCredentials(XlsFieldMapper fieldMapper) {
-		userName = fieldMapper.getCredentialSheet().getCell(1, 1).getContents();
-		userId = getInteger(fieldMapper.getCredentialSheet().getCell(1, 2).getContents());
-		submitterName = fieldMapper.getCredentialSheet().getCell(1, 3).getContents();
-		submitterId = getInteger(fieldMapper.getCredentialSheet().getCell(1, 4).getContents());
-		groupName = fieldMapper.getCredentialSheet().getCell(1, 5).getContents();
-		groupId = getInteger(fieldMapper.getCredentialSheet().getCell(1, 6).getContents());
+		
+		userName = fieldMapper.getCredentialSheet().getRow(1).getCell(1).getStringCellValue();
+		userId = getInteger(fieldMapper.getCredentialSheet().getRow(2).getCell(1).getStringCellValue());
+		submitterName = fieldMapper.getCredentialSheet().getRow(3).getCell(1).getStringCellValue();
+		submitterId = (int)fieldMapper.getCredentialSheet().getRow(4).getCell(1).getNumericCellValue();
+		groupName = fieldMapper.getCredentialSheet().getRow(5).getCell(1).getStringCellValue();
+		groupId = getInteger(fieldMapper.getCredentialSheet().getRow(6).getCell(1).getStringCellValue());
 	}
 
 	private void getCredentials(DwcaFieldMapper fieldMapper) {
@@ -451,14 +451,14 @@ public class MapSpreadsheetToXml {
 	public static Date createDate(Cell cell) {
 		if (cell != null) {
 			try {
-				DateCell dateCell = (DateCell) cell;
-				return dateCell.getDate();
+				return cell.getDateCellValue();
 			}
 			catch(Exception e) { //show the cell coordinates
-				String error = "Date format ambiguous at row " + (cell.getRow() + 1) + 
-				" col " + getColumnId(cell.getColumn()) + ". Cell content: " + cell.getContents();
+
+				String error = "Date format ambiguous at row " + (cell.getRowIndex() + 1) + 
+				" col " + getColumnId(cell.getColumnIndex()) + ". Cell content: " + cell.getStringCellValue();
 				MorphbankConfig.SYSTEM_LOGGER.info(error);
-				return parseDate(cell.getContents());
+				return parseDate(cell.getStringCellValue());
 			}
 		}
 		return null;
