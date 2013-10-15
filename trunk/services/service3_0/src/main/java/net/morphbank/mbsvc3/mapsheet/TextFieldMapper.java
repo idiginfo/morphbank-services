@@ -12,8 +12,7 @@
 package net.morphbank.mbsvc3.mapsheet;
 
 import java.io.*;
-
-import jxl.Cell;
+import org.apache.poi.ss.usermodel.Cell;
 
 public class TextFieldMapper implements FieldMapper {
 
