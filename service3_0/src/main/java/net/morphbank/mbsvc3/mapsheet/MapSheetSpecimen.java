@@ -11,10 +11,10 @@
  ******************************************************************************/
 package net.morphbank.mbsvc3.mapsheet;
 
-import java.util.Map;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Sheet;
 
-import jxl.Cell;
-import jxl.Sheet;
 import net.morphbank.MorphbankConfig;
 import net.morphbank.mbsvc3.xml.*;
 
@@ -174,20 +174,28 @@ public class MapSheetSpecimen {
 		if (this.specimen instanceof XlsFieldMapper)
 		{
 			Sheet links = ((XlsFieldMapper) this.specimen).getLinks();
-			int c = links.getColumns();
-			if (c != 4) {
+			int cols = links.getRow(0).getLastCellNum();
+			if (cols != 4) {
 				MorphbankConfig.SYSTEM_LOGGER.info("Wrong number of colums in Excel spreadsheet.");
 				return null;
 			}
-			c = 4;
-			int r = links.getRows();
-			userProperties = new String[r][c];
-			for (int i = 0; i < links.getColumns(); i++){
-				Cell[] cells = links.getColumn(i);
-				for (int j = 0; j < cells.length; j++){
-					userProperties[j][i] = cells[j].getContents();
+			
+			cols = 4;
+			int rows = links.getLastRowNum();
+			userProperties = new String[rows+1][cols+1];
+			int i, j;
+			i = j = 0;
+			for (Row row : links) {
+				j = 0;
+				for (Cell cell : row) {
+					userProperties[i][j] = cell.getStringCellValue();
+					j++;
 				}
+				i++;
 			}
+			
+			
+			
 			return userProperties;
 		}
 		return null;
