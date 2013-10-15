@@ -11,8 +11,7 @@
  ******************************************************************************/
 package net.morphbank.mbsvc3.mapsheet;
 
-import jxl.Cell;
-import jxl.Sheet;
+import org.apache.poi.ss.usermodel.Cell;
 
 public interface FieldMapper {
 	
