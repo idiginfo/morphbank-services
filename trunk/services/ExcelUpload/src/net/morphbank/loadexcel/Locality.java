@@ -26,13 +26,8 @@ package net.morphbank.loadexcel;
 //                                                 /
 ////////////////////////////////////////////////////
 
-import java.io.*;
 import java.sql.*;
 import java.util.*;
-
-import javax.swing.*;
-import java.awt.*;
-import jxl.*;
 
 public class Locality {
 
