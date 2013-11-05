@@ -23,21 +23,27 @@ package net.morphbank.loadexcel;
 //                                                             /
 //created by: Karolina Maneva-Jakimoska                         /
 //date     : Jan 20 2006                                       /
-//modified : September 29 2006                                 /
-////////////////////////////////////////////////////////////////
+//modified : September 29 2006
+//Modified by: Shantanu Gautam				           			//
+//date created:  November 05 2013                      			//
+////////////////////////////////////////////////////////////////////////
 
-import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.SimpleDateFormat;
-import jxl.Cell;
-import jxl.DateCell;
-import jxl.Sheet;
-import jxl.StringFormulaCell;
-import jxl.Workbook;
+
+
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.DateUtil;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
+
 
 // start of public class SheetReader                               
 public class SheetReader {
@@ -81,17 +87,20 @@ public class SheetReader {
 		metadata = null;
 
 		try {
-			Workbook workbook = Workbook.getWorkbook(new File(fname));
+			
+			InputStream inp = new FileInputStream(fname);
+			Workbook workbook = WorkbookFactory.create(inp);
+
 			// extract the sheets from a formed workbook
-			imageCollectionSheet = workbook.getSheet(0);
-			imageSheet = workbook.getSheet(1);
-			viewSheet = workbook.getSheet(2);
-			taxonSheet = workbook.getSheet(4);
-			specimenSheet = workbook.getSheet(3);
-			localitySheet = workbook.getSheet(5);
-			extLinkSheet = workbook.getSheet(6);
-			supportDataSheet = workbook.getSheet(7);
-			protectedDataSheet = workbook.getSheet(9);
+			imageCollectionSheet = workbook.getSheetAt(0);
+			imageSheet = workbook.getSheetAt(1);
+			viewSheet = workbook.getSheetAt(2);
+			taxonSheet = workbook.getSheetAt(4);
+			specimenSheet = workbook.getSheetAt(3);
+			localitySheet = workbook.getSheetAt(5);
+			extLinkSheet = workbook.getSheetAt(6);
+			supportDataSheet = workbook.getSheetAt(7);
+			protectedDataSheet = workbook.getSheetAt(9);
 			readHeaders();
 			setReleaseDate();
 
@@ -103,18 +112,24 @@ public class SheetReader {
 	public String getEntry(String sheetName, int col, int row) {
 		Sheet sheet = getSheet(sheetName);
 		if (sheet == null) return "";
-		Cell cell = sheet.getCell(col, row);
-		if (cell.getType().toString().equalsIgnoreCase("Date")) 
+
+		Cell cell = sheet.getRow(row).getCell(col);
+		switch(cell.getCellType())
 		{
-			DateCell datecell = (DateCell) cell;
-			SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-			return format.format(datecell.getDate());
+			case Cell.CELL_TYPE_NUMERIC:
+				if (DateUtil.isCellDateFormatted(cell)) {
+					SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+					return dateFormat.format(cell.getDateCellValue());
+				}
+				break;
+				
+			case Cell.CELL_TYPE_FORMULA:
+				return cell.getCellFormula();
+				
+			default:
+				break;
 		}
-		if (cell.getType().toString().equalsIgnoreCase("String Formula")) {
-			StringFormulaCell formulaCell = (StringFormulaCell) cell;
-			return formulaCell.getContents().trim();
-		}
-		return sheet.getCell(col, row).getContents().trim();
+		return cell.getStringCellValue();
 	}
 
 	public Sheet getSheet(String sheetName) {
@@ -142,45 +157,46 @@ public class SheetReader {
 
 	
 	public void readHeaders() {
-		numFields = viewSheet.getColumns();
+		//Oct 24, 2013 :: 1:48:54 PM :: sg11x
+		numFields = viewSheet.getRow(0).getLastCellNum();
 		headersView = new String[numFields];
 		for (int i = 0; i < numFields; i++) {
-			headersView[i] = viewSheet.getCell(i, 0).getContents().toLowerCase().trim();
+			headersView[i] = viewSheet.getRow(0).getCell(i).getStringCellValue().toLowerCase().trim();
 		}
-		numFields = imageSheet.getColumns();
+		numFields = imageSheet.getRow(0).getLastCellNum();
 		headersImage = new String[numFields];
 		for (int i = 0; i < numFields; i++) {
-			headersImage[i] = imageSheet.getCell(i, 0).getContents().toLowerCase().trim();
+			headersImage[i] = imageSheet.getRow(0).getCell(i).getStringCellValue().toLowerCase().trim();
 		}
-		numFields = specimenSheet.getColumns();
+		numFields = specimenSheet.getRow(0).getLastCellNum();
 		headersSpecimen = new String[numFields];
 		for (int i = 0; i < numFields; i++) {
-			headersSpecimen[i] = specimenSheet.getCell(i, 0).getContents().toLowerCase().trim();
+			headersSpecimen[i] = specimenSheet.getRow(0).getCell(i).getStringCellValue().toLowerCase().trim();
 		}
-		numFields = localitySheet.getColumns();
+		numFields = localitySheet.getRow(0).getLastCellNum();
 		headersLocality = new String[numFields];
 		for (int i = 0; i < numFields; i++) {
-			headersLocality[i] = localitySheet.getCell(i, 0).getContents().toLowerCase().trim();
+			headersLocality[i] = localitySheet.getRow(0).getCell(i).getStringCellValue().toLowerCase().trim();
 		}
-		numFields = taxonSheet.getColumns();
+		numFields = taxonSheet.getRow(0).getLastCellNum();
 		headersTaxon = new String[numFields];
 		for (int i = 0; i < numFields; i++) {
-			headersTaxon[i] = taxonSheet.getCell(i, 0).getContents().toLowerCase().trim();
+			headersTaxon[i] = taxonSheet.getRow(0).getCell(i).getStringCellValue().toLowerCase().trim();
 		}
-		numFields = extLinkSheet.getColumns();
+		numFields = extLinkSheet.getRow(0).getLastCellNum();
 		headersExtLink = new String[numFields];
 		for (int i = 0; i < numFields; i++) {
-			headersExtLink[i] = extLinkSheet.getCell(i, 0).getContents().toLowerCase().trim();
+			headersExtLink[i] = extLinkSheet.getRow(0).getCell(i).getStringCellValue().toLowerCase().trim();
 		}
-		numFields = supportDataSheet.getColumns();
+		numFields = supportDataSheet.getRow(0).getLastCellNum();
 		headersSupportData = new String[numFields];
 		for (int i = 0; i < numFields; i++) {
-			headersSupportData[i] = supportDataSheet.getCell(i, 0).getContents().toLowerCase().trim();
+			headersSupportData[i] = supportDataSheet.getRow(0).getCell(i).getStringCellValue().toLowerCase().trim();
 		}
-		numFields = protectedDataSheet.getColumns();
+		numFields = protectedDataSheet.getRow(0).getLastCellNum();
 		headersProtectedData = new String[numFields];
 		for (int i = 0; i < numFields; i++) {
-			headersProtectedData[i] = protectedDataSheet.getCell(i, 0).getContents().toLowerCase().trim();
+			headersProtectedData[i] = protectedDataSheet.getRow(0).getCell(i).getStringCellValue().toLowerCase().trim();
 		}
 	}
 	
@@ -236,7 +252,7 @@ public class SheetReader {
 	public int GetColumns(String sheetName) {
 		Sheet sheet = getSheet(sheetName);
 		if (sheet == null) return 0;
-		return sheet.getColumns();
+		return sheet.getRow(0).getLastCellNum();
 	}
 
 	/**
@@ -248,7 +264,7 @@ public class SheetReader {
 	public int GetRows(String sheetName) {
 		Sheet sheet = getSheet(sheetName);
 		if (sheet == null) return 0;
-		return sheet.getRows();
+		return sheet.getLastRowNum() - 1;
 	}
 
 	public String getReleaseDate() {
@@ -262,15 +278,10 @@ public class SheetReader {
 	 * @return
 	 */
 	public String setReleaseDate() {
-//	public Date setReleaseDate() {
-		if (imageCollectionSheet.getCell(0, 6).getContents().equals("Release date (yyyy-mm-dd):")
-				&& !imageCollectionSheet.getCell(1, 6).equals("")) {
-//			DateCell datecell = (DateCell) imageCollectionSheet.getCell(1, 6);
-//			SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-//			String releaseDateStr = imageCollectionSheet.getCell(1, 6).getContents().trim().replaceAll(" ", "-").substring(0,10);
-//			releaseDate = Date.valueOf(format.format(datecell.getDate()));
-			releaseDate = imageCollectionSheet.getCell(1, 6).getContents();
-		} 
+		if (imageCollectionSheet.getRow(6).getCell(0).equals("Release date (yyyy-mm-dd):")
+				&& !imageCollectionSheet.getRow(6).getCell(1).equals("")){
+					releaseDate = imageCollectionSheet.getRow(6).getCell(1).getStringCellValue();
+				}
 		return releaseDate;
 	}
 
@@ -363,7 +374,9 @@ public class SheetReader {
 		String personalGroupMessage = "The contributor does not have a personal group";
 		int groupId = 0;
 		String temp = "";
-		String group = imageCollectionSheet.getCell(1, 7).getContents();
+		
+		String group = imageCollectionSheet.getRow(7).getCell(1).getStringCellValue();
+		
 		statement = LoadData.getStatement();
 		if (group.length() != 0) {
 			temp = "SELECT id FROM Groups WHERE groupName=?";
@@ -403,7 +416,8 @@ public class SheetReader {
 		} else {
 			// if group not specified personal group of the contributor will be
 			// used
-			String user = imageCollectionSheet.getCell(1, 4).getContents();
+			String user = imageCollectionSheet.getRow(4).getCell(1).getStringCellValue();
+			
 			temp = "SELECT id FROM Groups WHERE groupName=\"" + user + "'s group" + "\"";
 			// System.out.println(temp);
 			try {
@@ -495,7 +509,8 @@ public class SheetReader {
 	 * @return
 	 */
 	public String GetInstitutionLink() {
-		return imageCollectionSheet.getCell(1, 9).getContents().trim();
+		return imageCollectionSheet.getRow(9).getCell(1).getStringCellValue().trim();
+		
 	}
 
 	/**
@@ -505,7 +520,7 @@ public class SheetReader {
 	 * @return
 	 */
 	public String GetInstitutionName() {
-		return imageCollectionSheet.getCell(1, 8).getContents().trim();
+		return imageCollectionSheet.getRow(8).getCell(1).getStringCellValue().trim(); 
 	}
 
 	/**
@@ -515,8 +530,7 @@ public class SheetReader {
 	 * @return
 	 */
 	public String GetProjectLink1() {
-
-		return imageCollectionSheet.getCell(1, 11).getContents().trim();
+		return imageCollectionSheet.getRow(11).getCell(1).getStringCellValue().trim();
 	}
 
 	/**
@@ -526,7 +540,7 @@ public class SheetReader {
 	 * @return
 	 */
 	public String GetProjectLink2() {
-		return imageCollectionSheet.getCell(1, 13).getContents().trim();
+		return imageCollectionSheet.getRow(13).getCell(1).getStringCellValue().trim();
 	}
 
 	/**
@@ -535,7 +549,7 @@ public class SheetReader {
 	 * @return
 	 */
 	public String GetProjectName1() {
-		return imageCollectionSheet.getCell(1, 10).getContents().trim();
+		return imageCollectionSheet.getRow(10).getCell(1).getStringCellValue().trim();
 	}
 
 	/**
@@ -544,6 +558,6 @@ public class SheetReader {
 	 * @return
 	 */
 	public String GetProjectName2() {
-		return imageCollectionSheet.getCell(1, 12).getContents().trim();
+		return imageCollectionSheet.getRow(12).getCell(1).getStringCellValue().trim();
 	}
 }
