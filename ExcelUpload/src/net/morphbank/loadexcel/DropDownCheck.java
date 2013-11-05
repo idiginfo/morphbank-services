@@ -1,7 +1,8 @@
 package net.morphbank.loadexcel;
 
-import jxl.Cell;
-import jxl.Sheet;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
 
 public class DropDownCheck {
 
@@ -27,6 +28,31 @@ public class DropDownCheck {
 		isXlsValid &= this.isMyViewOk();
 		return isXlsValid;
 	}
+	
+	
+	/**
+	 * Convenient method to get all columns of a particular 
+	 * 	column number from a specified sheet 
+	 * 
+	 * @return array of cell
+	 */
+	private Cell[] getColumn(Sheet sheet, int columnNum){
+		int numOfRows = sheet.getLastRowNum();
+		Cell cell = null;
+		Cell[] destCell = new Cell[numOfRows];
+		int locIx=0;
+		for (Row row : sheet) {
+			cell = null;
+			cell =  row.getCell(columnNum);
+			if(cell != null) {
+				if(locIx==numOfRows){
+					break;
+				}
+				destCell[locIx++] = cell;
+			}
+		}
+		return destCell;
+	}
 
 	/**
 	 * The selected value from the dropdown menu needs to match the list
@@ -38,16 +64,16 @@ public class DropDownCheck {
 	public boolean isSpecimenVSLocalityOk() {
 		Sheet specimenSheet = sheetReader.getSheet("Specimen");
 		Sheet localitySheet = sheetReader.getSheet("Locality");
+		
 		// build a list of localities in Locality
 		int colLocalityName = sheetReader.getColumnNumberByName("Locality",
 				"Locality Name [Auto generated--Do not change!]");
-		Cell[] localityNamesLocality = localitySheet.getColumn(colLocalityName);
+		Cell[] localityNamesLocality = getColumn(localitySheet, colLocalityName);
+		
 		// build a list of localities in Specimen
 		int colSpecimenLocality = sheetReader.getColumnNumberByName("Specimen",
 				"Locality");
-		Cell[] localityNamesSpecimen = specimenSheet
-				.getColumn(colSpecimenLocality);
-
+		Cell[] localityNamesSpecimen = getColumn(specimenSheet, colSpecimenLocality);
 		return this.testColumns(localityNamesSpecimen, localityNamesLocality,
 				"Specimen", "Locality", null);
 	}
@@ -65,12 +91,12 @@ public class DropDownCheck {
 		// build a list of specimens in Specimen
 		int colSpecimenName = sheetReader.getColumnNumberByName("Specimen",
 				ExcelTools.COL_SPECIMEN_DESCRIPTION);
-		Cell[] specimenNamesSpecimen = specimenSheet.getColumn(colSpecimenName);
+		Cell[] specimenNamesSpecimen = getColumn(specimenSheet, colSpecimenName);
+		
 		// build a list of specimen in Images
 		int colImageSpecimen = sheetReader.getColumnNumberByName("Image",
 				ExcelTools.COL_IMAGE_SPECIMEN_DESCRIPTION);
-		Cell[] specimenNamesImage = imageSheet.getColumn(colImageSpecimen);
-
+		Cell[] specimenNamesImage = getColumn(imageSheet, colImageSpecimen);
 		return this.testColumns(specimenNamesImage, specimenNamesSpecimen,
 				"Image", "Specimen", null);
 	}
@@ -88,12 +114,12 @@ public class DropDownCheck {
 		// build a list of views in MyView
 		int colViewName = sheetReader.getColumnNumberByName("View",
 				"My View Name");
-		Cell[] viewNamesView = viewSheet.getColumn(colViewName);
+		Cell[] viewNamesView = getColumn(viewSheet, colViewName);
+		
 		// build a list of views in Images
 		int colImageView = sheetReader.getColumnNumberByName("Image",
 				"My View Name");
-		Cell[] viewNamesImage = imageSheet.getColumn(colImageView);
-
+		Cell[] viewNamesImage = getColumn(imageSheet, colImageView);
 		return this.testColumns(viewNamesImage, viewNamesView, "Image", "View", null);
 	}
 
@@ -120,12 +146,14 @@ public class DropDownCheck {
 	}
 
 	private boolean checkColumnsData(Sheet sheet1, Sheet sheet2, String col) {
-		String sheet1Name = sheet1.getName();
-		String sheet2Name = sheet2.getName();
+		String sheet1Name = sheet1.getSheetName();
+		String sheet2Name = sheet2.getSheetName();
 		int col1Num = sheetReader.getColumnNumberByName(sheet1Name, col);
-		Cell[] col1Cells = sheet1.getColumn(col1Num);
+		Cell[] col1Cells = getColumn(sheet1, col1Num);
+		
 		int col2Num = sheetReader.getColumnNumberByName(sheet2Name, col);
-		Cell[] col2Cells = sheet2.getColumn(col2Num);
+		Cell[] col2Cells = getColumn(sheet2, col2Num);
+
 		return this.testColumns(col1Cells, col2Cells, sheet1Name, sheet2Name, col);
 	}
 
@@ -153,11 +181,11 @@ public class DropDownCheck {
 		}
 		for (int i = 1; i < col1.length; i++) {
 			if (!col1Sheet.equalsIgnoreCase(ExcelTools.VIEW_SHEET) 
-					|| col1[i].getContents().length() > 1 && !col1[i].getContents().equalsIgnoreCase(col2Header)) {
+					|| col1[i].getStringCellValue().length() > 1 && !col1[i].getStringCellValue().equalsIgnoreCase(col2Header)) {
 				boolean test = false;
 				for (int j = 1; j < col2.length; j++) {
-					test |= col1[i].getContents().equals(col2[j].getContents());
-					if (col1[i].getContents().length() < 1 || test) {
+					test |= col1[i].getStringCellValue().equals(col2[j].getStringCellValue());
+					if (col1[i].getStringCellValue().length() < 1 || test) {
 						test = true;
 						break;
 					}
