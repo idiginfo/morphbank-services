@@ -19,14 +19,18 @@ package net.morphbank.loadexcel;
 //                                                             /
 //crated by: Karolina Maneva-Jakimoska                         /
 //date     : July 2 2007                                       /
+//Modified by: Shantanu Gautam				          		   /
+//date created:  November 05 2013                      		   /
 ////////////////////////////////////////////////////////////////
 
-import java.io.File;
-import java.util.Date;
+
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.sql.*;
-import javax.swing.*;
-import java.awt.*;
-import jxl.*;
+
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 
 // start of public class SheetReader                               
 public class ReadExternalLinks {
@@ -47,9 +51,11 @@ public class ReadExternalLinks {
 		metadata = null;
 
 		try {
-			Workbook workbook = Workbook.getWorkbook(new File(fname));
+			InputStream inp = new FileInputStream(fname);
+			Workbook workbook = WorkbookFactory.create(inp);
+			
 			// extract the sheets from a formed workbook
-			Links = workbook.getSheet(0);
+			Links = workbook.getSheetAt(0);
 
 		} catch (Exception ioexception) {
 			ioexception.printStackTrace();
@@ -64,13 +70,13 @@ public class ReadExternalLinks {
 	// public method for retrieving the number of columns
 	public int GetColumns(Sheet sheet) {
 		Sheet temp = sheet;
-		return temp.getColumns();
+		return temp.getRow(0).getLastCellNum();
 	}
 
 	// public method for retrieving the number of rows
 	public int GetRows(Sheet sheet) {
 		Sheet temp = sheet;
-		return temp.getRows();
+		return temp.getLastRowNum();
 	}
 
 }// end of public class ReadExternalLinks
