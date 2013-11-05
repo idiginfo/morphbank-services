@@ -20,7 +20,8 @@ package net.morphbank.loadexcel;
 //                                                              /
 //created by: Karolina Maneva-Jakimoska                         /
 //      date: March 23 2007                                     /
-//                                                              /
+//Modified by: Shantanu Gautam				           			//
+//date created:  November 05 2013                      			//
 /////////////////////////////////////////////////////////////////
 
 import java.io.*;
@@ -33,8 +34,6 @@ import java.util.*;
 
 import javax.swing.*;
 import java.awt.*;
-import jxl.*;
-
 public class TaxonData {
 	public static String MYTYPE = "Taxon";
 	public static HashMap<String, Integer> taxonIds = new HashMap<String, Integer>();
