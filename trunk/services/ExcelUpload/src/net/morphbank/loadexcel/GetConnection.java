@@ -23,6 +23,8 @@ package net.morphbank.loadexcel;
 //                                                     //
 //created by: Karolina Maneva-Jakimoska                //
 //date:       January 18 2006                          //
+//Modified by: Shantanu Gautam				           //
+//date created:  November 05 2013                      //
 /////////////////////////////////////////////////////////
 
 import java.sql.Connection;
@@ -62,7 +64,7 @@ public class GetConnection {
 		try {
 			if (port == null || port.equals("")) port = "3306";
 			Class.forName("com.mysql.jdbc.Driver").newInstance();
-			//System.out.println("The Driver has been loaded");
+			System.out.println("The Driver has been loaded");
 			String connString = "jdbc:mysql://" + dbHost + ":" + port + "/" + dbName
 					+ "?noAccessToProcedureBodies=true"
 					+ "&useUnicode=true&characterEncoding=UTF-8";
@@ -74,6 +76,7 @@ public class GetConnection {
 			LoadData.log("Connection was established to "+dbName+" on "+dbHost);
 		} catch (Exception e) {
 			e.printStackTrace();
+			System.out.println("com.mysql.jdbc.Driver Could not be loaded !!");
 //			System.exit(1);
 		}
 		return conn;
