@@ -27,7 +27,7 @@ package net.morphbank.loadexcel;
 //Modified by: Shantanu Gautam				           			//
 //date created:  November 05 2013                      			//
 ////////////////////////////////////////////////////////////////////////
-
+ 
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.sql.PreparedStatement;
@@ -178,52 +178,14 @@ public class SheetReader {
 	}
 
 	public void readHeaders() {
-		// Oct 24, 2013 :: 1:48:54 PM :: sg11x
 		headersView = getHeaders(viewSheet);
-
-		// TODO fix the rest of these, as above
-		numFields = imageSheet.getRow(0).getLastCellNum();
-		headersImage = new String[numFields];
-		for (int i = 0; i < numFields; i++) {
-			headersImage[i] = imageSheet.getRow(0).getCell(i)
-					.getStringCellValue().toLowerCase().trim();
-		}
-		numFields = specimenSheet.getRow(0).getLastCellNum();
-		headersSpecimen = new String[numFields];
-		for (int i = 0; i < numFields; i++) {
-			headersSpecimen[i] = specimenSheet.getRow(0).getCell(i)
-					.getStringCellValue().toLowerCase().trim();
-		}
-		numFields = localitySheet.getRow(0).getLastCellNum();
-		headersLocality = new String[numFields];
-		for (int i = 0; i < numFields; i++) {
-			headersLocality[i] = localitySheet.getRow(0).getCell(i)
-					.getStringCellValue().toLowerCase().trim();
-		}
-		numFields = taxonSheet.getRow(0).getLastCellNum();
-		headersTaxon = new String[numFields];
-		for (int i = 0; i < numFields; i++) {
-			headersTaxon[i] = taxonSheet.getRow(0).getCell(i)
-					.getStringCellValue().toLowerCase().trim();
-		}
-		numFields = extLinkSheet.getRow(0).getLastCellNum();
-		headersExtLink = new String[numFields];
-		for (int i = 0; i < numFields; i++) {
-			headersExtLink[i] = extLinkSheet.getRow(0).getCell(i)
-					.getStringCellValue().toLowerCase().trim();
-		}
-		numFields = supportDataSheet.getRow(0).getLastCellNum();
-		headersSupportData = new String[numFields];
-		for (int i = 0; i < numFields; i++) {
-			headersSupportData[i] = supportDataSheet.getRow(0).getCell(i)
-					.getStringCellValue().toLowerCase().trim();
-		}
-		numFields = protectedDataSheet.getRow(0).getLastCellNum();
-		headersProtectedData = new String[numFields];
-		for (int i = 0; i < numFields; i++) {
-			headersProtectedData[i] = protectedDataSheet.getRow(0).getCell(i)
-					.getStringCellValue().toLowerCase().trim();
-		}
+		headersImage = getHeaders(imageSheet);
+		headersSpecimen = getHeaders(specimenSheet);
+		headersLocality = getHeaders(localitySheet);
+		headersTaxon = getHeaders(taxonSheet);
+		headersExtLink = getHeaders(extLinkSheet);
+		headersSupportData = getHeaders(supportDataSheet);
+		headersProtectedData = getHeaders(protectedDataSheet);
 	}
 
 	private String[] getHeaders(String sheet) {
@@ -483,7 +445,7 @@ public class SheetReader {
 	}// end of GetGroupId
 
 	/**
-	 * public get method that retreives the submitterId
+	 * public get method that retrieves the submitterId
 	 * 
 	 * @return
 	 */
