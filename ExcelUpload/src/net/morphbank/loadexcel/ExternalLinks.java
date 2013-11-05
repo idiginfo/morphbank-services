@@ -22,16 +22,13 @@ package net.morphbank.loadexcel;
 //created by: Karolina Maneva-Jakimoska                 /
 //date created:  October 03 2006                        /
 //                                                      /
+//Modified by: Shantanu Gautam				           //
+//date created:  November 05 2013                      //
 /////////////////////////////////////////////////////////
 
-import java.io.*;
 import java.sql.*;
-import java.util.*;
 import java.util.List;
 
-import javax.swing.*;
-import java.awt.*;
-import jxl.*;
 
 public class ExternalLinks {
 	final static String MYTYPE = "ExternalLinks";
