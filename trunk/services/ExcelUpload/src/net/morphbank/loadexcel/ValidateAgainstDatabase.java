@@ -6,7 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
-import jxl.Sheet;
+import org.apache.poi.ss.usermodel.Sheet;
 
 /**
  * Use this class to add more tests against the database
@@ -222,9 +222,10 @@ public class ValidateAgainstDatabase {
 	 */
 	public boolean checkCredentials(){
 		boolean credentialsOK = true;
+
 		Sheet imageCollection = sheetReader.getSheet(ExcelTools.IMAGE_COLLECTION_SHEET);
-		String groupName = imageCollection.getCell(1, 7).getContents();
-		String userName = imageCollection.getCell(1, 4).getContents();
+		String groupName = imageCollection.getRow(7).getCell(1).getStringCellValue();  
+		String userName = imageCollection.getRow(4).getCell(1).getStringCellValue();   
 		String grpStmt = "SELECT id FROM Groups WHERE groupName=?";
 		String userStmt = "SELECT id FROM User WHERE uin=?";
 		credentialsOK &= execStmt(grpStmt, "group name", groupName);
@@ -242,6 +243,9 @@ public class ValidateAgainstDatabase {
 	 */
 	public boolean execStmt(String stmt, String field, String value) {
 		try {
+			if(conn==null){
+				return false;
+			}
 			PreparedStatement getStmt = conn
 					.prepareStatement(stmt);
 			getStmt.setString(1, value);
