@@ -35,15 +35,15 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
-
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
-
 
 // start of public class SheetReader                               
 public class SheetReader {
@@ -57,25 +57,25 @@ public class SheetReader {
 	private Sheet extLinkSheet;
 	private Sheet imageCollectionSheet;
 	private Sheet protectedDataSheet;
-	
+
 	private String fname;
 	private GetConnection connect = null;
 	private ResultSet result;
 	private Statement statement;
 	private ResultSetMetaData metadata;
-//	private java.sql.Date releaseDate = null;
+	// private java.sql.Date releaseDate = null;
 	private String releaseDate;
 
 	protected String[] headersView = null;
-	protected String[] headersImage= null;
+	protected String[] headersImage = null;
 	protected String[] headersSpecimen = null;
-	protected String[] headersLocality= null;
+	protected String[] headersLocality = null;
 	protected String[] headersTaxon = null;
 	protected String[] headersExtLink = null;
 	protected String[] headersSupportData = null;
 	protected String[] headersProtectedData = null;
 	int numFields;
-	
+
 	// constructor for the class SheetReader;
 	// it takes the file name as a parameter
 	public SheetReader(String filename, GetConnection conn) {
@@ -87,7 +87,7 @@ public class SheetReader {
 		metadata = null;
 
 		try {
-			
+
 			InputStream inp = new FileInputStream(fname);
 			Workbook workbook = WorkbookFactory.create(inp);
 
@@ -109,45 +109,57 @@ public class SheetReader {
 		}
 	}// end of SheetReader constructor
 
+	static final NumberFormat INTEGER_FORMATTER = NumberFormat
+			.getIntegerInstance();
+	static final NumberFormat DOUBLE_FORMATTER = new DecimalFormat("0.0##");
+
 	public String getEntry(String sheetName, int col, int row) {
 		Sheet sheet = getSheet(sheetName);
-		if (sheet == null) return "";
+		if (sheet == null)
+			return "";
 
 		Cell cell = sheet.getRow(row).getCell(col);
-		switch(cell.getCellType())
-		{
-			case Cell.CELL_TYPE_NUMERIC:
-				if (DateUtil.isCellDateFormatted(cell)) {
-					SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-					return dateFormat.format(cell.getDateCellValue());
-				}
-				break;
-				
-			case Cell.CELL_TYPE_FORMULA:
-				return cell.getCellFormula();
-				
-			default:
-				break;
+		if (cell.getCellType() != Cell.CELL_TYPE_NUMERIC) {
+			return cell.getStringCellValue();
 		}
-		return cell.getStringCellValue();
+		// must be numeric
+		// Date
+		if (DateUtil.isCellDateFormatted(cell)) {
+			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+			return dateFormat.format(cell.getDateCellValue());
+		}
+		double value = cell.getNumericCellValue();
+		if ((value % 1) == 0) {
+			// integer
+			return INTEGER_FORMATTER.format(value);
+		}
+		// float
+		return DOUBLE_FORMATTER.format(value);
 	}
 
 	public Sheet getSheet(String sheetName) {
 		if ("View".equals(sheetName) || sheetName.equals(ExcelTools.VIEW_SHEET)) {
 			return viewSheet;
-		} else if ("Specimen".equals(sheetName) || sheetName.equals(ExcelTools.SPECIMEN_SHEET)) {
+		} else if ("Specimen".equals(sheetName)
+				|| sheetName.equals(ExcelTools.SPECIMEN_SHEET)) {
 			return specimenSheet;
-		} else if ("Image".equals(sheetName) || sheetName.equals(ExcelTools.IMAGE_SHEET)) {
+		} else if ("Image".equals(sheetName)
+				|| sheetName.equals(ExcelTools.IMAGE_SHEET)) {
 			return imageSheet;
-		} else if ("Locality".equals(sheetName) || sheetName.equals(ExcelTools.LOCALITY_SHEET)) {
+		} else if ("Locality".equals(sheetName)
+				|| sheetName.equals(ExcelTools.LOCALITY_SHEET)) {
 			return localitySheet;
-		} else if ("SupportData".equals(sheetName) || sheetName.equals(ExcelTools.SUPPORTING_DATA_SHEET)) {
+		} else if ("SupportData".equals(sheetName)
+				|| sheetName.equals(ExcelTools.SUPPORTING_DATA_SHEET)) {
 			return supportDataSheet;
-		} else if ("ImageCollection".equals(sheetName) || sheetName.equals(ExcelTools.IMAGE_COLLECTION_SHEET)) {
+		} else if ("ImageCollection".equals(sheetName)
+				|| sheetName.equals(ExcelTools.IMAGE_COLLECTION_SHEET)) {
 			return imageCollectionSheet;
-		} else if ("Taxon".equals(sheetName) || sheetName.equals(ExcelTools.SPECIMEN_TAXON_DATA_SHEET)) {
+		} else if ("Taxon".equals(sheetName)
+				|| sheetName.equals(ExcelTools.SPECIMEN_TAXON_DATA_SHEET)) {
 			return taxonSheet;
-		} else if ("ExternalLinks".equals(sheetName) || sheetName.equals(ExcelTools.EXT_LINK_SHEET)) {
+		} else if ("ExternalLinks".equals(sheetName)
+				|| sheetName.equals(ExcelTools.EXT_LINK_SHEET)) {
 			return extLinkSheet;
 		} else if (sheetName.equals(ExcelTools.PROTECTED_DATA_SHEET)) {
 			return protectedDataSheet;
@@ -155,75 +167,97 @@ public class SheetReader {
 		return null;
 	}
 
-	
-	public void readHeaders() {
-		//Oct 24, 2013 :: 1:48:54 PM :: sg11x
-		numFields = viewSheet.getRow(0).getLastCellNum();
-		headersView = new String[numFields];
+	public static String[] getHeaders(Sheet sheet) {
+		int numFields = sheet.getRow(0).getLastCellNum();
+		String[] headers = new String[numFields];
 		for (int i = 0; i < numFields; i++) {
-			headersView[i] = viewSheet.getRow(0).getCell(i).getStringCellValue().toLowerCase().trim();
+			headers[i] = sheet.getRow(0).getCell(i).getStringCellValue()
+					.toLowerCase().trim();
 		}
+		return headers;
+	}
+
+	public void readHeaders() {
+		// Oct 24, 2013 :: 1:48:54 PM :: sg11x
+		headersView = getHeaders(viewSheet);
+
+		// TODO fix the rest of these, as above
 		numFields = imageSheet.getRow(0).getLastCellNum();
 		headersImage = new String[numFields];
 		for (int i = 0; i < numFields; i++) {
-			headersImage[i] = imageSheet.getRow(0).getCell(i).getStringCellValue().toLowerCase().trim();
+			headersImage[i] = imageSheet.getRow(0).getCell(i)
+					.getStringCellValue().toLowerCase().trim();
 		}
 		numFields = specimenSheet.getRow(0).getLastCellNum();
 		headersSpecimen = new String[numFields];
 		for (int i = 0; i < numFields; i++) {
-			headersSpecimen[i] = specimenSheet.getRow(0).getCell(i).getStringCellValue().toLowerCase().trim();
+			headersSpecimen[i] = specimenSheet.getRow(0).getCell(i)
+					.getStringCellValue().toLowerCase().trim();
 		}
 		numFields = localitySheet.getRow(0).getLastCellNum();
 		headersLocality = new String[numFields];
 		for (int i = 0; i < numFields; i++) {
-			headersLocality[i] = localitySheet.getRow(0).getCell(i).getStringCellValue().toLowerCase().trim();
+			headersLocality[i] = localitySheet.getRow(0).getCell(i)
+					.getStringCellValue().toLowerCase().trim();
 		}
 		numFields = taxonSheet.getRow(0).getLastCellNum();
 		headersTaxon = new String[numFields];
 		for (int i = 0; i < numFields; i++) {
-			headersTaxon[i] = taxonSheet.getRow(0).getCell(i).getStringCellValue().toLowerCase().trim();
+			headersTaxon[i] = taxonSheet.getRow(0).getCell(i)
+					.getStringCellValue().toLowerCase().trim();
 		}
 		numFields = extLinkSheet.getRow(0).getLastCellNum();
 		headersExtLink = new String[numFields];
 		for (int i = 0; i < numFields; i++) {
-			headersExtLink[i] = extLinkSheet.getRow(0).getCell(i).getStringCellValue().toLowerCase().trim();
+			headersExtLink[i] = extLinkSheet.getRow(0).getCell(i)
+					.getStringCellValue().toLowerCase().trim();
 		}
 		numFields = supportDataSheet.getRow(0).getLastCellNum();
 		headersSupportData = new String[numFields];
 		for (int i = 0; i < numFields; i++) {
-			headersSupportData[i] = supportDataSheet.getRow(0).getCell(i).getStringCellValue().toLowerCase().trim();
+			headersSupportData[i] = supportDataSheet.getRow(0).getCell(i)
+					.getStringCellValue().toLowerCase().trim();
 		}
 		numFields = protectedDataSheet.getRow(0).getLastCellNum();
 		headersProtectedData = new String[numFields];
 		for (int i = 0; i < numFields; i++) {
-			headersProtectedData[i] = protectedDataSheet.getRow(0).getCell(i).getStringCellValue().toLowerCase().trim();
+			headersProtectedData[i] = protectedDataSheet.getRow(0).getCell(i)
+					.getStringCellValue().toLowerCase().trim();
 		}
 	}
-	
+
 	private String[] getHeaders(String sheet) {
-		if (sheet.equalsIgnoreCase("View") || sheet.equalsIgnoreCase(ExcelTools.VIEW_SHEET)) 
+		if (sheet.equalsIgnoreCase("View")
+				|| sheet.equalsIgnoreCase(ExcelTools.VIEW_SHEET))
 			return headersView;
-		if (sheet.equalsIgnoreCase("Image") || sheet.equalsIgnoreCase(ExcelTools.IMAGE_SHEET)) 
+		if (sheet.equalsIgnoreCase("Image")
+				|| sheet.equalsIgnoreCase(ExcelTools.IMAGE_SHEET))
 			return headersImage;
-		if (sheet.equalsIgnoreCase("Specimen") || sheet.equalsIgnoreCase(ExcelTools.SPECIMEN_SHEET)) 
+		if (sheet.equalsIgnoreCase("Specimen")
+				|| sheet.equalsIgnoreCase(ExcelTools.SPECIMEN_SHEET))
 			return headersSpecimen;
-		if (sheet.equalsIgnoreCase("Locality") || sheet.equalsIgnoreCase(ExcelTools.LOCALITY_SHEET)) 
+		if (sheet.equalsIgnoreCase("Locality")
+				|| sheet.equalsIgnoreCase(ExcelTools.LOCALITY_SHEET))
 			return headersLocality;
-		if (sheet.equalsIgnoreCase("Taxon") || sheet.equalsIgnoreCase(ExcelTools.SPECIMEN_TAXON_DATA_SHEET)) 
+		if (sheet.equalsIgnoreCase("Taxon")
+				|| sheet.equalsIgnoreCase(ExcelTools.SPECIMEN_TAXON_DATA_SHEET))
 			return headersTaxon;
-		if (sheet.equalsIgnoreCase("ExternalLinks") || sheet.equalsIgnoreCase(ExcelTools.EXT_LINK_SHEET)) 
+		if (sheet.equalsIgnoreCase("ExternalLinks")
+				|| sheet.equalsIgnoreCase(ExcelTools.EXT_LINK_SHEET))
 			return headersExtLink;
-		if (sheet.equalsIgnoreCase("SupportData") || sheet.equalsIgnoreCase(ExcelTools.SUPPORTING_DATA_SHEET)) 
+		if (sheet.equalsIgnoreCase("SupportData")
+				|| sheet.equalsIgnoreCase(ExcelTools.SUPPORTING_DATA_SHEET))
 			return headersSupportData;
-		if (sheet.equalsIgnoreCase(ExcelTools.PROTECTED_DATA_SHEET)) 
+		if (sheet.equalsIgnoreCase(ExcelTools.PROTECTED_DATA_SHEET))
 			return headersProtectedData;
-		else return null;
+		else
+			return null;
 	}
-	
+
 	public String getValue(String sheet, String fieldName, int row) {
 		fieldName = fieldName.toLowerCase().trim();
 		String[] headers = getHeaders(sheet);
-		
+
 		for (int i = 0; i < headers.length; i++) {
 			if (headers != null && fieldName.equals(headers[i])) {
 				return getEntry(sheet, i, row);
@@ -231,7 +265,7 @@ public class SheetReader {
 		}
 		return "";
 	}
-	
+
 	public Integer getColumnNumberByName(String sheet, String fieldName) {
 		fieldName = fieldName.toLowerCase().trim();
 		String[] headers = getHeaders(sheet);
@@ -242,7 +276,7 @@ public class SheetReader {
 		}
 		return -1;
 	}
-	
+
 	/**
 	 * method for retrieving the number of columns
 	 * 
@@ -251,7 +285,8 @@ public class SheetReader {
 	 */
 	public int GetColumns(String sheetName) {
 		Sheet sheet = getSheet(sheetName);
-		if (sheet == null) return 0;
+		if (sheet == null)
+			return 0;
 		return sheet.getRow(0).getLastCellNum();
 	}
 
@@ -263,12 +298,13 @@ public class SheetReader {
 	 */
 	public int GetRows(String sheetName) {
 		Sheet sheet = getSheet(sheetName);
-		if (sheet == null) return 0;
+		if (sheet == null)
+			return 0;
 		return sheet.getLastRowNum() - 1;
 	}
 
 	public String getReleaseDate() {
-//	public Date getReleaseDate() {
+		// public Date getReleaseDate() {
 		return releaseDate;
 	}
 
@@ -278,10 +314,12 @@ public class SheetReader {
 	 * @return
 	 */
 	public String setReleaseDate() {
-		if (imageCollectionSheet.getRow(6).getCell(0).equals("Release date (yyyy-mm-dd):")
-				&& !imageCollectionSheet.getRow(6).getCell(1).equals("")){
-					releaseDate = imageCollectionSheet.getRow(6).getCell(1).getStringCellValue();
-				}
+		if (imageCollectionSheet.getRow(6).getCell(0)
+				.equals("Release date (yyyy-mm-dd):")
+				&& !imageCollectionSheet.getRow(6).getCell(1).equals("")) {
+			releaseDate = imageCollectionSheet.getRow(6).getCell(1)
+					.getStringCellValue();
+		}
 		return releaseDate;
 	}
 
@@ -294,33 +332,34 @@ public class SheetReader {
 		String errorMessage = "The contributor is not a valid user in the Morphbank database";
 		int userId = 0;
 		String user = getEntry(ExcelTools.IMAGE_COLLECTION_SHEET, 1, 4);
-		if ((getEntry(ExcelTools.IMAGE_COLLECTION_SHEET, 0, 4).equals("Contributor (morphbank username):"))
+		if ((getEntry(ExcelTools.IMAGE_COLLECTION_SHEET, 0, 4)
+				.equals("Contributor (morphbank username):"))
 				&& (!user.equals(""))) {
 			try {
 				statement = connect.getConnect().createStatement();
 			} catch (Exception e) {
 				e.printStackTrace();
-//				System.exit(1);
+				// System.exit(1);
 			}
 			String temp = "SELECT id FROM User WHERE uin='" + user + "'";
 			try {
 				result = statement.executeQuery(temp);
 				metadata = result.getMetaData();
 				int numberOfRows = 0;
-				if (result.last()) numberOfRows = result.getRow();
+				if (result.last())
+					numberOfRows = result.getRow();
 				if (numberOfRows != 0 && metadata.getColumnCount() == 1) {
 					result.first();
 					userId = result.getInt(1);
 				} else {
-					System.out
-							.println(errorMessage);
+					System.out.println(errorMessage);
 					LoadData.log(errorMessage);
-//					System.exit(1);
+					// System.exit(1);
 					return -1;
 				}
 			} catch (SQLException sql) {
 				sql.printStackTrace();
-//				System.exit(1);
+				// System.exit(1);
 			}
 		} else {
 			user = getEntry(ExcelTools.IMAGE_COLLECTION_SHEET, 1, 3);
@@ -331,32 +370,32 @@ public class SheetReader {
 					statement = connect.getConnect().createStatement();
 				} catch (Exception e) {
 					e.printStackTrace();
-//					System.exit(1);
+					// System.exit(1);
 				}
 				String temp = "SELECT id FROM User WHERE name='" + user + "'";
 				try {
 					result = statement.executeQuery(temp);
 					metadata = result.getMetaData();
 					int numberOfRows = 0;
-					if (result.last()) numberOfRows = result.getRow();
+					if (result.last())
+						numberOfRows = result.getRow();
 					if (numberOfRows != 0 && metadata.getColumnCount() == 1) {
 						result.first();
 						userId = result.getInt(1);
 					} else {
-						System.out
-								.println(errorMessage);
+						System.out.println(errorMessage);
 						LoadData.log(errorMessage);
-//						System.exit(1);
+						// System.exit(1);
 						return -1;
 					}
 				} catch (SQLException sql) {
 					sql.printStackTrace();
-//					System.exit(1);
+					// System.exit(1);
 				}
 			} else {
 				System.out.println("No Contributor provided.");
 				LoadData.log("No Contributor provided.");
-//				System.exit(1);
+				// System.exit(1);
 				return -1;
 			}
 		}
@@ -374,51 +413,54 @@ public class SheetReader {
 		String personalGroupMessage = "The contributor does not have a personal group";
 		int groupId = 0;
 		String temp = "";
-		
-		String group = imageCollectionSheet.getRow(7).getCell(1).getStringCellValue();
-		
+
+		String group = imageCollectionSheet.getRow(7).getCell(1)
+				.getStringCellValue();
+
 		statement = LoadData.getStatement();
 		if (group.length() != 0) {
 			temp = "SELECT id FROM Groups WHERE groupName=?";
 			try {
-				PreparedStatement prepStmt = LoadData.getConnection().prepareStatement(temp);
+				PreparedStatement prepStmt = LoadData.getConnection()
+						.prepareStatement(temp);
 				prepStmt.setString(1, group);
 				result = prepStmt.executeQuery();
 				if (result.next()) {
 					groupId = result.getInt(1);
 					// System.out.println("Group id is: " + groupId);
 				} else {
-					System.out
-							.println(existGroupMessage);
+					System.out.println(existGroupMessage);
 					LoadData.log(existGroupMessage);
-//					System.exit(1);
+					// System.exit(1);
 					return -1;
 				}
 			} catch (SQLException sql) {
 				sql.printStackTrace();
-//				System.exit(1);
+				// System.exit(1);
 			}
 			// check if the contributor belongs to the specified group
-			temp = "SELECT user FROM UserGroup WHERE user=" + GetUserId() + " and groups="
-					+ groupId;
+			temp = "SELECT user FROM UserGroup WHERE user=" + GetUserId()
+					+ " and groups=" + groupId;
 			try {
 				result = statement.executeQuery(temp);
 				if (!result.next()) {
 					System.out.println(belongGroupMessage);
 					LoadData.log(belongGroupMessage);
 					return -1;
-//					System.exit(1);
+					// System.exit(1);
 				}
 			} catch (SQLException sql) {
 				sql.printStackTrace();
-//				System.exit(1);
+				// System.exit(1);
 			}
 		} else {
 			// if group not specified personal group of the contributor will be
 			// used
-			String user = imageCollectionSheet.getRow(4).getCell(1).getStringCellValue();
-			
-			temp = "SELECT id FROM Groups WHERE groupName=\"" + user + "'s group" + "\"";
+			String user = imageCollectionSheet.getRow(4).getCell(1)
+					.getStringCellValue();
+
+			temp = "SELECT id FROM Groups WHERE groupName=\"" + user
+					+ "'s group" + "\"";
 			// System.out.println(temp);
 			try {
 				// System.out.println(temp);
@@ -434,7 +476,7 @@ public class SheetReader {
 
 			} catch (SQLException sql) {
 				sql.printStackTrace();
-//				System.exit(1);
+				// System.exit(1);
 			}
 		}
 		return groupId;
@@ -449,36 +491,38 @@ public class SheetReader {
 		String errorMessage = "The submitter is not a valid user in the Morphbank database";
 		int submitterId = 0;
 		String submitter = getEntry(ExcelTools.IMAGE_COLLECTION_SHEET, 1, 5);
-		if ((getEntry(ExcelTools.IMAGE_COLLECTION_SHEET, 0, 5).equals("Submitter (first_name last_name only):"))
+		if ((getEntry(ExcelTools.IMAGE_COLLECTION_SHEET, 0, 5)
+				.equals("Submitter (first_name last_name only):"))
 				&& (!submitter.equals(""))) {
 			try {
 				statement = connect.getConnect().createStatement();
 			} catch (Exception e) {
 				e.printStackTrace();
-//				System.exit(1);
+				// System.exit(1);
 			}
 			String temp = "SELECT id FROM User WHERE name='" + submitter + "'";
 			try {
 				result = statement.executeQuery(temp);
 				metadata = result.getMetaData();
 				int numberOfRows = 0;
-				if (result.last()) numberOfRows = result.getRow();
+				if (result.last())
+					numberOfRows = result.getRow();
 				if (numberOfRows != 0 && metadata.getColumnCount() == 1) {
 					result.first();
 					submitterId = result.getInt(1);
 				} else {
-					System.out
-							.println(errorMessage);
+					System.out.println(errorMessage);
 					LoadData.log(errorMessage);
-//					System.exit(1);
+					// System.exit(1);
 					return -1;
 				}
 			} catch (SQLException sql) {
 				sql.printStackTrace();
-//				System.exit(1);
+				// System.exit(1);
 			}
 		}
-		if (submitter.equals("")) submitterId = GetUserId();
+		if (submitter.equals(""))
+			submitterId = GetUserId();
 		return submitterId;
 	}// end of GetSubmitterId
 
@@ -489,15 +533,14 @@ public class SheetReader {
 	 */
 	public int GetKingdom(int tsn) {
 		int kingdomId = 0;
-		String temp = "SELECT kingdom_id FROM Tree WHERE tsn="
-				+ tsn;
+		String temp = "SELECT kingdom_id FROM Tree WHERE tsn=" + tsn;
 		try {
 			result = statement.executeQuery(temp);
 			result.next();
 			kingdomId = result.getInt(1);
 		} catch (SQLException sql) {
 			sql.printStackTrace();
-//			System.exit(1);
+			// System.exit(1);
 		}
 		return kingdomId;
 	}
@@ -509,8 +552,9 @@ public class SheetReader {
 	 * @return
 	 */
 	public String GetInstitutionLink() {
-		return imageCollectionSheet.getRow(9).getCell(1).getStringCellValue().trim();
-		
+		return imageCollectionSheet.getRow(9).getCell(1).getStringCellValue()
+				.trim();
+
 	}
 
 	/**
@@ -520,7 +564,8 @@ public class SheetReader {
 	 * @return
 	 */
 	public String GetInstitutionName() {
-		return imageCollectionSheet.getRow(8).getCell(1).getStringCellValue().trim(); 
+		return imageCollectionSheet.getRow(8).getCell(1).getStringCellValue()
+				.trim();
 	}
 
 	/**
@@ -530,7 +575,8 @@ public class SheetReader {
 	 * @return
 	 */
 	public String GetProjectLink1() {
-		return imageCollectionSheet.getRow(11).getCell(1).getStringCellValue().trim();
+		return imageCollectionSheet.getRow(11).getCell(1).getStringCellValue()
+				.trim();
 	}
 
 	/**
@@ -540,7 +586,8 @@ public class SheetReader {
 	 * @return
 	 */
 	public String GetProjectLink2() {
-		return imageCollectionSheet.getRow(13).getCell(1).getStringCellValue().trim();
+		return imageCollectionSheet.getRow(13).getCell(1).getStringCellValue()
+				.trim();
 	}
 
 	/**
@@ -549,7 +596,8 @@ public class SheetReader {
 	 * @return
 	 */
 	public String GetProjectName1() {
-		return imageCollectionSheet.getRow(10).getCell(1).getStringCellValue().trim();
+		return imageCollectionSheet.getRow(10).getCell(1).getStringCellValue()
+				.trim();
 	}
 
 	/**
@@ -558,6 +606,7 @@ public class SheetReader {
 	 * @return
 	 */
 	public String GetProjectName2() {
-		return imageCollectionSheet.getRow(12).getCell(1).getStringCellValue().trim();
+		return imageCollectionSheet.getRow(12).getCell(1).getStringCellValue()
+				.trim();
 	}
 }
