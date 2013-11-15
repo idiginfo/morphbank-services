@@ -3,12 +3,10 @@ package net.morphbank.mbsvc3.webservices.tools;
 import java.io.File;
 import java.util.Date;
 
-import jxl.Cell;
-import jxl.CellType;
-
 import net.morphbank.MorphbankConfig;
 
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.poi.ss.usermodel.Cell;
 
 public class Tools {
 
@@ -27,7 +25,7 @@ public class Tools {
 
 	public static void eraseTempFile(String folderPath, String fileName, boolean eraseFolder) {
 		File file = new File(folderPath + fileName);
-		if (file.exists()) {
+		if (file.exists()) { 
 			file.delete();
 		}
 		if (eraseFolder) {
@@ -60,8 +58,8 @@ public class Tools {
 		return false;
 	}
 	
-	public static boolean checkCellType(Cell cell, CellType type) {
-		if (cell.getType() != type) return false;
+	public static boolean checkCellType(Cell cell,  int CellType) {
+		if (cell.getCellType() != CellType) return false;
 		return true;
 	}
 	
@@ -72,7 +70,7 @@ public class Tools {
 	 * @return true if the format is correct
 	 */
 	public static boolean checkDateFormat(Cell cell) {
-		String content = cell.getContents();
+		String content = cell.getStringCellValue() ;
 		boolean result = true;
 		String[] parts = content.split("-");
 		if (parts.length != 3) 
@@ -93,7 +91,7 @@ public class Tools {
 	}
 	
 	public static boolean isEmpty(Cell cell) {
-		return cell.getContents().equalsIgnoreCase("");
+		return cell.getStringCellValue().equalsIgnoreCase("");
 	}
 	
 	public static String outputListOfExtensions() {
