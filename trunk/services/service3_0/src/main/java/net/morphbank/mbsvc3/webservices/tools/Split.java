@@ -1,19 +1,18 @@
 package net.morphbank.mbsvc3.webservices.tools;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import javax.swing.SwingWorker;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 
-import jxl.Cell;
-import jxl.Sheet;
-import jxl.Workbook;
-import jxl.read.biff.BiffException;
-import jxl.write.WritableSheet;
-import jxl.write.WritableWorkbook;
-import jxl.write.WriteException;
-import jxl.write.biff.RowsExceededException;
 
 public class Split extends SwingWorker<Object, Object>
 {
@@ -26,37 +25,42 @@ public class Split extends SwingWorker<Object, Object>
 		this.limit = limit;
 		try {
 			init();
-		} catch (BiffException e) {
+		}catch (InvalidFormatException e) {
 			e.printStackTrace();
-		} catch (IOException e) {
+		} 
+		catch (IOException e) {
 			e.printStackTrace();
 		}
+ 
 	}
 
-	private void init() throws BiffException, IOException
+	private void init() throws IOException, InvalidFormatException
 	{
-		this.workbook = Workbook.getWorkbook(new File(this.originalFile));
+		this.workbook = WorkbookFactory.create(new File(this.originalFile));
 	}
 
-	private void createNewFile(String newFileName, int current) throws IOException, WriteException, BiffException {
-		File newFile = new File(newFileName);
-		WritableWorkbook newWorkbook = Workbook.createWorkbook(newFile, Workbook.getWorkbook(new File(this.originalFile)));
-		WritableSheet sheet0 = newWorkbook.getSheet(0);
+	private void createNewFile(String newFileName, int current)
+			throws InvalidFormatException, IOException {
+
+		Workbook newWorkbook = WorkbookFactory.create(new File(
+				this.originalFile));
+		Sheet sheet0 = newWorkbook.getSheetAt(0);
 		removeRows(sheet0, current);
-		newWorkbook.write();
-		newWorkbook.close();
+		FileOutputStream newFile = new FileOutputStream(newFileName);
+		newWorkbook.write(newFile);
 	}
 
-	private void removeRows(WritableSheet sheet, int current) throws RowsExceededException, WriteException {
-		int rows = sheet.getRows();
+
+	private void removeRows(Sheet sheet, int current){ 
+		int rows = sheet.getLastRowNum();
 		for (int i = 1; i <= current * this.limit; i++) {
-			sheet.removeRow(1);
+			sheet.removeRow(sheet.getRow(1));
 		}
 		for (int i = 1; i <= rows - this.limit; i++)
-			sheet.removeRow(this.limit + 1);
+			sheet.removeRow(sheet.getRow(this.limit + 1));
 	}
 
-	public ArrayList<String> createMultiplefiles() throws WriteException, IOException, BiffException
+	public ArrayList<String> createMultiplefiles() 
 	{
 		ArrayList<String> fileList = new ArrayList<String>();
 		int files = this.countRows() / this.limit + 1;
@@ -65,7 +69,11 @@ public class Split extends SwingWorker<Object, Object>
 			String newFile = this.originalFile.substring(0, this.originalFile.length() - 4) + String.valueOf(i) + ".xls";
 			System.out.println("Creating file :" + newFile);
 			fileList.add(newFile);
-			createNewFile(newFile, i);
+			try {
+				createNewFile(newFile, i);
+			} catch (InvalidFormatException | IOException e) {
+				e.printStackTrace();
+			}
 			Date now = new Date();
 			System.out.println("Duration: " + (now.getTime() - before.getTime()) + "ms");
 		}
@@ -73,13 +81,37 @@ public class Split extends SwingWorker<Object, Object>
 	}
 	
 	private boolean isCellEmpty(Cell cell) {
-		if (cell.getContents() == null || cell.getContents().equals(""))
+		if (cell == null || cell.getStringCellValue().equals(""))
 			return true;
 		return false;
 	}
 	
+	/**
+	 * Convenient method to get all columns of a particular 
+	 * 	column number from a specified sheet 
+	 * 
+	 * @return array of cell
+	 */
+	private Cell[] getColumns(Sheet sheet, int columnNum){
+		int numOfRows = sheet.getLastRowNum();
+		Cell cell = null;
+		Cell[] destCell = new Cell[numOfRows];
+		int locIx=0;
+		for (Row row : sheet) {
+			cell = null;
+			cell =  row.getCell(columnNum);
+			if(cell != null) {
+				if(locIx==numOfRows){
+					break;
+				}
+				destCell[locIx++] = cell;
+			}
+		}
+		return destCell;
+	}
+	
 	private int countRows() {
-		Cell[] cells = this.workbook.getSheet(0).getColumn(3);
+		Cell[] cells = getColumns(this.workbook.getSheetAt(0), 3);
 		int size = 0;
 		for (int i = 0; i < cells.length; i++) {
 			if (!isCellEmpty(cells[i])) {
