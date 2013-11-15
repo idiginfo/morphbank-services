@@ -8,13 +8,16 @@
  *  Contributors:
  *  	Greg Riccardi - initial API and implementation
  * 	Guillaume Jimenez - initial API and implementation
+ *  Shantanu Gautam - Modified to use org.apache.poi.ss.usermodel
+ *  Date - Nov 6, 2013
  ******************************************************************************/
 package net.morphbank.mbsvc3.fsuherb;
 
-import java.io.File;
-
-import jxl.Sheet;
-import jxl.Workbook;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 
 public class XlsFieldMapper implements FieldMapper {
 
@@ -34,11 +37,11 @@ public class XlsFieldMapper implements FieldMapper {
 	public XlsFieldMapper(String fileName) {
 		try {
 			this.fileName = fileName;
-			File file = new File(fileName);
-			Workbook workbook = Workbook.getWorkbook(file);
-			views = workbook.getSheet(0);
+			InputStream inp = new FileInputStream(fileName);
+			Workbook workbook = WorkbookFactory.create(inp);
+			views = workbook.getSheetAt(0);
 			readHeaders();
-			lastLine = views.getRows() - 1;
+			lastLine = views.getLastRowNum() - 1;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -48,11 +51,12 @@ public class XlsFieldMapper implements FieldMapper {
 		return currentLine = lineNumber;
 	}
 
+
 	public void readHeaders() {
-		numFields = views.getColumns();
+		numFields = views.getRow(0).getLastCellNum();
 		headers = new String[numFields];
 		for (int i = 0; i < numFields; i++) {
-			headers[i] = views.getCell(i, 0).getContents().toLowerCase();
+			headers[i] = views.getRow(0).getCell(i).getStringCellValue().toLowerCase();
 		}
 		currentLine = 0;
 	}
@@ -68,7 +72,7 @@ public class XlsFieldMapper implements FieldMapper {
 	}
 
 	public String getValue(int index) {
-		return views.getCell(index, currentLine).getContents();
+		return views.getRow(currentLine).getCell(index).getStringCellValue();
 	}
 
 	public String getValue(String fieldName) {
