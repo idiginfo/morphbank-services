@@ -11,9 +11,10 @@
  ******************************************************************************/
 package net.morphbank.mbsvc3.mapping;
 
+import java.security.CryptoPrimitive;
+
 import net.morphbank.object.*;
 import net.morphbank.mbsvc3.xml.*;
-
 
 public class MBCredentials {
 	User user = null;
@@ -24,9 +25,47 @@ public class MBCredentials {
 		this(objectlist.getSubmitter());
 	}
 
+	private User getUser(Credentials credentials) {
+		// try userid
+		Object obj;
+		obj = BaseObject.getEJB3Object(credentials.getUserId());
+		if(null != obj)
+		{
+			if (obj instanceof User) {
+				return (User) obj;
+			}
+		}
+		// try uin
+		User user = User.getUserByUIN(credentials.getUin());
+		if (user != null)
+			return user;
+		// try name
+		user = User.getUserByFirstLast(credentials.getUserName());
+		// TODO eliminate default user and group
+		if (user != null)
+			return user;
+		// all else failed, use default user (1 is Fredrik Ronquist)
+		return (User) BaseObject.getEJB3Object(1);
+	}
+
+	private Group getGroup(Credentials credentials){
+		// try groupId
+		Object obj;
+		obj = BaseObject.getEJB3Object(credentials.getGroupId());
+		if (obj instanceof Group) {
+			return (Group) obj;
+		} 
+		// try group name
+		Group group = Group.getGroupByName(credentials.getGroupName());
+		if(group != null) return group;
+		// all else failed, use default group
+		return (Group) BaseObject.getEJB3Object(2);
+	}
+	
 	public MBCredentials(Credentials credentials) {
-		BaseObject obj;
 		if (credentials != null) {
+			// look for user
+			// try keystring first
 			if (credentials.getKeyString() != null) {
 				// get user and group for keyString
 				UserGroupKey ugk = UserGroupKey.getUserGroupKey(credentials
@@ -36,25 +75,10 @@ public class MBCredentials {
 					group = ugk.getGroup();
 				}
 			} else {
-				obj = BaseObject.getEJB3Object(credentials.getUserId());
-				if (obj instanceof User) {
-					user = (User) obj;
-				} else { // try uin
-					user = User.getUserByUIN(credentials.getUin());
-				}
+				user = getUser(credentials);
 			}
-			// TODO eliminate default user and group
-			if (user == null)
-				user = (User) BaseObject.getEJB3Object(1);
 
-			obj = BaseObject.getEJB3Object(credentials.getGroupId());
-			if (obj instanceof Group){
-				group = (Group) obj;
-			} else {
-				group = Group.getGroupByName(credentials.getGroupName());
-			}
-			if (group == null)
-				group = (Group) BaseObject.getEJB3Object(2);
+			group = getGroup(credentials);
 			password = credentials.getPassword();
 			// TODO validate password!
 		}
