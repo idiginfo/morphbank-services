@@ -19,15 +19,11 @@ import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.io.PrintWriter;
-import java.io.Reader;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Properties;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -36,16 +32,13 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import jxl.read.biff.BiffException;
-import jxl.write.WriteException;
-
 import net.morphbank.MorphbankConfig;
 import net.morphbank.mbsvc3.mapping.ProcessRequest;
 import net.morphbank.mbsvc3.mapsheet.MapSpreadsheetToXml;
 import net.morphbank.mbsvc3.request.RequestParams;
 import net.morphbank.mbsvc3.sharing.UpdateRemote;
-import net.morphbank.mbsvc3.webservices.tools.Tools;
 import net.morphbank.mbsvc3.webservices.tools.Split;
+import net.morphbank.mbsvc3.webservices.tools.Tools;
 import net.morphbank.mbsvc3.xml.Credentials;
 import net.morphbank.mbsvc3.xml.Request;
 import net.morphbank.mbsvc3.xml.Responses;
@@ -104,7 +97,7 @@ public class Uploader extends javax.servlet.http.HttpServlet implements javax.se
 		if ("remoteupdate".equals(method)) {
 			UpdateRemote.update(request, response);
 		} else {
-			// TODO turn over to processrequest
+			// TODO turn over to process request
 			response.setContentType("text/xml");
 			PrintStream out = new PrintStream(response.getOutputStream());
 			out.println("<html><body>Here I am</body></html>");
@@ -272,7 +265,7 @@ public class Uploader extends javax.servlet.http.HttpServlet implements javax.se
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		return null;
+		return null; 
 	}
 
 	/**
@@ -283,11 +276,8 @@ public class Uploader extends javax.servlet.http.HttpServlet implements javax.se
 		Split split = new Split(folderPath + "temp.xls", numLines);
 		try {
 			return split.createMultiplefiles();
-		} catch (WriteException e) {
-			e.printStackTrace();
-		} catch (BiffException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
+		}
+		catch (Exception e) {
 			e.printStackTrace();
 		} 
 		return null;
