@@ -4,9 +4,9 @@
 package net.morphbank.object;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.Set;
 
-import javax.persistence.AttributeOverride;
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
@@ -29,7 +29,7 @@ import net.morphbank.MorphbankConfig;
 @Entity
 @Table(name = "User")
 @DiscriminatorValue("User")
-//@AttributeOverride(column = @Column(name = "name"), name = "name")
+// @AttributeOverride(column = @Column(name = "name"), name = "name")
 // @XStreamConverter(net.morphbank.object.converter.UserConverter.class)
 public class User extends BaseObject implements Serializable {
 	static final long serialVersionUID = 1;
@@ -76,21 +76,17 @@ public class User extends BaseObject implements Serializable {
 	private Set<Image> images;
 
 	@ManyToMany(fetch = FetchType.LAZY)
-	@JoinTable(name="UserGroup",
-        joinColumns=
-            @JoinColumn(name="userId"),
-        inverseJoinColumns=
-            @JoinColumn(name="groups")
-        )
+	@JoinTable(name = "UserGroup", joinColumns = @JoinColumn(name = "userId"), inverseJoinColumns = @JoinColumn(name = "groups"))
 	private Set<Group> groups;
-	
+
 	// Set<Specimen> specimens;
 
 	public User() {
 		super();
 	}
 
-	public User(int id, String name, User owner, User submitter, Group group,String userName, String uin, String pin) {
+	public User(int id, String name, User owner, User submitter, Group group,
+			String userName, String uin, String pin) {
 		super(id, name, owner, submitter, group);
 		pin = "";
 		this.userName = userName;
@@ -99,41 +95,77 @@ public class User extends BaseObject implements Serializable {
 	}
 
 	public static final String USER_QUERY = "select u from User u where u.uin=:uin";
+	public static final String LAST_FIRST_QUERY = "select u from User u where u.lastName=:lastName and u.firstName=:firstName";
+	public static final String NAME_QUERY = "select u from User u where u.name=:name";
 
 	public static User getUserByUserId(String userId) {
-		if (userId == null || userId.length()==0) return null;
+		if (userId == null || userId.length() == 0)
+			return null;
 		User user = getUserByUIN(userId);
-		if (user != null) return user;
+		if (user != null)
+			return user;
 		int objectId;
 		try {
 			objectId = Integer.parseInt(userId);
 			BaseObject obj = BaseObject.getEJB3Object(objectId);
-			if (obj instanceof User) return (User) obj;
+			if (obj instanceof User)
+				return (User) obj;
 		} catch (Exception e) {
 		}
 		return null;
 	}
 
 	public static User getUserByUIN(String uin) {
-		if (uin == null) return null;
+		if (uin == null)
+			return null;
 		EntityManager em = MorphbankConfig.getEntityManager();
 		Query query = em.createQuery(USER_QUERY);
 		query.setParameter("uin", uin);
 		try {
-			return (User) query.getSingleResult();
+			Object obj =  query.getSingleResult();
+			return (User) obj;
 		} catch (Exception e) {
 			return null;
 		}
 	}
 
+	public static User getUserByFirstLast(String name) {
+		if (name == null)
+			return null;
+		String[] names = name.split(" ");
+		if (names.length != 2)
+			return null;
+		EntityManager em = MorphbankConfig.getEntityManager();
+		
+		Query query = em.createQuery(LAST_FIRST_QUERY);
+		query.setParameter("lastName", names[1]);
+		query.setParameter("firstName", names[0]);
+		
+		try {
+			
+			List results =  query.getResultList();
+			if (results.size() == 1)
+				return (User) results.get(0);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+		
+		return null;
+	}
+
 	public String getStatus() {
-		if (status!=null && status==1) return "true";
+		if (status != null && status == 1)
+			return "true";
 		return "false";
 	}
 
 	public void setStatus(String accountstatus) {
-		if ("true".equals(accountstatus)) this.status = 1;
-		else this.status = 0;
+		if ("true".equals(accountstatus))
+			this.status = 1;
+		else
+			this.status = 0;
 	}
 
 	public String getAddress() {
@@ -339,7 +371,7 @@ public class User extends BaseObject implements Serializable {
 	public static String getUSER_LOGO_BASE_URL() {
 		return USER_LOGO_BASE_URL;
 	}
-	
+
 	public Set<Group> getGroups() {
 		return groups;
 	}
