@@ -14,9 +14,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import jxl.Workbook;
-import jxl.read.biff.BiffException;
-
 import net.morphbank.MorphbankConfig;
 import net.morphbank.loadexcel.SheetReader;
 import net.morphbank.loadexcel.ValidateXls;
@@ -29,6 +26,9 @@ import org.apache.commons.fileupload.FileItemFactory;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 
 public class Validate extends javax.servlet.http.HttpServlet implements javax.servlet.Servlet{
 
@@ -212,15 +212,19 @@ public class Validate extends javax.servlet.http.HttpServlet implements javax.se
 
 	private String excelFileType(String fileName, String folderPath) {
 		try {
-			Workbook workbook = Workbook.getWorkbook(new File(folderPath + fileName));
-			String[] sheets = workbook.getSheetNames();
+			Workbook workbook = WorkbookFactory.create(new File(folderPath + fileName));
+			int numSheets =  workbook.getNumberOfSheets();
+			String[] sheets = new String[numSheets];
+			for(int index=0;index<numSheets;index++){
+				sheets[index] = workbook.getSheetName(index);
+			}
 			if (sheets.length < 8) return CUSTOM_BOOK;
 			return MB3AP_BOOK;
-		} catch (BiffException e) {
+		} catch (InvalidFormatException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
-		}
+		} 
 		return null;
 	}
 
@@ -256,7 +260,7 @@ public class Validate extends javax.servlet.http.HttpServlet implements javax.se
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
-			e.printStackTrace();
+			e.printStackTrace(); 
 		}
 		return null;
 	}
