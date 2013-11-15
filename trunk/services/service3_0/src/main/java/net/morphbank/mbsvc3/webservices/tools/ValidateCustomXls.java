@@ -2,6 +2,8 @@ package net.morphbank.mbsvc3.webservices.tools;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -16,13 +18,13 @@ import javax.persistence.Query;
 
 import net.morphbank.MorphbankConfig;
 
-import jxl.Cell;
-import jxl.CellType;
-import jxl.DateCell;
-import jxl.Sheet;
-import jxl.StringFormulaCell;
-import jxl.Workbook;
-import jxl.read.biff.BiffException;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.DateUtil;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 
 public class ValidateCustomXls {
 
@@ -56,10 +58,10 @@ public class ValidateCustomXls {
 	
 	private Workbook createWorkbook() {
 		try {
-			return Workbook.getWorkbook(new File(fileName));
-		} catch (BiffException e) {
+			return WorkbookFactory.create(new File(fileName));
+		}  catch (IOException e) {
 			e.printStackTrace();
-		} catch (IOException e) {
+		} catch (InvalidFormatException e) {
 			e.printStackTrace();
 		}
 		return null;
@@ -104,23 +106,23 @@ public class ValidateCustomXls {
 
 	/**
 	 * Get headers for the following sheets:
-	 * Drop Downs, Data, UserProperties
+	 * Drop Downs, Data, UserProperties 
 	 */
 	private void readHeaders() {
-		int numFields = dropDownsSheet.getColumns();
+		int numFields = dropDownsSheet.getRow(0).getLastCellNum();
 		headersDropDowns = new String[numFields];
 		for (int i = 0; i < numFields; i++) {
-			headersDropDowns[i] = dropDownsSheet.getCell(i, 0).getContents().toLowerCase().trim();
+			headersDropDowns[i] = dropDownsSheet.getRow(0).getCell(i).getStringCellValue().toLowerCase().trim();
 		}
-		numFields = dataSheet.getColumns();
+		numFields = dataSheet.getRow(0).getLastCellNum();
 		headersData = new String[numFields];
 		for (int i = 0; i < numFields; i++) {
-			headersData[i] = dataSheet.getCell(i, 0).getContents().toLowerCase().trim();
+			headersData[i] = dataSheet.getRow(0).getCell(i).getStringCellValue().toLowerCase().trim();
 		}
-		numFields = userPropertiesSheet.getColumns();
+		numFields = userPropertiesSheet.getRow(0).getLastCellNum();
 		headersUserProp = new String[numFields];
 		for (int i = 0; i < numFields; i++) {
-			headersUserProp[i] = userPropertiesSheet.getCell(i, 0).getContents().toLowerCase().trim();
+			headersUserProp[i] = userPropertiesSheet.getRow(0).getCell(i).getStringCellValue().toLowerCase().trim();
 		}
 		
 	}
@@ -162,21 +164,32 @@ public class ValidateCustomXls {
 		return null;
 	}
 	
+	static final NumberFormat INTEGER_FORMATTER = NumberFormat
+			.getIntegerInstance();
+	static final NumberFormat DOUBLE_FORMATTER = new DecimalFormat("0.0##");
+	
 	private String getEntry(String sheetName, int col, int row) {
 		Sheet sheet = getSheet(sheetName);
-		if (sheet == null) return "";
-		Cell cell = sheet.getCell(col, row);
-		if (cell.getType().toString().equalsIgnoreCase("Date")) 
-		{
-			DateCell datecell = (DateCell) cell;
+		if (sheet == null)
+			return "";
+
+		Cell cell = sheet.getRow(row).getCell(col);
+		if (cell.getCellType() != Cell.CELL_TYPE_NUMERIC) {
+			return cell.getStringCellValue();
+		}
+		// must be numeric
+		// Date
+		if (DateUtil.isCellDateFormatted(cell)) {
 			SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-			return format.format(datecell.getDate());
+			return format.format(cell.getDateCellValue());
 		}
-		if (cell.getType().toString().equalsIgnoreCase("String Formula")) {
-			StringFormulaCell formulaCell = (StringFormulaCell) cell;
-			return formulaCell.getContents().trim();
+		double value = cell.getNumericCellValue();
+		if ((value % 1) == 0) {
+			// integer
+			return INTEGER_FORMATTER.format(value);
 		}
-		return sheet.getCell(col, row).getContents().trim();
+		// float
+		return DOUBLE_FORMATTER.format(value);
 	}
 
 	private Sheet getSheet(String sheetName) {
@@ -198,10 +211,10 @@ public class ValidateCustomXls {
 	 */
 	private boolean checkUniqueImageExtId() {
 		HashMap<Integer, Integer> duplicates = new HashMap<Integer, Integer>();
-		Cell[] cells = dataSheet.getColumn(this.getColumnNumberByName(DATA_SHEET_NAME, "Image External id"));
+		Cell[] cells = getColumn(dataSheet, this.getColumnNumberByName(DATA_SHEET_NAME, "Image External id"));
 		String[] columnValues = new String[cells.length];
 		for (int i = 0; i < cells.length -1; i++) {
-			columnValues[i] = cells[i+1].getContents();
+			columnValues[i] = cells[i+1].getStringCellValue();
 			for (int j = 0; j < i; j++) {
 				if (!columnValues[i].equalsIgnoreCase("") && columnValues[j].equalsIgnoreCase(columnValues[i])) duplicates.put(j + 2, i + 2);
 			}
@@ -246,7 +259,7 @@ public class ValidateCustomXls {
 		for (String colName:dateColumns){
 			Integer col = this.getColumnNumberByName(DATA_SHEET_NAME, colName);
 			if (col != null) {
-				Cell[] cells = dataSheet.getColumn(col);
+				Cell[] cells = getColumn(dataSheet, col);
 				correctFormat &= checkFormatDate(cells, colName);
 			}
 		}
@@ -258,8 +271,7 @@ public class ValidateCustomXls {
 		boolean isRowCorrect = true;
 		for (int i = 1; i < cells.length; i++) {
 			if (Tools.isEmpty(cells[i])) continue;
-			isCorrectFormat = Tools.checkCellType(cells[i], CellType.LABEL);
-			if (!isCorrectFormat) {
+			if(cells[i].getCellType() != Cell.CELL_TYPE_STRING){
 				isRowCorrect = false;
 				String error = "In column "+ colName +", row " + (i+1) + " should be formatted as text.";
 				System.out.println(error);
@@ -269,8 +281,8 @@ public class ValidateCustomXls {
 				isCorrectFormat = Tools.checkDateFormat(cells[i]);
 				if (!isCorrectFormat) {
 					isRowCorrect = false;
-					String error = "In column "+ colName +", row " + (i+1) + 
-							" should be formatted as yyyy-mm-dd instead of " + cells[i].getContents() +".";
+					String error = "In column "+ colName +", row " + (i+1) +
+							" should be formatted as yyyy-mm-dd instead of " + cells[i].getStringCellValue() +".";
 					System.out.println(error);
 					this.messageToOutput(error);
 				}
@@ -296,21 +308,69 @@ public class ValidateCustomXls {
 	}
 	
 	/**
+	 * Convenient method to get all cells of a particular 
+	 * 	column number from a specified sheet 
+	 * 
+	 * @return array of cell
+	 */
+	private Cell[] getColumn(Sheet sheet, int columnNum){
+		int numOfRows = sheet.getLastRowNum();
+		Cell cell = null;
+		Cell[] destCell = new Cell[numOfRows];
+		int locIx=0;
+		for (Row row : sheet) {
+			cell = null;
+			cell =  row.getCell(columnNum);
+			if(cell != null) {
+				if(locIx==numOfRows){
+					break;
+				}
+				destCell[locIx++] = cell;
+			}
+		}
+		return destCell;
+	}
+	
+	/**
+	 * Convenient method to get all cells of a particular 
+	 * 	row number from a specified sheet 
+	 * 
+	 * @return array of cell
+	 */
+	private Cell[] getRow(Sheet sheet, int rowNum){
+		int numOfRows = sheet.getLastRowNum();
+		Row row = sheet.getRow(rowNum);
+		Cell[] destCell = new Cell[numOfRows];
+		int locIx=0;
+		for (Cell cell : row) {
+			if(cell != null) {
+				if(locIx==numOfRows){
+					break;
+				}
+				destCell[locIx++] = cell;
+			}
+			cell = null;
+		}
+		return destCell;
+	}
+	
+	/**
 	 * Compares the scientific name with the TSN to see
 	 * if they match in the database
 	 * @return true is the whole column of scientific name found a TSN match
 	 */
 	private boolean checkTSN() {
 		boolean columnValid = true;
-		Cell[] cellsDetermination = dataSheet.getColumn(this.getColumnNumberByName(DATA_SHEET_NAME, "Determination Scientific Name"));
-		Cell[] cellsTSN = dataSheet.getColumn(this.getColumnNumberByName(DATA_SHEET_NAME, "Determination TSN"));
+		Cell[] cellsDetermination = getColumn(dataSheet, this.getColumnNumberByName(DATA_SHEET_NAME, "Determination Scientific Name"));
+		Cell[] cellsTSN = getColumn(dataSheet, this.getColumnNumberByName(DATA_SHEET_NAME, "Determination TSN"));
+		
 		String select = "select t.tsn from Taxon t where t.scientificName = :scientificName";
 		Query query = em.createQuery(select);
 //		query = MorphbankConfig.getEntityManager().createQuery(select);
 		for (int i = 1; i < cellsDetermination.length; i++) {
 			boolean matchFound = false;
 			if (Tools.isEmpty(cellsDetermination[i])) continue;
-			query.setParameter("scientificName", cellsDetermination[i].getContents());
+			query.setParameter("scientificName", cellsDetermination[i].getStringCellValue());
 			List tsns = query.getResultList();
 			if (tsns == null) {
 				String error = "Scientific name " + cellsDetermination[i] + " at row " + (i+1) + " is not in Morphbank.";
@@ -322,14 +382,14 @@ public class ValidateCustomXls {
 				Iterator it = tsns.iterator();
 				while (it.hasNext()) {
 					int next = (Integer) it.next();
-					int tsn = Integer.valueOf(this.safeCast(cellsTSN[i].getContents(), i+1));
+					int tsn = Integer.valueOf(this.safeCast(cellsTSN[i].getStringCellValue(), i+1));
 					if (tsn == next)
 						matchFound |= true;
 					else
 						matchFound |= false;
 				}
 				if (!matchFound) {
-					String error = "Scientific name " + cellsDetermination[i].getContents() + " does not match TSN " + cellsTSN[i].getContents() + " at row " + (i+1) + ".";
+					String error = "Scientific name " + cellsDetermination[i].getStringCellValue() + " does not match TSN " + cellsTSN[i].getStringCellValue() + " at row " + (i+1) + ".";
 					System.out.println(error);
 					this.messageToOutput(error);
 				}
@@ -366,23 +426,22 @@ public class ValidateCustomXls {
 	private boolean checkCredentials() {
 		boolean credentialsOK = true;
 		boolean emptyCells = false;
-		String cName = contributorSheet.getCell(1, 1).getContents();
-		String cId = contributorSheet.getCell(1, 2).getContents();
-		emptyCells |= areCellsBothEmpty(contributorSheet.getCell(0, 1).getContents(), cName,
-				contributorSheet.getCell(0, 2).getContents(), cId);
+		
+		String cName = contributorSheet.getRow(1).getCell(1).getStringCellValue();
+		String cId = contributorSheet.getRow(2).getCell(1).getStringCellValue();
+		emptyCells |= areCellsBothEmpty(contributorSheet.getRow(1).getCell(0).getStringCellValue(), cName,
+				contributorSheet.getRow(2).getCell(0).getStringCellValue(), cId);
+		String sName = contributorSheet.getRow(3).getCell(1).getStringCellValue();
+		String sId = contributorSheet.getRow(4).getCell(1).getStringCellValue();
+		emptyCells |= areCellsBothEmpty(contributorSheet.getRow(3).getCell(0).getStringCellValue(), sName,
+				contributorSheet.getRow(4).getCell(0).getStringCellValue(), sId);
+		String gName = contributorSheet.getRow(5).getCell(1).getStringCellValue();
+		String gId = contributorSheet.getRow(6).getCell(1).getStringCellValue();
+		emptyCells |= areCellsBothEmpty(contributorSheet.getRow(5).getCell(0).getStringCellValue(), gName,
+				contributorSheet.getRow(6).getCell(0).getStringCellValue(), gId);
 
-		String sName = contributorSheet.getCell(1, 3).getContents();
-		String sId = contributorSheet.getCell(1, 4).getContents();
-		emptyCells |= areCellsBothEmpty(contributorSheet.getCell(0, 3).getContents(), sName,
-				contributorSheet.getCell(0, 4).getContents(), sId);
-		
-		String gName = contributorSheet.getCell(1, 5).getContents();
-		String gId = contributorSheet.getCell(1, 6).getContents();
-		emptyCells |= areCellsBothEmpty(contributorSheet.getCell(0, 5).getContents(), gName,
-				contributorSheet.getCell(0, 6).getContents(), gId);
-		
-		String date = contributorSheet.getCell(1, 7).getContents();
-		emptyCells |= isCellEmpty(contributorSheet.getCell(0, 7).getContents(), date);
+		String date = contributorSheet.getRow(7).getCell(1).getStringCellValue();
+		emptyCells |= isCellEmpty(contributorSheet.getRow(7).getCell(0).getStringCellValue(), date);
 		if(emptyCells) return false;
 		
 		String select = "select u.userName, u.id from User u where u.userName = :name";
@@ -524,25 +583,25 @@ public class ValidateCustomXls {
 	 * @return
 	 */
 	private boolean checkOriginalFileName() {
-		Cell[] cells = dataSheet.getColumn(this.getColumnNumberByName(DATA_SHEET_NAME, "Original File Name"));
+		Cell[] cells = getColumn(dataSheet, this.getColumnNumberByName(DATA_SHEET_NAME, "Original File Name"));
 		boolean isValid = true;
 		String error = "In column Original File Name, row ";
 		for (int i = 1; i < cells.length; i++) {
 			if (Tools.isEmpty(cells[i])) continue;
-			if (cells[i].getContents().indexOf(" ") > 0) {
+			if (cells[i].getStringCellValue().indexOf(" ") > 0) {
 				isValid = false;
 				String message = error + (i+1) + " should not contain spaces.";
 				System.out.println(message);
 				this.messageToOutput(message);
 			}
-			if (!Tools.fileExtensionOk(cells[i].getContents())) {
+			if (!Tools.fileExtensionOk(cells[i].getStringCellValue())) {
 				isValid = false;
 				String message = error + (i+1) 
 				+ " file extension should be " + Tools.outputListOfExtensions();
 				System.out.println(message);
 				this.messageToOutput(message);
 			}
-			if (!Tools.fileNameFormattedOk(cells[i].getContents())) {
+			if (!Tools.fileNameFormattedOk(cells[i].getStringCellValue())) {
 				isValid = false;
 				String message = error + (i+1) + " cannot use '.' in the file name.";
 				System.out.println(message);
@@ -568,9 +627,10 @@ public class ValidateCustomXls {
 	private boolean checkMandatoryCellsNotEmpty() {
 		boolean isValid = true;
 		//either all cells empty or all full
-		int maxRows = dataSheet.getRows();
+		int maxRows = dataSheet.getLastRowNum();
 		for (int i = 1; i < maxRows; i++) {
-			String[] row = this.getMandatoryRow(dataSheet.getRow(i));
+			//get all the cells on the specified row
+			String[] row = this.getMandatoryRow(getRow(dataSheet, i));
 			if (row == null) return printMandatoryRowsHelp(isValid);
 			isValid &= this.checkMandatoryRow(row, i);
 		}
@@ -635,17 +695,17 @@ public class ValidateCustomXls {
 			}
 			
 			String[] row = new String[11];
-			row[0] = entireRow[colImgExtId].getContents(); 
-			row[1] = entireRow[colImgExtIdPrfx].getContents(); 
-			row[2] = entireRow[colOriglFileName].getContents(); 
-			row[3] = entireRow[colCreativeCommons].getContents(); 
-			row[4] = entireRow[colSpExtId].getContents();
-			row[5] = entireRow[colSpExtIdPrfx].getContents(); 
-			row[6] = entireRow[colDetScName].getContents(); 
-			row[7] = entireRow[colDetTSN].getContents(); 
-			row[8] = entireRow[colBasisOfRecord].getContents(); 
-			row[9] = entireRow[colTypeStatus].getContents();
-			row[10] = entireRow[colViewAppTaxon].getContents(); 
+			row[0] = entireRow[colImgExtId].getStringCellValue(); 
+			row[1] = entireRow[colImgExtIdPrfx].getStringCellValue(); 
+			row[2] = entireRow[colOriglFileName].getStringCellValue(); 
+			row[3] = entireRow[colCreativeCommons].getStringCellValue(); 
+			row[4] = entireRow[colSpExtId].getStringCellValue();
+			row[5] = entireRow[colSpExtIdPrfx].getStringCellValue(); 
+			row[6] = entireRow[colDetScName].getStringCellValue(); 
+			row[7] = entireRow[colDetTSN].getStringCellValue(); 
+			row[8] = entireRow[colBasisOfRecord].getStringCellValue(); 
+			row[9] = entireRow[colTypeStatus].getStringCellValue();
+			row[10] = entireRow[colViewAppTaxon].getStringCellValue(); 
 			
 			return row;
 	}
@@ -705,17 +765,17 @@ public class ValidateCustomXls {
 		boolean matchAll = true;
 		boolean currentMatch = false;
 		String[] headers = getHeaders(DATA_SHEET_NAME);
-		Cell[] userProperties = userPropertiesSheet.getColumn(this.getColumnNumberByName(USER_PROPERTIES_SHEET_NAME, "<userProperty>"));
+		Cell[] userProperties = getColumn(userPropertiesSheet, this.getColumnNumberByName(USER_PROPERTIES_SHEET_NAME, "<userProperty>"));
 		for (Cell userProp:userProperties) {
-			if (userProp.getContents().equals("<userProperty>")) continue;
+			if (userProp.getStringCellValue().equals("<userProperty>")) continue;
 			for (String header:headers) {
-				if (userProp.getContents().toLowerCase().equals(header)) {
+				if (userProp.getStringCellValue().toLowerCase().equals(header)) {
 					currentMatch = true;
 					break;
 				}
 			}
 			if (!currentMatch) {
-				String message = errorMessagePart1 + userProp.getContents() + errorMessagePart2;
+				String message = errorMessagePart1 + userProp.getStringCellValue() + errorMessagePart2;
 				System.out.println(message);
 				this.messageToOutput(message);
 				matchAll = false;
@@ -731,15 +791,15 @@ public class ValidateCustomXls {
 	 */
 	private boolean checkSpecimenIdHasUniqueName() {
 		boolean uniqueName = true;
-		Cell[] specimenExtIds = dataSheet.getColumn(this.getColumnNumberByName(DATA_SHEET_NAME, "Specimen External id"));
-		Cell[] sciNames = dataSheet.getColumn(this.getColumnNumberByName(DATA_SHEET_NAME, "Determination Scientific Name"));
-
+		Cell[] specimenExtIds = getColumn(dataSheet, this.getColumnNumberByName(DATA_SHEET_NAME, "Specimen External id"));
+		Cell[] sciNames = getColumn(dataSheet, this.getColumnNumberByName(DATA_SHEET_NAME, "Determination Scientific Name"));
+		
 		for (int i = 1; i < specimenExtIds.length; i++) {
-			String sciName = sciNames[i].getContents();
-			String extId = specimenExtIds[i].getContents();
+			String sciName = sciNames[i].getStringCellValue();
+			String extId = specimenExtIds[i].getStringCellValue();
 			for (int j = i; j < specimenExtIds.length; j++) {
-				String sciNameDup = sciNames[j].getContents();
-				String extIdDup = specimenExtIds[j].getContents();
+				String sciNameDup = sciNames[j].getStringCellValue();
+				String extIdDup = specimenExtIds[j].getStringCellValue();
 				if (extId.equals(extIdDup)) {
 					if (!sciName.equals(sciNameDup)){
 						uniqueName = false;
