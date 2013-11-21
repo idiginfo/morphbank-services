@@ -7,6 +7,7 @@ import net.morphbank.MorphbankConfig;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.DateUtil;
 
 public class Tools {
 
@@ -91,7 +92,19 @@ public class Tools {
 	}
 	
 	public static boolean isEmpty(Cell cell) {
+		if( (cell == null) || (cell.getCellType()==Cell.CELL_TYPE_BLANK)) return true;
+		if(cell.getCellType()==Cell.CELL_TYPE_STRING){
 		return cell.getStringCellValue().equalsIgnoreCase("");
+		}
+		else if(cell.getCellType()==Cell.CELL_TYPE_NUMERIC){
+			if (DateUtil.isCellDateFormatted(cell)) {//returns null for blank cells
+				return (cell.getDateCellValue()==null)?true:false;
+			}
+			else{
+				return (cell.getNumericCellValue()==0)?true:false;
+			}
+		}
+		return false;
 	}
 	
 	public static String outputListOfExtensions() {
