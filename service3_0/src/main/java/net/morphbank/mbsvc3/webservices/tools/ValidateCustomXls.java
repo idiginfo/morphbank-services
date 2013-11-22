@@ -22,7 +22,7 @@ import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Sheet; 
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 
@@ -38,7 +38,7 @@ public class ValidateCustomXls {
 	private boolean versionInfo;
 	private String fileName;
 	private Workbook workbook;
-	private Sheet dropDownsSheet;
+	private Sheet dropDownsSheet; 
 	private Sheet dataSheet;
 	private Sheet contributorSheet;
 	private Sheet userPropertiesSheet;
@@ -366,12 +366,12 @@ public class ValidateCustomXls {
 		
 		String select = "select t.tsn from Taxon t where t.scientificName = :scientificName";
 		Query query = em.createQuery(select);
-//		query = MorphbankConfig.getEntityManager().createQuery(select);
+		//Query query = MorphbankConfig.getEntityManager().createQuery(select);
 		for (int i = 1; i < cellsDetermination.length; i++) {
 			boolean matchFound = false;
 			if (Tools.isEmpty(cellsDetermination[i])) continue;
 			query.setParameter("scientificName", cellsDetermination[i].getStringCellValue());
-			List tsns = query.getResultList();
+			List<Integer> tsns = query.getResultList();
 			if (tsns == null) {
 				String error = "Scientific name " + cellsDetermination[i] + " at row " + (i+1) + " is not in Morphbank.";
 				System.out.println(error);
@@ -379,17 +379,36 @@ public class ValidateCustomXls {
 			}
 			if (Tools.isEmpty(cellsTSN[i])) continue;
 			else {
-				Iterator it = tsns.iterator();
+				Iterator<Integer> it = tsns.iterator();
 				while (it.hasNext()) {
-					int next = (Integer) it.next();
-					int tsn = Integer.valueOf(this.safeCast(cellsTSN[i].getStringCellValue(), i+1));
-					if (tsn == next)
-						matchFound |= true;
-					else
-						matchFound |= false;
+					int tsn=0;
+					int next = it.next();
+					if (cellsTSN[i].getCellType() == Cell.CELL_TYPE_STRING) {
+						tsn = Integer.valueOf(this.safeCast(
+								cellsTSN[i].getStringCellValue(), i + 1));
+					}
+					if (cellsTSN[i].getCellType() == Cell.CELL_TYPE_NUMERIC) {
+						tsn = (int)cellsTSN[i].getNumericCellValue();
+
+					}
+						if (tsn == next)
+							matchFound |= true;
+						else
+							matchFound |= false;
+					
 				}
 				if (!matchFound) {
-					String error = "Scientific name " + cellsDetermination[i].getStringCellValue() + " does not match TSN " + cellsTSN[i].getStringCellValue() + " at row " + (i+1) + ".";
+					String cellTsnContent = "";
+					if (cellsTSN[i].getCellType() == Cell.CELL_TYPE_NUMERIC) {
+						cellTsnContent = Integer.toString((int)cellsTSN[i].getNumericCellValue());
+					}
+					
+					String error = "Error : Scientific name "
+							+ cellsDetermination[i].getStringCellValue()
+							+ " does not match TSN "
+							+ cellTsnContent + " at row "
+							+ " at row "
+							+ (i + 1) + ".";
 					System.out.println(error);
 					this.messageToOutput(error);
 				}
@@ -432,7 +451,7 @@ public class ValidateCustomXls {
 		emptyCells |= areCellsBothEmpty(contributorSheet.getRow(1).getCell(0).getStringCellValue(), cName,
 				contributorSheet.getRow(2).getCell(0).getStringCellValue(), cId);
 		String sName = contributorSheet.getRow(3).getCell(1).getStringCellValue();
-		String sId = contributorSheet.getRow(4).getCell(1).getStringCellValue();
+		String sId = Integer.toString((int)contributorSheet.getRow(4).getCell(1).getNumericCellValue());
 		emptyCells |= areCellsBothEmpty(contributorSheet.getRow(3).getCell(0).getStringCellValue(), sName,
 				contributorSheet.getRow(4).getCell(0).getStringCellValue(), sId);
 		String gName = contributorSheet.getRow(5).getCell(1).getStringCellValue();
@@ -440,7 +459,7 @@ public class ValidateCustomXls {
 		emptyCells |= areCellsBothEmpty(contributorSheet.getRow(5).getCell(0).getStringCellValue(), gName,
 				contributorSheet.getRow(6).getCell(0).getStringCellValue(), gId);
 
-		String date = contributorSheet.getRow(7).getCell(1).getStringCellValue();
+		String date = Integer.toString((int)contributorSheet.getRow(7).getCell(1).getNumericCellValue()) ;
 		emptyCells |= isCellEmpty(contributorSheet.getRow(7).getCell(0).getStringCellValue(), date);
 		if(emptyCells) return false;
 		
@@ -545,14 +564,14 @@ public class ValidateCustomXls {
 	 */
 	private boolean compareUserGroup(Query query, String id, String groupName) {
 		if(groupName == null || groupName.equals("") || id == null || id.equals("")) return true;
-		List names = query.getResultList();
+		List<Integer> names = query.getResultList();
 		if (names.isEmpty()) {
 			String error = "Id:" + id + " is not in the group " + groupName + ".";
 			System.out.println(error);
 			this.messageToOutput(error);
 			return false;
 		}
-		Iterator it = names.iterator();
+		Iterator<Integer> it = names.iterator();
 		boolean matchFound = false;
 		Integer user;
 		while (it.hasNext()) {
@@ -615,7 +634,7 @@ public class ValidateCustomXls {
 	 * Append messages to a StringBuffer that can be used to
 	 * display messages on a webpage.
 	 * @param message
-	 */
+	 */ 
 	private void messageToOutput(String message) {
 		output.append(message);
 		output.append("<br />");
@@ -699,10 +718,10 @@ public class ValidateCustomXls {
 			row[1] = entireRow[colImgExtIdPrfx].getStringCellValue(); 
 			row[2] = entireRow[colOriglFileName].getStringCellValue(); 
 			row[3] = entireRow[colCreativeCommons].getStringCellValue(); 
-			row[4] = entireRow[colSpExtId].getStringCellValue();
+			row[4] = Integer.toString((int)entireRow[colSpExtId].getNumericCellValue());
 			row[5] = entireRow[colSpExtIdPrfx].getStringCellValue(); 
 			row[6] = entireRow[colDetScName].getStringCellValue(); 
-			row[7] = entireRow[colDetTSN].getStringCellValue(); 
+			row[7] = Integer.toString((int)entireRow[colDetTSN].getNumericCellValue()); 
 			row[8] = entireRow[colBasisOfRecord].getStringCellValue(); 
 			row[9] = entireRow[colTypeStatus].getStringCellValue();
 			row[10] = entireRow[colViewAppTaxon].getStringCellValue(); 
@@ -796,10 +815,10 @@ public class ValidateCustomXls {
 		
 		for (int i = 1; i < specimenExtIds.length; i++) {
 			String sciName = sciNames[i].getStringCellValue();
-			String extId = specimenExtIds[i].getStringCellValue();
+			String extId = Integer.toString((int)specimenExtIds[i].getNumericCellValue());
 			for (int j = i; j < specimenExtIds.length; j++) {
 				String sciNameDup = sciNames[j].getStringCellValue();
-				String extIdDup = specimenExtIds[j].getStringCellValue();
+				String extIdDup = Integer.toString((int)specimenExtIds[j].getNumericCellValue());
 				if (extId.equals(extIdDup)) {
 					if (!sciName.equals(sciNameDup)){
 						uniqueName = false;
