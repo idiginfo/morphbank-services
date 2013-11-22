@@ -10,10 +10,14 @@ public class ValidateCustomXlsTest {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		ValidateCustomXls test = new ValidateCustomXls("/home/gjimenez/Morphbank/uploads/Rebecca/Aptostichus_mb_customWorkbook.xls"
+		//ValidateCustomXls test = new ValidateCustomXls("/home/gjimenez/Morphbank/uploads/Rebecca/Aptostichus_mb_customWorkbook.xls"
+		ValidateCustomXls test = new ValidateCustomXls("C:/sg11x/workbooks/test-webservices-workbook/customWorkbook_TTRS_Birds-0213.xls" 
 				, true, MorphbankConfig.PERSISTENCE_MBPROD);
-		boolean passed = test.checkEverything();
-		System.out.println(passed);
+		boolean testResult = test.checkEverything();
+		if(testResult)
+			System.out.println("Test Passed");
+		else
+			System.out.println("Test Failed");
 	}
 
 }
