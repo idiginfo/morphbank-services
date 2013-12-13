@@ -63,30 +63,29 @@ public class XlsFieldMapper implements FieldMapper {
 	}
 
 	public void readHeaders() {
-		
-		Row row = views.getRow(0); 
-		
+
+		Row row = views.getRow(0);
 		numFields = views.getRow(0).getLastCellNum();
-		headers = new String[numFields];
-		
+		if (numFields > 0) {
+			headers = new String[numFields];
+		} else {
+			headers = new String[1];
+		}
 		for (Cell cell : row) {
 			int index = cell.getColumnIndex();
-			switch(cell.getCellType())
-			{
+			switch (cell.getCellType()) {
 			case Cell.CELL_TYPE_STRING:
 				headers[index] = cell.getStringCellValue().toLowerCase();
 				break;
 			case Cell.CELL_TYPE_NUMERIC:
 				if (DateUtil.isCellDateFormatted(cell)) {
 					headers[index] = cell.getDateCellValue().toString();
-				}
-				else
-				{
-					headers[index] = Integer.toString((int)cell.getNumericCellValue());
+				} else {
+					headers[index] = Integer.toString((int) cell
+							.getNumericCellValue());
 				}
 			}
 		}
-		
 		currentLine = 0;
 	}
 
@@ -101,10 +100,17 @@ public class XlsFieldMapper implements FieldMapper {
 	}
 
 	public String getValue(int index) {
-		Cell cell = views.getRow(currentLine).getCell(index);
 		String retValue = "";
+		Row row =  views.getRow(currentLine);
+		Cell cell = null;
+		if(null!= row){
+			cell = row.getCell(index);
+		}
+		if(null==cell){
+			return retValue;
+		}
 		
-		switch(views.getRow(currentLine).getCell(index).getCellType())
+		switch(row.getCell(index).getCellType())
 		{
 			case Cell.CELL_TYPE_NUMERIC:
 				if (DateUtil.isCellDateFormatted(cell)) {
