@@ -51,13 +51,18 @@ public class Split extends SwingWorker<Object, Object>
 	}
 
 
-	private void removeRows(Sheet sheet, int current){ 
+	private void removeRows(Sheet sheet, int current) {
 		int rows = sheet.getLastRowNum();
 		for (int i = 1; i <= current * this.limit; i++) {
-			sheet.removeRow(sheet.getRow(1));
+			if (null != sheet.getRow(1)) {
+				sheet.removeRow(sheet.getRow(1));
+			}
 		}
-		for (int i = 1; i <= rows - this.limit; i++)
-			sheet.removeRow(sheet.getRow(this.limit + 1));
+		for (int i = 1; i <= rows - this.limit; i++) {
+			if (null != sheet.getRow(this.limit + 1)) {
+				sheet.removeRow(sheet.getRow(this.limit + 1));
+			}
+		}
 	}
 
 	public ArrayList<String> createMultiplefiles() 
