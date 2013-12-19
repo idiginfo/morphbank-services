@@ -11,6 +11,8 @@
  ******************************************************************************/
 package net.morphbank.mbsvc3.mapsheet;
 
+import java.util.Date;
+
 import org.apache.poi.ss.usermodel.Cell;
 
 public interface FieldMapper {
@@ -21,7 +23,7 @@ public interface FieldMapper {
 	
 	public String getValue(String fieldName);
 	
-	public Cell getValueDate(String fieldName);
+	public Date getValueDate(String fieldName);
 	
 	public boolean hasNext();
 	

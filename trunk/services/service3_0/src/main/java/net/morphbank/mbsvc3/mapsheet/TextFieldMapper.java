@@ -12,6 +12,8 @@
 package net.morphbank.mbsvc3.mapsheet;
 
 import java.io.*;
+import java.util.Date;
+
 import org.apache.poi.ss.usermodel.Cell;
 
 public class TextFieldMapper implements FieldMapper {
@@ -159,7 +161,7 @@ public class TextFieldMapper implements FieldMapper {
 	}
 	
 	@Override
-	public Cell getValueDate(String fieldName) {
+	public Date getValueDate(String fieldName) {
 		// TODO Auto-generated method stub
 		return null;
 	}
