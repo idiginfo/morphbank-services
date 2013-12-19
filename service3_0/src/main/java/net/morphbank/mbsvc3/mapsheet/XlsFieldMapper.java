@@ -12,9 +12,15 @@
 package net.morphbank.mbsvc3.mapsheet;
 
 import java.io.File;
-
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+
+import net.morphbank.MorphbankConfig;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.DateUtil;
@@ -22,8 +28,6 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
-
-
 
 public class XlsFieldMapper implements FieldMapper {
 
@@ -52,7 +56,7 @@ public class XlsFieldMapper implements FieldMapper {
 			links = workbook.getSheetAt(1);
 			readHeaders();
 			lastLine = views.getLastRowNum() - 1;
-			
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -92,6 +96,7 @@ public class XlsFieldMapper implements FieldMapper {
 	public boolean hasNext() {
 		return currentLine < lastLine;
 	}
+
 	public void getNextLine() {
 		// split and retain line
 		if (hasNext()) {
@@ -101,34 +106,31 @@ public class XlsFieldMapper implements FieldMapper {
 
 	public String getValue(int index) {
 		String retValue = "";
-		Row row =  views.getRow(currentLine);
+		Row row = views.getRow(currentLine);
 		Cell cell = null;
-		if(null!= row){
+		if (null != row) {
 			cell = row.getCell(index);
 		}
-		if(null==cell){
+		if (null == cell) {
 			return retValue;
 		}
-		
-		switch(row.getCell(index).getCellType())
-		{
-			case Cell.CELL_TYPE_NUMERIC:
-				if (DateUtil.isCellDateFormatted(cell)) {
-					retValue = cell.getDateCellValue().toString();
-				}
-				else
-				{
-					retValue =  Integer.toString((int) cell.getNumericCellValue());
-				}
-				break;
-				
-			case Cell.CELL_TYPE_STRING:
-				retValue = cell.getStringCellValue();
-				break;
-				
-			case Cell.CELL_TYPE_FORMULA:
-				retValue = cell.getCellFormula();
-				break;
+
+		switch (row.getCell(index).getCellType()) {
+		case Cell.CELL_TYPE_NUMERIC:
+			if (DateUtil.isCellDateFormatted(cell)) {
+				retValue = cell.getDateCellValue().toString();
+			} else {
+				retValue = Integer.toString((int) cell.getNumericCellValue());
+			}
+			break;
+
+		case Cell.CELL_TYPE_STRING:
+			retValue = cell.getStringCellValue();
+			break;
+
+		case Cell.CELL_TYPE_FORMULA:
+			retValue = cell.getCellFormula();
+			break;
 		}
 		return retValue;
 	}
@@ -142,37 +144,84 @@ public class XlsFieldMapper implements FieldMapper {
 		}
 		return "";
 	}
-	
+
 	@Override
 	public String getValueFormula(String fieldName) {
 		fieldName = fieldName.toLowerCase();
 		for (int i = 0; i < headers.length; i++) {
 			if (fieldName.equals(headers[i])) {
-				
-				if(views.getRow(currentLine).getCell(i).getCellType() == Cell.CELL_TYPE_FORMULA)
-				{
-					return views.getRow(currentLine).getCell(i).getCellFormula();
+
+				if (views.getRow(currentLine).getCell(i).getCellType() == Cell.CELL_TYPE_FORMULA) {
+					return views.getRow(currentLine).getCell(i)
+							.getCellFormula();
 				}
 			}
-			
-				return getValue(i);
-			}
+
+			return getValue(i);
+		}
 		return "";
 	}
 
-	public Cell getValueDate(String fieldName) {
+	public Date getValueDate(String fieldName) {
 		fieldName = fieldName.toLowerCase();
 		for (int i = 0; i < headers.length; i++) {
 			if (fieldName.equals(headers[i])) {
 
 				Cell date = views.getRow(currentLine).getCell(i);
-				if(!date.getStringCellValue().equalsIgnoreCase(""))
-				{
-					return date;
+				if (!date.getStringCellValue().equalsIgnoreCase("")) {
+					return createDate(date, i, currentLine);
 				}
 			}
 		}
 		return null;
+	}
+
+	public static Date createDate(Cell cell, int colIndex, int rowIndex) {
+		if (cell != null) {
+			try {
+				return cell.getDateCellValue();
+			} catch (Exception e) { // show the cell coordinates
+
+				String error = "Date format ambiguous at row " + (rowIndex + 1)
+						+ " col " + colIndex + ". Cell content: "
+						+ cell.getStringCellValue();
+				MorphbankConfig.SYSTEM_LOGGER.info(error);
+				return parseDate(cell.getStringCellValue());
+			}
+		}
+		return null;
+	}
+
+	static Calendar calendar = Calendar.getInstance();
+	static DateFormat dateFormatSlash = DateFormat
+			.getDateInstance(DateFormat.SHORT);
+	static DateFormat dateFormatDash = new SimpleDateFormat("yyyy-MM-dd");
+
+	private static Date parseDate(String date) {
+		calendar.clear();
+
+		if (date.length() == 4) {
+			date += "-01-01";
+
+		} else if (date.length() == 10) {
+			date = date.replaceAll("-00", "-01");
+		} else {
+			String error = "Impossible to parse this date";
+			MorphbankConfig.SYSTEM_LOGGER.info(error);
+			return null;
+		}
+		try {
+			calendar.setTime(dateFormatDash.parse(date));
+		} catch (ParseException e) {
+			e.printStackTrace();
+			String error = "Impossible to parse this date";
+			MorphbankConfig.SYSTEM_LOGGER.info(error);
+		}
+		String info = "Date Changed to:"
+				+ dateFormatDash.format(calendar.getTime());
+		MorphbankConfig.SYSTEM_LOGGER.info(info);
+		return calendar.getTime();
+
 	}
 
 	public String[] getHeaders() {
@@ -197,6 +246,5 @@ public class XlsFieldMapper implements FieldMapper {
 	public Sheet getLinks() {
 		return links;
 	}
-
 
 }

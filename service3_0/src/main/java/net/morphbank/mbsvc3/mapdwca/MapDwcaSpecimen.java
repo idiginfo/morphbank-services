@@ -43,8 +43,8 @@ public class MapDwcaSpecimen {
 		xmlSpecimen.addDarwinTag(objectFactory.createIdentifiedBy(specimen
 				.getValue("Determined By")));
 		xmlSpecimen.addDarwinTag(objectFactory
-				.createDateIdentified(MapSpreadsheetToXml.createDate(specimen
-						.getValueDate("Date Determined"))));
+				.createDateIdentified(specimen
+						.getValueDate("Date Determined")));
 		xmlSpecimen.setStandardImage(MapSpreadsheetToXml
 				.getStandarImageId(specimen));// /////////////////////////////
 
@@ -83,13 +83,11 @@ public class MapDwcaSpecimen {
 				.getValue("Notes")));
 
 		xmlSpecimen.addDarwinTag(objectFactory
-				.createEarliestDateCollected(MapSpreadsheetToXml
-						.createDate(specimen
-								.getValueDate("Earliest Date Collected"))));
+				.createEarliestDateCollected(specimen
+								.getValueDate("Earliest Date Collected")));
 		xmlSpecimen.addDarwinTag(objectFactory
-				.createEarliestDateCollected(MapSpreadsheetToXml
-						.createDate(specimen
-								.getValueDate("Latest Date Collected"))));
+				.createEarliestDateCollected(specimen
+								.getValueDate("Latest Date Collected")));
 
 		// Locality properties
 		xmlSpecimen.addDarwinTag(objectFactory.createContinent(specimen

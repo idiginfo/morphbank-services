@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -12,7 +13,8 @@ import java.util.Set;
 
 import net.morphbank.mbsvc3.mapsheet.FieldMapper;
 
-import org.apache.poi.ss.usermodel.Cell;
+
+//import org.apache.poi.ss.usermodel.Cell;
 import org.gbif.dwc.record.Record;
 import org.gbif.dwc.text.Archive;
 import org.gbif.dwc.text.ArchiveFactory;
@@ -115,7 +117,7 @@ public class DwcaFieldMapper implements FieldMapper {
 	}
 
 	@Override
-	public Cell getValueDate(String fieldName) {
+	public Date getValueDate(String fieldName) {
 		// TODO Auto-generated method stub
 		return null;
 	}
