@@ -5,7 +5,6 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -13,8 +12,8 @@ import java.util.Set;
 
 import net.morphbank.mbsvc3.mapsheet.FieldMapper;
 
+import org.apache.poi.ss.usermodel.Cell;
 import org.gbif.dwc.record.Record;
-import org.gbif.dwc.terms.ConceptTerm;
 import org.gbif.dwc.text.Archive;
 import org.gbif.dwc.text.ArchiveFactory;
 import org.gbif.dwc.text.StarRecord;
@@ -23,8 +22,6 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.XMLReaderFactory;
-
-import jxl.Cell;
 
 public class DwcaFieldMapper implements FieldMapper {
 	
