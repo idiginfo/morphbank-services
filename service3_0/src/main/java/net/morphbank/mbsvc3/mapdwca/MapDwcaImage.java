@@ -11,14 +11,15 @@
  ******************************************************************************/
 package net.morphbank.mbsvc3.mapdwca;
 
-import jxl.Cell;
-import jxl.Sheet;
 import net.morphbank.mbsvc3.mapsheet.FieldMapper;
 import net.morphbank.mbsvc3.mapsheet.MapSpreadsheetToXml;
 import net.morphbank.mbsvc3.mapsheet.XlsFieldMapper;
 import net.morphbank.mbsvc3.xml.Extref;
 import net.morphbank.mbsvc3.xml.ObjectFactory;
 import net.morphbank.mbsvc3.xml.XmlBaseObject;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Sheet;
 
 public class MapDwcaImage {
 	// protected MapFishSpreadsheetToXml objMapper;
@@ -109,20 +110,21 @@ public class MapDwcaImage {
 	}
 	
 	public String[][] getUserProperties() {
-		if (this.image instanceof XlsFieldMapper)
-		{
-			Sheet links = ((XlsFieldMapper) this.image).getLinks();
-			int c = links.getColumns();
-			int r = links.getRows();
-			userProperties = new String[r][c];
-			for (int i = 0; i < links.getColumns(); i++){
-				Cell[] cells = links.getColumn(i);
-				for (int j = 0; j < cells.length; j++){
-					userProperties[j][i] = cells[j].getContents();
-				}
-			}
-			return userProperties;
-		}
+//TODO rewrite this method
+//		if (this.image instanceof XlsFieldMapper)
+//		{
+//			Sheet links = ((XlsFieldMapper) this.image).getLinks();
+//			int c = links.getColumns();
+//			int r = links.getRows();
+//			userProperties = new String[r][c];
+//			for (int i = 0; i < links.getColumns(); i++){
+//				Cell[] cells = links.getColumn(i);
+//				for (int j = 0; j < cells.length; j++){
+//					userProperties[j][i] = cells[j].getContents();
+//				}
+//			}
+//			return userProperties;
+//		}
 		return null;
 	}
 }

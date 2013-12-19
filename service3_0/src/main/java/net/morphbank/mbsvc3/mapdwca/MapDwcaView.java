@@ -11,8 +11,9 @@
  ******************************************************************************/
 package net.morphbank.mbsvc3.mapdwca;
 
-import jxl.Cell;
-import jxl.Sheet;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Sheet;
 import net.morphbank.mbsvc3.mapsheet.FieldMapper;
 import net.morphbank.mbsvc3.mapsheet.MapSpreadsheetToXml;
 import net.morphbank.mbsvc3.mapsheet.XlsFieldMapper;
@@ -56,54 +57,63 @@ public class MapDwcaView {
 				.getValue("View Applicable to Taxon")));
 		xmlView.addDescription(createViewDescription());
 		Extref extref = MapSpreadsheetToXml.getExternalLink(view, "View");
-		if (extref != null) xmlView.addExternalRef(extref);
-		if (userProperties != null && userProperties.length >= 1){
+		if (extref != null)
+			xmlView.addExternalRef(extref);
+		if (userProperties != null && userProperties.length >= 1) {
 			this.addUserProperty(xmlView);
 		}
 
 	}
 
-	//add user properties to xml document in the correct object (view)
-	//and generate uri if present
+	// add user properties to xml document in the correct object (view)
+	// and generate uri if present
 	private void addUserProperty(XmlBaseObject xmlView) {
-		for(int i = 1; i < userProperties.length; i++) {
+		for (int i = 1; i < userProperties.length; i++) {
 			String property[] = userProperties[i];
-			if(property[1].equalsIgnoreCase("view")){
-				if (property[3] == null || property[3].equalsIgnoreCase("")){ //namespace uri empty
-					if (property[2] == null || property[2].equalsIgnoreCase("")){ //property name empty
-						xmlView.addUserProperty(property[0], view.getValue(property[0]));
+			if (property[1].equalsIgnoreCase("view")) {
+				if (property[3] == null || property[3].equalsIgnoreCase("")) { // namespace
+																				// uri
+																				// empty
+					if (property[2] == null || property[2].equalsIgnoreCase("")) { // property
+																					// name
+																					// empty
+						xmlView.addUserProperty(property[0],
+								view.getValue(property[0]));
+					} else { // property name present
+						xmlView.addUserProperty(property[2],
+								view.getValue(property[0]));
 					}
-					else { //property name present
-						xmlView.addUserProperty(property[2], view.getValue(property[0]));
-					}
-				}
-				else { //namespace uri present
-					if (property[2] == null || property[2].equalsIgnoreCase("")){ //property name empty
-						xmlView.addUserProperty(property[0], view.getValue(property[0]), property[3]);
-					}
-					else { //property name present
-						xmlView.addUserProperty(property[2], view.getValue(property[0]), property[3]);
+				} else { // namespace uri present
+					if (property[2] == null || property[2].equalsIgnoreCase("")) { // property
+																					// name
+																					// empty
+						xmlView.addUserProperty(property[0],
+								view.getValue(property[0]), property[3]);
+					} else { // property name present
+						xmlView.addUserProperty(property[2],
+								view.getValue(property[0]), property[3]);
 					}
 				}
 			}
 		}
 	}
-	
+
 	public String[][] getUserProperties() {
-		if (this.view instanceof XlsFieldMapper)
-		{
-			Sheet links = ((XlsFieldMapper) this.view).getLinks();
-			int c = links.getColumns();
-			int r = links.getRows();
-			userProperties = new String[r][c];
-			for (int i = 0; i < links.getColumns(); i++){
-				Cell[] cells = links.getColumn(i);
-				for (int j = 0; j < cells.length; j++){
-					userProperties[j][i] = cells[j].getContents();
-				}
-			}
-			return userProperties;
-		}
+		// TODO rewrite method
+		// if (this.view instanceof XlsFieldMapper)
+		// {
+		// Sheet links = ((XlsFieldMapper) this.view).getLinks();
+		// int c = links.getColumns();
+		// int r = links.getRows();
+		// userProperties = new String[r][c];
+		// for (int i = 0; i < links.getColumns(); i++){
+		// Cell[] cells = links.getColumn(i);
+		// for (int j = 0; j < cells.length; j++){
+		// userProperties[j][i] = cells[j].getContents();
+		// }
+		// }
+		// return userProperties;
+		// }
 		return null;
 	}
 }
