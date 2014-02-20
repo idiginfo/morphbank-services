@@ -1,0 +1,370 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+</meta>
+<meta name="keywords"
+	content="DBI-0446224,Morphbank,NSF,BDI,ATOL,biology,digital,images,web,services,taxonomy" />
+<title>Morphbank Services : tools</title>
+<link rel="stylesheet" title="Default"
+	href="http://www.morphbank.net/style/morphbank2.css" type="text/css"
+	media="screen">
+</link>
+<link rel="shortcut icon"
+	href="http://www.morphbank.net/style/webImages/mLogo16.ico" />
+<link
+	href="http://services.morphbank.net/mbd/request?method=xml&keywords=geranium&objecttype=Image&limit=10&firstResult=05&format=rss"
+	rel="alternate" type="application/rss+xml" title="Morphbank RSS Feed"
+	id="gallery" />
+<script type="text/javascript"
+	src="http://www.morphbank.net/js/head.js"></script>
+<script language="javascript" type="text/javascript"
+	src="http://www.morphbank.net/js/spry/SpryData.js"></script>
+<script language="javascript" type="text/javascript"
+	src="http://www.morphbank.net/js/spry/SpryEffects.js"></script>
+<script type="text/javascript">
+		window.name="main";
+		var jsDomainName = "http://www.morphbank.net/";
+		
+		function getWindowHeight() {
+			var windowHeight = 0;
+			if (typeof(window.innerHeight) == 'number') {
+				windowHeight = window.innerHeight;
+			}
+			else {
+				if (document.documentElement && document.documentElement.clientHeight) {
+					windowHeight = document.documentElement.clientHeight;
+				}
+				else {
+					if (document.body && document.body.clientHeight) {
+						windowHeight = document.body.clientHeight;
+					}
+				}
+			}
+			return windowHeight;
+		}
+		function setFooter() {
+			if (document.getElementById) {
+				var windowHeight = getWindowHeight();
+				if (windowHeight > 0) {
+					var contentHeight = document.getElementById('main').offsetHeight;
+					var footerElement = document.getElementById('footer');
+					var footerHeight  = footerElement.offsetHeight;
+					if (windowHeight - (contentHeight + footerHeight) >= 0) {
+						footerElement.style.position = 'relative';
+						footerElement.style.top = ((windowHeight - (contentHeight + footerHeight)) -0) + 'px';
+					}
+					else {
+						footerElement.style.position = 'static';
+					}
+				}
+				footerElement.style.visibility = 'visible';
+			}
+		}
+		window.onload = function() {
+			setFooter();
+		}
+		window.onresize = function() {
+			setFooter();
+		}
+	</script>
+<script type="text/javascript">
+ function validateFormConvert()
+ {
+	 if(document.convert.numLinesPerFile.value < 100 || document.convert.numLinesPerFile.value > 700) {
+		 alert("Numer of lines should be between 100 and 700");
+		 document.convert.numLinesPerFile.focus();
+		 document.convert.numLinesPerFile.select();
+		 return false;
+	 }
+	 var size = document.getElementsByName("convertFile[]").length;
+	 var empty = true;
+	 for (var i = 0; i < size; i++) {
+		if (document.getElementsByName("convertFile[]").item(i).value == "") {
+		}
+		else {
+			empty = false;
+			if (!document.getElementsByName("convertFile[]").item(i).value.match(/xls$/)) {
+				alert("The file extension must be .xls or .csv");
+				document.getElementsByName("convertFile[]").item(i).focus();
+				return false;
+			}
+		}
+	 }
+	 if (empty) {
+		alert("Select a file.");
+		return false;
+	 }
+	 return pleaseWait();
+ }
+</script>
+<script type="text/javascript">
+ 	function validateFormUploadXls()
+ 	{
+	 	if(document.uploadFormXls.uploadFileXls.value == "") {
+		 	alert("Select a file.");
+		 	document.uploadFormXls.uploadFileXls.focus();
+		 	return false;
+	 	}
+	 	return pleaseWait();
+ 	}
+</script>
+<script type="text/javascript">
+ 	function validateFormUploadXml()
+ 	{
+	 	if(document.uploadFormXml.uploadFileXml.value == "") {
+		 	alert("Select a file.");
+		 	document.uploadFormXml.uploadFileXml.focus();
+		 	return false;
+	 	}
+	 	if(!document.uploadFormXml.uploadFileXml.value.match(/xml$)) {
+	 		alert("The file extension must be .xml");
+	 		document.uploadFormXml.uploadFileXml.focus();
+	 		return false;
+	 	}
+	 	return pleaseWait();
+ 	}
+</script>
+<script type="text/javascript">
+ 	function validateFormValidate()
+ 	{
+ 		var size = document.getElementsByName("uploadFile[]").length;
+ 		var empty = true;
+ 		for (var i = 0; i < size; i++) {
+ 			if (document.getElementsByName("uploadFile[]").item(i).value == "") {
+ 			}
+ 			else {
+ 				empty = false;
+ 				if (!document.getElementsByName("uploadFile[]").item(i).value.match(/xls$/)) {
+ 					alert("The file extension must be .xls");
+ 					document.getElementsByName("uploadFile[]").item(i).focus();
+ 					return false;
+ 				}
+ 			}
+ 		}
+ 		if (empty) {
+ 			alert("Select a file.");
+ 			return false;
+ 		}
+ 		else
+ 		{ 
+ 			return pleaseWait();
+ 		}
+ 	}
+</script>
+<script type="text/javascript">
+  		function pleaseWait()
+ 		{
+  			ProgressImage = document.getElementById("loading_image");
+  			document.getElementById("darkenScreenObject").style.display = "block";
+  			document.getElementById("loading").style.visibility = "visible";
+  			setTimeout("ProgressImage.src = ProgressImage.src",100);
+  			return true;
+ 		}
+</script>
+<script type="text/javascript">
+  		function hide()
+ 		{
+  			document.getElementById("loading").style.visibility = "hidden";
+  			document.getElementById("darkenScreenObject").style.display = "none";
+  			return true;
+ 		}
+</script>
+<script type="text/javascript">
+ 	function showInstructions()
+ 	{
+	 	document.getElementById("showText").style.display = "block";
+ 	}
+ 	function hideInstructions()
+ 	{
+	 	document.getElementById("showText").style.display = "none";
+ 	}
+</script>
+
+<style type="text/css">
+
+.test2 {
+   background-color: #F0EDFF;
+    border: 1px solid #808080;
+    color: #000000;
+    font-size: 12px;
+    margin: 20px;
+    padding: 10px;
+    width: 150px;
+	height: 20px; 
+-moz-transition-duration: 0.8s;
+-moz-transition-timing-function: ease-in;
+-webkit-transition-duration: 0.8s;
+-webkit-transition-timing-function: ease-in;
+transition-duration: 0.8s;
+transition-timing-function: ease-in;
+
+}
+.test2:hover {
+width: 500px;
+height: 250px;
+
+}
+
+.test2 .showText {
+/*	display: none; 
+	visibility: hidden; 
+
+ */
+	overflow: hidden;
+	height: 0px;
+	-moz-transition: 0.8s ease-in;
+	-webkit-transition: 0.8s ease-in;
+	-transition: 0.8s ease-in;
+
+}
+
+.test2:hover .showText {
+
+height: 250px;
+
+}
+
+
+
+</style>
+
+</head>
+<body onunload=hide()>
+<div id="main">
+  <div class="mainHeader">
+    <div class="mainHeaderLogo"><a
+	href="http://www.morphbank.net/index.php"> <img border="0"
+	src="http://www.morphbank.net/style/webImages/mbLogoHeader.png"
+	alt="logo" /> </a>&nbsp;</div>
+    <div class="mainHeaderTitle">Morphbank test Services for metadata Validation, Conversion &amp; Upload</div>
+  </div>
+  <div class="mainRibbon"></div>
+  <div class="test2">
+  	<h3>Brief Instructions</h3>
+  	<div class="showText">
+  	<p>Morphbank administrative staff use this services site to:</p>
+  	<ul>
+  	<li>validate any Morphbank .xls workbook (original or custom)
+    </li>
+    <li>upload the <em>original workbook</em> (mb3a.xls or mb3p.xls)
+    </li>
+    <li>convert the <em>custom workbook</em> into Morphbank XML format prior to upload
+    </li>
+    <li>upload the new XML file/s to Morphbank
+    </li>
+  </ul>
+  <h3>Two possible paths</h3>
+  <p>Original Excel workbook (mb3a.xls or mb3p.xls)<br />
+  &nbsp;&nbsp;<em>Validate Morphbank Excel > Upload mb3a or mb3p</em></p>
+  <p>Custom Excel workbook<br />
+  &nbsp;&nbsp;<em>Validate Morphbank  Excel > Convert to XML > Upload XML</em></p>
+  </div>
+  </div>
+  <div id="darkenScreenObject" style="position: absolute; top: 0px; left: 0px;
+   overflow: hidden; display: none; opacity: 0.6; z-index: 40; 
+   background-color: rgb(0, 0, 0); width: 1241px; height: 1000px; disabled: disabled""></div>
+  
+  
+  <div class="mainGenericContainer" style="width: 450px; height: 312px; margin: 35px 0 27px 20px;">
+    <h3 title="Test any Morphbank Excel file, original or custom .xls workbooks">Validate Morphbank Excel (.xls) files before upload</h3>
+    <form name="uploadForm" action="validateXls" method="post" enctype="multipart/form-data" onsubmit="return validateFormValidate()">
+      <p> <strong>Display version info:</strong>
+        <input type="checkbox" name="versionInfo" value="Info" />
+      </p>
+      <p> <strong>Select file for testing:</strong>
+        <input type="file" size="20" name="uploadFile[]" />
+      </p>
+      <p> <strong>Select file for testing:</strong>
+        <input type="file" size="20" name="uploadFile[]" />
+      </p>
+      <p> <strong>Select file for testing:</strong>
+        <input type="file" size="20" name="uploadFile[]" />
+      </p>
+      <p> <strong>Select file for testing:</strong>
+        <input type="file" size="20" name="uploadFile[]" />
+      </p>
+      <p> <strong>Select file for testing:</strong>
+        <input type="file" size="20" name="uploadFile[]" />
+      </p>
+      <p> <br />
+        <br />
+        <br />
+        <input type="submit" value="Check File(s)"/> <input type="button" value="Reset Form" onclick="this.form.reset()" />
+      </p>
+    </form>
+  </div>
+  <div class="mainGenericContainer" style="width: 450px; height: 312px; margin: 35px 0 27px 20px;">
+    <h3 title="After validation, convert the custom .xls workbook into Morphbank XML schema">Convert <em>custom workbook</em> into xml</h3>
+    <form name="convert" action="convert" method="post"
+	enctype="multipart/form-data" onsubmit="return validateFormConvert()">
+      <p><strong>Number of lines per file</strong>
+        <input type="text" name="numLinesPerFile" value="700" />
+      </p>
+      <p><strong>Upload files after conversion (default is
+        conversion only)</strong>
+        <input type="checkbox" name="sendtoDB" value="send" />
+      </p>
+      <p><strong>Select file for conversion:</strong>
+        <input type="file" size="20" name="convertFile[]" />
+      </p>
+      <p><strong>Select file for conversion:</strong>
+        <input type="file" size="20" name="convertFile[]" />
+      </p>
+      <p><strong>Select file for conversion:</strong>
+        <input type="file"	size="20" name="convertFile[]" />
+      </p>
+      <p><strong>Select file for conversion:</strong>
+        <input type="file"	size="20" name="convertFile[]" />
+      </p>
+      <p><strong>Select file for conversion:</strong>
+        <input type="file"	size="20" name="convertFile[]" />
+      </p>
+      <p><br />
+        <input type="submit" value="Convert to XML"/> <input type="button" value="Reset Form" onclick="this.form.reset()" />
+      </p>
+    </form>
+  </div>
+  <div class="mainGenericContainer" style="width: 450px; margin: 35px 0 27px 20px;">
+    <h3 title="After validation, push data into Morphbank from the original excel workbooks (mb3a or mb3p)">Upload mb3a or mb3p Excel workbooks</h3>
+    <form name="uploadFormXls" action="restfulexcel" method="post" enctype="multipart/form-data" onsubmit="return validateFormUploadXls()">
+      <p> <strong>Select file for upload:</strong>
+        <input type="file" size="20" name="uploadFileXls" />
+      </p>
+      <p> <br />
+        <input type="submit" value="Upload"/> <input type="button" value="Reset Form" onclick="this.form.reset()" />
+      </p>
+    </form>
+  </div>
+  <div class="mainGenericContainer" style="width: 450px; margin: 35px 0 27px 20px;">
+    <h3 title="After validation &amp; conversion to XML format, upload data to Morphbank">Upload xml files</h3>
+    <form name="uploadFormXml" action="restful" method="post" enctype="multipart/form-data" onsubmit="return validateFormUploadXml()">
+      <p> <strong>Select file for upload:</strong>
+        <input type="file" size="20" name="uploadFileXml" />
+      </p>
+      <p> <br />
+        <input type="submit" value="Upload"/> <input type="button" value="Reset Form" onclick="this.form.reset()" />
+      </p>
+    </form>
+  </div>
+  <p style="visibility:hidden; position:absolute; top:50%; left:50%; z-index: 50" id="loading";> <img id="loading_image" style="border: 3px black solid;"
+ src="http://www.morphbank.net/style/webImages/loading2.gif" alt="Please wait..."/> </p>
+</div>
+<!-- end div main -->
+
+<div style="clear: both;">&nbsp;</div>
+<div id="footer">
+  <div id="footerRibbon">&nbsp;</div>
+  <div style="float: left;"><a href="http://www.nsf.gov"> <img
+	src="http://www.morphbank.net/style/webImages/nsf-trans.png" width="50"
+	height="50" alt="NSF" title="NSF" /> </a></div>
+  <div style="float: right;"><a href="http://www.fsu.edu"> <img
+	src="http://www.morphbank.net/style/webImages/fsu-trans.png" width="50"
+	height="50" alt="FSU" title="FSU" /> </a></div>
+  <div class="footerContent"><a
+	href="http://www.morphbank.net/About/Copyright">Copyright Policy</a> - <a href="http://www.morphbank.net/About/Team">Contact</a> - <a href="http://www.morphbank.net/About/Introduction/">About Morphbank</a> <br />
+    <a href="javascript:openPopup('http://www.morphbank.net/About/Manual/');">Online
+    User Manual</a> - <a href="http://www.morphbank.net/Help/Documents">Documents</a> - <a href="http://www.morphbank.net/Help/feedback">Feedback</a></div>
+</div>
+</body>
+</html>
