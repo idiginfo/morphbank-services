@@ -29,11 +29,12 @@ public class AlaMappingTest {
 	static final int GROUP_ID = 2505490;
 
 	// scamit values C:\dev\morphbank\scamit
+	static final String INPUT_FILE = "c:/dev/dwca-ttrs";
 //		static final String INPUT_FILE = "/usr/local/dev/morphbank/upload/ANICSATSCANv2.xls";
 //		static final String INPUT_FILE = "/usr/local/dev/morphbank/upload/TTRS_v8.xls";
 //	static final String INPUT_FILE =  "/usr/local/dev/morphbank/upload/CinclosomaV4.xls";
 //	static final String INPUT_FILE =  "/usr/local/dev/morphbank/upload/USMSTest.xls";
-	static final String INPUT_FILE =  "/usr/local/dev/morphbank/upload/USMS/test/testbis.xls";
+	//static final String INPUT_FILE =  "/usr/local/dev/morphbank/upload/USMS/test/testbis.xls";
 //	static final String INPUT_FILE =  "/usr/local/dev/morphbank/upload/TTRS_testCharset.xls";
 	static final String FILE_PATH = "/usr/local/dev/morphbank/upload/";
 	//	static final String XML_OUTPUT_FILE = "/usr/local/dev/morphbank/upload/CinclosomaV3.xml";

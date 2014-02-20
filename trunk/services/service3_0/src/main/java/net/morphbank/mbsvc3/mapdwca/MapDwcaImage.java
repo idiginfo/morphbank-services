@@ -13,13 +13,9 @@ package net.morphbank.mbsvc3.mapdwca;
 
 import net.morphbank.mbsvc3.mapsheet.FieldMapper;
 import net.morphbank.mbsvc3.mapsheet.MapSpreadsheetToXml;
-import net.morphbank.mbsvc3.mapsheet.XlsFieldMapper;
 import net.morphbank.mbsvc3.xml.Extref;
 import net.morphbank.mbsvc3.xml.ObjectFactory;
 import net.morphbank.mbsvc3.xml.XmlBaseObject;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Sheet;
 
 public class MapDwcaImage {
 	// protected MapFishSpreadsheetToXml objMapper;
