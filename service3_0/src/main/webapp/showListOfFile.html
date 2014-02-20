@@ -1,3 +1,5 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
@@ -5,7 +7,7 @@
 </meta>
 <meta name="keywords"
 	content="DBI-0446224,Morphbank,NSF,BDI,ATOL,biology,digital,images,web,services,taxonomy" />
-<title>Morphbank Services : test of Excel files before submitting</title>
+<title>Morphbank Services : result</title>
 <link rel="stylesheet" title="Default"
 	href="http://www.morphbank.net/style/morphbank2.css" type="text/css"
 	media="screen"></link>
@@ -71,82 +73,8 @@
 			setFooter();
 		}
 	</script>
-	
-<script type="text/javascript">
-  		function pleaseWait()
- 		{
-  			ProgressImage = document.getElementById("loading_image");
-  			document.getElementById("darkenScreenObject").style.display = "block";
-  			document.getElementById("loading").style.visibility = "visible";
-  			setTimeout("ProgressImage.src = ProgressImage.src",100);
-  			return true;
- 		}
-</script>
-<script type="text/javascript">
-  		function hide()
- 		{
-  			document.getElementById("loading").style.visibility = "hidden";
-  			document.getElementById("darkenScreenObject").style.display = "none";
-  			return true;
- 		}
-</script>
-
-<script type="text/javascript">
- 	function validateForm()
- 	{
- 		var size = document.getElementsByName("uploadFile[]").length;
- 		var empty = true;
- 		for (var i = 0; i < size; i++) {
- 			if (document.getElementsByName("uploadFile[]").item(i).value == "") {
- 			}
- 			else {
- 				empty = false;
- 				if (!document.getElementsByName("uploadFile[]").item(i).value.match(/xls$/)) {
- 					alert("The file extension must be .xls");
- 					document.getElementsByName("uploadFile[]").item(i).focus();
- 					return false;
- 				}
- 			}
- 			
- 		}
- 		if (empty) {
- 			alert("Select a file.");
- 			return false;
- 		}
- 		else
- 		{ 
- 			
- 			return pleaseWait();
- 			
- 		}
-<!--	 	if(document.uploadForm.uploadFile1.value == ""-->
-<!--	 			&& document.uploadForm.uploadFile2.value == ""-->
-<!--	 			&& document.uploadForm.uploadFile3.value == ""-->
-<!--	 			&& document.uploadForm.uploadFile4.value == ""-->
-<!--	 			&& document.uploadForm.uploadFile5.value == "") {-->
-<!--		 	alert("Select a file.");-->
-<!--		 	document.uploadForm.uploadFile1.focus();-->
-<!--		 	return false;-->
-<!--	 	}-->
-<!--	 	if(!document.uploadForm.uploadFile1.value.match(/xls$/)-->
-<!--	 			|| !document.uploadForm.uploadFile2.value.match(/xls$/)-->
-<!--	 			|| !document.uploadForm.uploadFile3.value.match(/xls$/)-->
-<!--	 			|| !document.uploadForm.uploadFile4.value.match(/xls$/)-->
-<!--	 			|| !document.uploadForm.uploadFile5.value.match(/xls$/)){-->
-<!--	 		alert("The file extension must be .xls");-->
-<!--	 		return false;-->
-<!--	 	}-->
- 	}
-</script>
-
-
 </head>
-<body  onunload=hide()>
-
-<div id="darkenScreenObject" style="position: absolute; top: 0px; left: 0px;
-   overflow: hidden; display: none; opacity: 0.6; z-index: 40; 
-   background-color: rgb(0, 0, 0); width: 1241px; height: 1000px; disabled: disabled""></div>
-
+<body>
 	<div id="main">
 		<div class="mainHeader">
 			<div class="mainHeaderLogo">
@@ -154,42 +82,18 @@
 					src="http://www.morphbank.net/style/webImages/mbLogoHeader.png"
 					alt="logo" /> </a>&nbsp;
 			</div>
-			<div class="mainHeaderTitle">Morphbank Services : test of Excel files before submitting</div>
+			<div class="mainHeaderTitle">Morphbank Test Interface : Results</div>
 
 		</div>
 		<div class="mainRibbon"></div>
 
 		<div class="mainGenericContainer" style="width: 760px">
-			<form name="uploadForm" action="validateXls" method="post" enctype="multipart/form-data" onsubmit="return validateForm()">
-				<p>
-					<strong>Display version info:</strong> <input type="checkbox" name="versionInfo" value="Info" />
-				</p>
-				<p>
-					<strong>Select file for testing:</strong> <input type="file" size="20" name="uploadFile[]" />
-				</p>
-				<p>
-					<strong>Select file for testing:</strong> <input type="file" size="20" name="uploadFile[]" />
-				</p>
-								<p>
-					<strong>Select file for testing:</strong> <input type="file" size="20" name="uploadFile[]" />
-				</p>
-								<p>
-					<strong>Select file for testing:</strong> <input type="file" size="20" name="uploadFile[]" />
-				</p>
-								<p>
-					<strong>Select file for testing:</strong> <input type="file" size="20" name="uploadFile[]" />
-				</p>
-				<p>
-					<br /> <input type="submit" value="Check File(s)" /> <input type="button" value="Reset Form" onclick="this.form.reset()" />
-				</p>
-			</form>
+			<p>
+				<% out.print(request.getAttribute("listOfFiles")); %>
+			</p>
 		</div>
 		<div style="clear: both;">&nbsp;</div>
 	</div>
-	
-  <p style="visibility:hidden; position:absolute; top:50%; left:50%; z-index: 50" id="loading";> <img id="loading_image" style="border: 3px black solid;"
- src="http://www.morphbank.net/style/webImages/loading2.gif" alt="Please wait..."/> </p>
-	
 	<!-- end div main -->
 	<div id="footer">
 		<div id="footerRibbon">&nbsp;</div>
@@ -204,6 +108,8 @@
 				width="50" height="50" alt="FSU" title="FSU" /> </a>
 		</div>
 		<div class="footerContent">
+			<a href="mailto://riccardi@ci.fsu.edu?subject=" Contact about Sample
+				WebSite">Maintained by G. Riccardi: riccardi@ci.fsu.edu</a> <br />
 			<a href="http://www.morphbank.net/About/Copyright">Copyright
 				Policy</a> - <a href="http://www.morphbank.net/About/Team">Contact</a> -
 			<a href="http://www.morphbank.net/About/Introduction/">About
