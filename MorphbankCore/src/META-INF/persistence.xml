@@ -37,6 +37,34 @@
 		</properties>
 	</persistence-unit>
 
+	<persistence-unit name="morphbank-dev">
+		<provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
+		<exclude-unlisted-classes>false</exclude-unlisted-classes>
+		<properties>
+			<!-- Provider-specific connection properties -->
+			<property name="javax.persistence.jdbc.driver" value="com.mysql.jdbc.Driver" />
+			<!-- MB 32 on morphbank -->
+			<property name="javax.persistence.jdbc.url"
+				value="jdbc:mysql://10.145.254.16:3306/mbsample?zeroDateTimeBehavior=convertToNull&amp;useUnicode=true&amp;characterEncoding=UTF-8" />
+			<property name="javax.persistence.jdbc.user" value="morphbank-dev" />
+			<property name="javax.persistence.jdbc.password" value="1234rewq" />
+			<!-- -->
+			<!-- specific settings -->
+			<property name="eclipselink.logging.level" value="info" />
+			<property name="eclipselink.jdbc.read-connections.min"
+				value="2" />
+			<property name="eclipselink.jdbc.read-connections.max"
+				value="2" />
+			<property name="eclipselink.jdbc.write-connections.min"
+				value="5" />
+			<property name="eclipselink.jdbc.write-connections.max"
+				value="10" />
+			<property name="eclipselink.descriptor.customizer.BaseObject"
+				value="net.morphbank.object.MbDescriptorCustomizer" />
+			<property name="eclipselink.id-validation" value="NULL" />
+		</properties>
+	</persistence-unit>
+
 	<persistence-unit name="localhost">
 		<provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
 
@@ -77,8 +105,8 @@
 			<!-- MB 32 on localhost -->
 			<property name="javax.persistence.jdbc.url"
 				value="jdbc:mysql://localhost:3306/MB32?zeroDateTimeBehavior=convertToNull&amp;useUnicode=true&amp;characterEncoding=UTF-8" />
-			<property name="javax.persistence.jdbc.user" value="****" />
-			<property name="javax.persistence.jdbc.password" value="****" />
+			<property name="javax.persistence.jdbc.user" value="griccardi" />
+			<property name="javax.persistence.jdbc.password" value="Gadmin;" />
 			<!-- -->
 			<!-- specific settings -->
 			<property name="eclipselink.logging.level" value="info" />
