@@ -45,9 +45,9 @@
 			<property name="javax.persistence.jdbc.driver" value="com.mysql.jdbc.Driver" />
 			<!-- MB 32 on morphbank -->
 			<property name="javax.persistence.jdbc.url"
-				value="jdbc:mysql://10.145.254.16:3306/mbsample?zeroDateTimeBehavior=convertToNull&amp;useUnicode=true&amp;characterEncoding=UTF-8" />
-			<property name="javax.persistence.jdbc.user" value="morphbank-dev" />
-			<property name="javax.persistence.jdbc.password" value="1234rewq" />
+				value="jdbc:mysql://10.145.254.14:3306/MB32?zeroDateTimeBehavior=convertToNull&amp;useUnicode=true&amp;characterEncoding=UTF-8" />
+			<property name="javax.persistence.jdbc.user" value="mbscripts" />
+			<property name="javax.persistence.jdbc.password" value="bTQH2UCjhxDLpU7S" />
 			<!-- -->
 			<!-- specific settings -->
 			<property name="eclipselink.logging.level" value="info" />
