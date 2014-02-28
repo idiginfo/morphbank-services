@@ -7,27 +7,27 @@
     <servlet-class> net.morphbank.mbsvc3.request.RequestServlet </servlet-class>
     <init-param>
       <param-name>persistence</param-name>
-      <param-value>localhost</param-value>
+      <param-value>morphbank-dev</param-value>
     </init-param>
     <init-param>
       <param-name>logfile</param-name>
-      <param-value>/var/lib/tomcat7/webapps/mb3/mbdrequest.log</param-value>
+      <param-value>/usr/share/tomcat7/webapps/mbsvc3/mbdrequest.log</param-value>
     </init-param>
     <init-param>
       <param-name>filepath</param-name>
-      <param-value>/var/lib/tomcat7/webapps/mb3/xmlfiles/</param-value>
+      <param-value>/usr/share/tomcat7/webapps/mbsvc3/xmlfiles/</param-value>
     </init-param>
     <init-param>
       <param-name>serviceprefix</param-name>
-      <param-value>http://services.morphbank.net/mb3/request?</param-value>
+      <param-value>http://services.dev.biospex.org/mbsvc3/request?</param-value>
     </init-param>
     <init-param>
       <param-name>webserver</param-name>
-      <param-value>http://www.morphbank.net/</param-value>
+      <param-value>http://www.dev.biospex.org/</param-value>
     </init-param>
     <init-param>
       <param-name>remoteserver</param-name>
-      <param-value>http://services.morphbank.net/mb3/request?</param-value>
+      <param-value>http://services.dev.biospex.org/mbsvc3/request?</param-value>
     </init-param>
   </servlet>
   <servlet>
@@ -35,15 +35,15 @@
     <servlet-class> net.morphbank.mbsvc3.request.FlickrServlet </servlet-class>
     <init-param>
       <param-name>persistence</param-name>
-      <param-value>localhost</param-value>
+      <param-value>morphbank-dev</param-value>
     </init-param>
     <init-param>
       <param-name>filepath</param-name>
-      <param-value>/var/lib/tomcat7/webapps/mb3/xmlfiles/</param-value>
+      <param-value>/usr/share/tomcat7/webapps/mbsvc3/xmlfiles/</param-value>
     </init-param>
     <init-param>
       <param-name>serviceprefix</param-name>
-      <param-value>http://services.morphbank.net/mb3/flickr?</param-value>
+      <param-value>http://services.dev.biospex.org/mbsvc3/flickr?</param-value>
     </init-param>
   </servlet>
   <servlet>
@@ -51,19 +51,19 @@
     <servlet-class> net.morphbank.mbsvc3.webservices.RestService </servlet-class>
     <init-param>
       <param-name>persistence</param-name>
-      <param-value>localhost</param-value>
+      <param-value>morphbank-dev</param-value>
     </init-param>
     <init-param>
       <param-name>filepath</param-name>
-      <param-value>/var/lib/tomcat7/webapps/mb3/xmlfiles/</param-value>
+      <param-value>/usr/share/tomcat7/webapps/mbsvc3/xmlfiles/</param-value>
     </init-param>
     <init-param>
       <param-name>serviceprefix</param-name>
-      <param-value>http://services.morphbank.net/mb3/request?</param-value>
+      <param-value>http://services.dev.biospex.org/mbsvc3/request?</param-value>
     </init-param>
     <init-param>
       <param-name>ip_allowed</param-name>
-      <param-value>/var/lib/tomcat7/webapps/mb3/listIPs.properties</param-value>
+      <param-value>/usr/share/tomcat7/webapps/mbsvc3/listIPs.properties</param-value>
     </init-param>
   </servlet>
   <servlet>
@@ -72,15 +72,15 @@
 			net.morphbank.mbsvc3.webservices.RestServiceExcelUpload </servlet-class>
     <init-param>
       <param-name>persistence</param-name>
-      <param-value>localhost</param-value>
+      <param-value>morphbank-dev</param-value>
     </init-param>
     <init-param>
       <param-name>filepath</param-name>
-      <param-value>/var/lib/tomcat7/webapps/mb3/xmlfiles/</param-value>
+      <param-value>/usr/share/tomcat7/webapps/mbsvc3/xmlfiles/</param-value>
     </init-param>
     <init-param>
       <param-name>propertyFile</param-name>
-      <param-value>/var/lib/tomcat7/webapps/mb3/loadData.properties</param-value>
+      <param-value>/usr/share/tomcat7/webapps/mbsvc3/loadData.properties</param-value>
     </init-param>
   </servlet>
   <servlet>
@@ -88,11 +88,11 @@
     <servlet-class> net.morphbank.mbsvc3.webservices.Uploader </servlet-class>
     <init-param>
       <param-name>persistence</param-name>
-      <param-value>localhost</param-value>
+      <param-value>morphbank-dev</param-value>
     </init-param>
     <init-param>
       <param-name>filepath</param-name>
-      <param-value>/var/lib/tomcat7/webapps/mb3/xmlfiles/</param-value>
+      <param-value>/usr/share/tomcat7/webapps/mbsvc3/xmlfiles/</param-value>
     </init-param>
   </servlet>
   <servlet>
@@ -100,15 +100,15 @@
     <servlet-class>net.morphbank.mbsvc3.webservices.Validate</servlet-class>
     <init-param>
       <param-name>persistence</param-name>
-      <param-value>localhost</param-value>
+      <param-value>morphbank-dev</param-value>
     </init-param>
     <init-param>
       <param-name>propertyFile</param-name>
-      <param-value>/var/lib/tomcat7/webapps/mb3/loadData.properties</param-value>
+      <param-value>/usr/share/tomcat7/webapps/mbsvc3/loadData.properties</param-value>
     </init-param>
     <init-param>
       <param-name>filepath</param-name>
-      <param-value>/var/lib/tomcat7/webapps/mb3/xmlfiles/</param-value>
+      <param-value>/usr/share/tomcat7/webapps/mbsvc3/xmlfiles/</param-value>
     </init-param>
   </servlet>
   <servlet-mapping>
