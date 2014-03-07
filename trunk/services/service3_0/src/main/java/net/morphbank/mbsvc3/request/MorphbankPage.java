@@ -37,6 +37,7 @@ public class MorphbankPage {
 	public void printHeader(String title, String subtitle, String rssFeed) {
 		this.title = title;
 		this.subtitle = subtitle;
+		out.println("<!DOCTYPE html >");
 		out.println("<html xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"en\" xml:lang=\"en\">");
 		out.println("<head>");
 		out.print("<title>");
@@ -49,18 +50,19 @@ public class MorphbankPage {
 				+ "href=\"http://www.morphbank.net/style/webImages/mLogo16.ico\" />");
 		if (rssFeed != null) {
 			out.print("<link rel=\"alternate\" href=\"");
-			out.print(rssFeed);
+			out.print(encode(rssFeed));
 			out.println("\"");
-			out.println("type=\"application/rss+xml\"" + " title=\"\" id=\"morphbank images\" \\>");
+			out.println("type=\"application/rss+xml\""
+					+ " title=\"\" id=\"morphbankimages\" />");
 		}
 		out.println("</head>");
 		out.println("<body>");
 		out.println("<div id=\"main\">");
 		out.println("<div class=\"mainHeader\">");
 		out.println("<div class=\"mainHeaderLogo\"> "
-				+ "<a href=\"http://www.morphbank.net/index.php\"><img border=\"0\" "
+				+ "<a href=\"http://www.morphbank.net/index.php\"><img "
 				+ "src=\"http://www.morphbank.net/style/webImages/mbLogoHeader.png\" "
-				+ "alt=\"logo\" /></a>&nbsp; </div>");
+				+ "alt=\"logo\" /></a> </div>");
 		out.println("<div class=\"mainHeaderTitle\">");
 		out.println(title);
 		out.println("</div>");
@@ -91,12 +93,31 @@ public class MorphbankPage {
 		return outStr;
 	}
 
-	static final String POPUP_STYLE = "<style>#boxes a span {display: none;}\n"
-			+ "#boxes a:hover span{\n" + "display: block;\n" + "position: absolute;\n"
-			+ "top: 100px;\n" + "left: 0px;\n" + "width:150px;\n" + "margin: 0px;\n"
-			+ "padding: 10px;\n" + "color: #335500;\n" + "font-weight: normal;\n"
-			+ "background: #e5e5e5;\n" + "text-align: left;\n" + "border: 1px solid #666;\n"
-			+ "z-index:1000;\n" + "}</style> ";
+	public static String encodeAmp(String str) {
+		String outStr = null;
+		try {
+			
+			outStr = str.replace("&", "&amp;");
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+		return outStr;
+	}
+
+	static final String POPUP_STYLE = "<style type=\"text/css\" scoped>#boxes a span {display: none;}\n"
+			+ "#boxes a:hover span{\n"
+			+ "display: block;\n"
+			+ "position: absolute;\n"
+			+ "top: 100px;\n"
+			+ "left: 0px;\n"
+			+ "width:150px;\n"
+			+ "margin: 0px;\n"
+			+ "padding: 10px;\n"
+			+ "color: #335500;\n"
+			+ "font-weight: normal;\n"
+			+ "background: #e5e5e5;\n"
+			+ "text-align: left;\n"
+			+ "border: 1px solid #666;\n" + "z-index:1000;\n" + "}</style> ";
 
 	public void printThumbHeader(String title, String subtitle, int numResults,
 			int numResultsReturned, int firstResult, String rssFeed) {
@@ -104,11 +125,12 @@ public class MorphbankPage {
 		out.println(POPUP_STYLE);
 		// TODO print numresults, etc.
 		out.println("<h3> Number of Results: " + numResults + "</h3>");
-		out.println("<h3> Number of Results Returned: " + numResultsReturned + "</h3>");
+		out.println("<h3> Number of Results Returned: " + numResultsReturned
+				+ "</h3>");
 		out.println("<h3> First Result: " + firstResult + "</h3>");
-		out.print("<p><h2><a target=\"googlemap\" href=\"http://maps.google.com?q=");
+		out.print("<h2><a target=\"googlemap\" href=\"http://maps.google.com?q=");
 		out.print(encode(rssFeed));
-		out.println("\"/>Click for Google Map display of geolocated items</a></h2></p>");
+		out.println("\">Click for Google Map display of geolocated items</a></h2>");
 		out.println("<ul id=\"boxes\">");
 		thumbRowCount = 0;
 	}
@@ -131,7 +153,7 @@ public class MorphbankPage {
 		if (obj.getThumbURL() == null) {
 			thumbUrl = "http://www.morphbank.net/style/webImages/defaultThumbNailNotPub.png";
 		} else {
-			thumbUrl = obj.getFullThumbURL();
+			thumbUrl = encodeAmp(obj.getFullThumbURL());
 		}
 		String popupHtml = getPopupHtml(obj);
 		double latitude = 0.0;
@@ -144,43 +166,40 @@ public class MorphbankPage {
 				longitude = locality.getLongitude();
 			}
 		}
-		printThumbnail(showUrl, thumbUrl, objectType, id, popupHtml, isGeolocated, latitude,
-				longitude);
+		printThumbnail(showUrl, thumbUrl, objectType, id, popupHtml,
+				isGeolocated, latitude, longitude);
 	}
 
-	public void printThumbnail(String showUrl, String thumbUrl, String objectType, int id,
-			String popupHtml, boolean isGeolocated, double latitude, double longitude) {
+	public void printThumbnail(String showUrl, String thumbUrl,
+			String objectType, int id, String popupHtml, boolean isGeolocated,
+			double latitude, double longitude) {
 		out.print("<li style=\"height: 180px\"><a href=\"");
 		out.print(showUrl);
 		out.println("\">");
-		out.print("<img src=\"");
-		out.print(thumbUrl);
-		out.println("\">");
+		out.print(getImgThumbTag(thumbUrl, id));
 		out.println("<br/>" + objectType + ": " + id);
 		out.println(popupHtml);
 		out.println("</a>");
 		// make google map link
 		if (isGeolocated) {
-			out.print("<br/><a target=\"google\" href=\"http://maps.google.com/maps?z=8&q=");
-			out.print(latitude);
-			out.print(",");
-			out.print(longitude);
+			out.print("<br/><a target=\"google\" href=\""
+					+ "http://maps.google.com/maps?z=8&amp;q=" + latitude + ","
+					+ longitude);
 			out.println("\">Click for Google Map</a>");
 		}
 		out.println("</li>");
 	}
 
-	public void printOcrThumb(BaseObject obj, int imageId, int specId, String label) {
+	public void printOcrThumb(BaseObject obj, int imageId, int specId,
+			String label) {
 		out.print("<li style=\"width: 120px; height: 180px\">");
-		out.print("<a href=\"http://morphbank2.scs.fsu.edu:" + "8080/mb/request?id=");
-		out.print(obj.getId());
-		out.println("&method=ocr\">");
+		String url = "http://morphbank2.scs.fsu.edu:8080/mb/request?id="
+				+ obj.getId() + "&amp;method=ocr";
+		out.print("<a href=\"" + url + "\">");
 		if (obj.getThumbURL() == null) {
 			out.println("No image available");
 		} else {
-			out.print("<img src=\"");
-			out.print(obj.getFullThumbURL());
-			out.println("\">");
+			out.print(getImgThumbTag(obj.getFullThumbURL(), imageId));
 		}
 		out.println("</a>");
 		// print identifying info
@@ -203,13 +222,24 @@ public class MorphbankPage {
 		printOcrFooter();
 	}
 
-	public void printOcrPage(PrintWriter out, int imageId, int specimenId, Ocr ocr) {
+	public String getImgThumbTag(String thumbUrl, int imageId) {
+		return getImgTag(thumbUrl, imageId, "thumbnail image of " + imageId);
+	}
+
+	public String getImgTag(String thumbUrl, int imageId, String altText) {
+		String imgTag = "<img src=\"" + thumbUrl + "\" alt=\"" + altText
+				+ "\"/>";
+		return imgTag;
+	}
+
+	public void printOcrPage(PrintWriter out, int imageId, int specimenId,
+			Ocr ocr) {
 		printOcrHeader("OCR Results");
 		out.println("   <div class=\"mainGenericContainer\" style=\"width:760px\"> ");
 		out.println("<div><table><tr><td>");
-		out.print("<img src=\"http://morphbank.net?imgType=thumb&id=");
-		out.print(imageId);
-		out.println("\"></td><td>");
+		out.print(getImgThumbTag("http://morphbank.net?imgType=thumb&amp;id="
+				+ imageId, imageId));
+		out.println("</td><td>");
 		out.print("<h2>Image Id is: ");
 		out.print(imageId);
 		out.print(", Specimen Id is: ");
@@ -217,21 +247,22 @@ public class MorphbankPage {
 		out.println("</h2>\n<br /><a href=\"http://morphbank.net?id=");
 		out.print(imageId);
 		out.println("\">Morphbank page for image</a> ");
-		out.print("<br /><a href=\"http://morphbank.net?id=");
-		out.print(imageId);
-		out.print("&imgType=jpeg\">Jpeg file for image</a> ");
+		out.print("<br /><a href=\""
+				+ getImgThumbTag("http://morphbank.net?id=" + imageId
+						+ "&amp;imgType=jpeg", imageId)
+				+ "Jpeg file for image</a> ");
 		out.print("</a>\n<br /><a href=\"http://morphbank.net/Show/imageViewer?id=");
 		out.print(imageId);
 		out.println("\" target=\"_blank\">Detail view of image</a>" + "");
 		out.print("<br /><a href=\"?id=");
 		out.print(specimenId);
 		out.println("\" target=\"_blank\">Specimen metadata</a>");
-		out.print("<br /><a href=\"?method=herbis&id=");
+		out.print("<br /><a href=\"" + "?method=herbis&amp;id=");
 		out.print(specimenId);
 		out.println("\" target=\"_blank\">Herbis analysis</a>");
 		out.println("<p>barCode is: ");
 		out.println(ocr.getBarCode());
-		out.println("</p></td></tr></table>\n<div>OCR is: <div><pre>");
+		out.println("</p></td></tr></div>\n<div>OCR is: <div><pre>");
 		out.println(ocr.getOcr());
 		out.println("</pre></div></div></div></div>");
 
@@ -240,7 +271,7 @@ public class MorphbankPage {
 	}
 
 	public void printOcrHeader(String title) {
-		out.println("<html><head><title>");
+		out.println("<html><head><meta charset=\"utf-8\"/><title>");
 		out.print(title);
 		out.print("</title><link rel=\"stylesheet\" ");
 		out.print("href=\"http://www.morphbank.net/style/morphbank2.css\" ");
@@ -252,7 +283,7 @@ public class MorphbankPage {
 		out.println("   <div class=\"mainHeader\"> ");
 		out.println("     <div class=\"mainHeaderLogo\"> ");
 		out.println("<a href=\"http://www.morphbank.net/index.php\"> ");
-		out.print(" <img border=\"0\"  ");
+		out.print(" <img ");
 		out.print("src=\"http://www.morphbank.net/style/webImages/mbLogoHeader.png\"");
 		out.println(" alt=\"logo\"/>");
 		out.println("</a></div> ");
@@ -282,12 +313,13 @@ public class MorphbankPage {
 		String popupHtml = getPopupHtml(xmlObj, list);
 		double latitude = 0.0;
 		double longitude = 0.0;
-		printThumbnail(showUrl, thumbUrl, objectType, id, popupHtml, false, latitude, longitude);
+		printThumbnail(showUrl, thumbUrl, objectType, id, popupHtml, false,
+				latitude, longitude);
 	}
 
 	String getRemoteShowUrl(int id) {
 		String showRemote = MorphbankConfig.getServicePrefix() + "method="
-				+ RequestParams.METHOD_SHOW + "&id=" + id;
+				+ RequestParams.METHOD_SHOW + "&amp;id=" + id;
 		return showRemote;
 	}
 
