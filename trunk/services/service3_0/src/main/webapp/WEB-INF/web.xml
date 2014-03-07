@@ -7,15 +7,15 @@
     <servlet-class> net.morphbank.mbsvc3.request.RequestServlet </servlet-class>
     <init-param>
       <param-name>persistence</param-name>
-      <param-value>morphbank-dev</param-value>
+      <param-value>morphbank</param-value>
     </init-param>
     <init-param>
       <param-name>logfile</param-name>
-      <param-value>/usr/share/tomcat7/webapps/mbsvc3/mbdrequest.log</param-value>
+      <param-value>${CatalinaHome}/webapps/mbsvc3/mbdrequest.log</param-value>
     </init-param>
     <init-param>
       <param-name>filepath</param-name>
-      <param-value>/usr/share/tomcat7/webapps/mbsvc3/xmlfiles/</param-value>
+      <param-value>${CatalinaHome}/webapps/mbsvc3/xmlfiles/</param-value>
     </init-param>
     <init-param>
       <param-name>serviceprefix</param-name>
@@ -35,11 +35,11 @@
     <servlet-class> net.morphbank.mbsvc3.request.FlickrServlet </servlet-class>
     <init-param>
       <param-name>persistence</param-name>
-      <param-value>morphbank-dev</param-value>
+      <param-value>morphbank</param-value>
     </init-param>
     <init-param>
       <param-name>filepath</param-name>
-      <param-value>/usr/share/tomcat7/webapps/mbsvc3/xmlfiles/</param-value>
+      <param-value>${CatalinaHome}/webapps/mbsvc3/xmlfiles/</param-value>
     </init-param>
     <init-param>
       <param-name>serviceprefix</param-name>
@@ -51,11 +51,11 @@
     <servlet-class> net.morphbank.mbsvc3.webservices.RestService </servlet-class>
     <init-param>
       <param-name>persistence</param-name>
-      <param-value>morphbank-dev</param-value>
+      <param-value>morphbank</param-value>
     </init-param>
     <init-param>
       <param-name>filepath</param-name>
-      <param-value>/usr/share/tomcat7/webapps/mbsvc3/xmlfiles/</param-value>
+      <param-value>${CatalinaHome}/webapps/mbsvc3/xmlfiles/</param-value>
     </init-param>
     <init-param>
       <param-name>serviceprefix</param-name>
@@ -63,7 +63,7 @@
     </init-param>
     <init-param>
       <param-name>ip_allowed</param-name>
-      <param-value>/usr/share/tomcat7/webapps/mbsvc3/listIPs.properties</param-value>
+      <param-value>${CatalinaHome}/webapps/mbsvc3/listIPs.properties</param-value>
     </init-param>
   </servlet>
   <servlet>
@@ -72,15 +72,15 @@
 			net.morphbank.mbsvc3.webservices.RestServiceExcelUpload </servlet-class>
     <init-param>
       <param-name>persistence</param-name>
-      <param-value>morphbank-dev</param-value>
+      <param-value>morphbank</param-value>
     </init-param>
     <init-param>
       <param-name>filepath</param-name>
-      <param-value>/usr/share/tomcat7/webapps/mbsvc3/xmlfiles/</param-value>
+      <param-value>${CatalinaHome}/webapps/mbsvc3/xmlfiles/</param-value>
     </init-param>
     <init-param>
       <param-name>propertyFile</param-name>
-      <param-value>/usr/share/tomcat7/webapps/mbsvc3/loadData.properties</param-value>
+      <param-value>${CatalinaHome}/webapps/mbsvc3/loadData.properties</param-value>
     </init-param>
   </servlet>
   <servlet>
@@ -88,11 +88,11 @@
     <servlet-class> net.morphbank.mbsvc3.webservices.Uploader </servlet-class>
     <init-param>
       <param-name>persistence</param-name>
-      <param-value>morphbank-dev</param-value>
+      <param-value>morphbank</param-value>
     </init-param>
     <init-param>
       <param-name>filepath</param-name>
-      <param-value>/usr/share/tomcat7/webapps/mbsvc3/xmlfiles/</param-value>
+      <param-value>${CatalinaHome}/webapps/mbsvc3/xmlfiles/</param-value>
     </init-param>
   </servlet>
   <servlet>
@@ -100,15 +100,15 @@
     <servlet-class>net.morphbank.mbsvc3.webservices.Validate</servlet-class>
     <init-param>
       <param-name>persistence</param-name>
-      <param-value>morphbank-dev</param-value>
+      <param-value>morphbank</param-value>
     </init-param>
     <init-param>
       <param-name>propertyFile</param-name>
-      <param-value>/usr/share/tomcat7/webapps/mbsvc3/loadData.properties</param-value>
+      <param-value>${CatalinaHome}/webapps/mbsvc3/loadData.properties</param-value>
     </init-param>
     <init-param>
       <param-name>filepath</param-name>
-      <param-value>/usr/share/tomcat7/webapps/mbsvc3/xmlfiles/</param-value>
+      <param-value>${CatalinaHome}/webapps/mbsvc3/xmlfiles/</param-value>
     </init-param>
   </servlet>
   <servlet-mapping>
