@@ -15,6 +15,7 @@
 				<directory>src</directory>
 				<excludes>
 					<exclude>**/*.java</exclude>
+					<exclude>META-INF/persistence.xml</exclude>
 				</excludes>
 			</resource>
 		</resources>
