@@ -44,6 +44,7 @@ public class UsageExample {
 		
 		for (ArchiveFile extension: extensions){
 			ArchiveField id = extension.getId();
+			
 			Map<ConceptTerm, ArchiveField> fields = extension.getFields();
 			t = extension.getRowType();
 			System.out.println("extension has row type: "+t);
