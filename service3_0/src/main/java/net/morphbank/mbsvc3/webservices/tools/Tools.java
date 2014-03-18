@@ -16,7 +16,7 @@ public class Tools {
 	public static String createFolder(String fileName) {
 		Date date = new Date();
 		byte[] bytes = DigestUtils.sha(fileName + date.getTime());
-		String folder = DigestUtils.sha256Hex(bytes);
+		String folder = DigestUtils.shaHex(bytes);
 		boolean success = new File(MorphbankConfig.getFilepath() + folder).mkdir();
 		if (!success) {
 			System.err.println("Error creating a folder.");
