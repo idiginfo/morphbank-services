@@ -8,23 +8,28 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import net.morphbank.mbsvc3.mapsheet.FieldMapper;
+import net.morphbank.mbsvc3.maptoxml.FieldMapper;
+import net.morphbank.mbsvc3.maptoxml.SourceObject;
 
 //import org.apache.poi.ss.usermodel.Cell;
 import org.gbif.dwc.record.Record;
 import org.gbif.dwc.text.Archive;
 import org.gbif.dwc.text.ArchiveFactory;
 import org.gbif.dwc.text.StarRecord;
+import org.gbif.utils.file.ClosableIterator;
 
 public class DwcaFieldMapper implements FieldMapper {
 
 	private Archive dwcaArchive;
-	private ArrayList<Record> records = new ArrayList<Record>();
-	int lastLine;
-	int currentLine;
+	private ClosableIterator<StarRecord> sourceIterator;
+	StarRecord currentRecord = null;
+	Iterator<Record> extensionIterator;
 
 	public static void extractFile(InputStream inStream, OutputStream outStream)
 			throws IOException {
@@ -50,9 +55,8 @@ public class DwcaFieldMapper implements FieldMapper {
 					(new File(zipentry.getName())).mkdir();
 					continue;
 				}
-				String fileName = zipDirName+"/"+zipentry.getName();
-				System.out.println("Name of Extract fille : "
-						+ fileName);
+				String fileName = zipDirName + "/" + zipentry.getName();
+				System.out.println("Name of Extract fille : " + fileName);
 
 				extractFile(zip.getInputStream(zipentry), new FileOutputStream(
 						fileName));
@@ -64,19 +68,58 @@ public class DwcaFieldMapper implements FieldMapper {
 		}
 	}
 
+	String coreType = "specimen";
+	boolean coreIsSpecimen = true;
+	String extensionType = "image";
+	String extensionName = "http://rs.tdwg.org/ac/terms/multimedia";
+
 	public DwcaFieldMapper(String fileName) {
 		try {
 			dwcaArchive = ArchiveFactory.openArchive(new File(fileName));
-			//lastLine = dwcaArchive.
-			for (StarRecord record : dwcaArchive) {
-				records.add(record.core());
-			}
-			lastLine = records.size();
+			sourceIterator = dwcaArchive.iterator();
+			// TODO detect the core type and the extension type.
+			// use this info to set sourceobject type string and extension name
 		} catch (Exception e) {
-			//e.printStackTrace();
+			// e.printStackTrace();
 		}
 	}
 
+	static SourceObject createSourceObject(boolean isSpecimen, Record record) {
+		if (isSpecimen)
+			return new DwcaOccurrenceObject("specimen", record);
+		return new DwcaExtensionObject("image", record);
+	}
+
+	@Override
+	public SourceObject next() {
+		// if there's an available media extension object return it
+		if (currentRecord != null && extensionIterator != null
+				&& extensionIterator.hasNext()) {
+			return createSourceObject(!coreIsSpecimen, extensionIterator.next());
+		}
+		// get next star record
+		currentRecord = sourceIterator.next();
+		// set up iterator for extension records
+		Map<String, List<Record>> extensions = currentRecord.extensions();
+		List<Record> extensionRecords = extensions
+				.get(extensionName);
+		extensionIterator = extensionRecords.iterator();
+		return createSourceObject(coreIsSpecimen, currentRecord.core());
+	}
+
+	@Override
+	public boolean hasNext() {
+		if (currentRecord != null && extensionIterator != null
+				&& extensionIterator.hasNext())
+			return true;
+		return sourceIterator.hasNext();
+	}
+
+	@Override
+	public void remove() {
+		// TODO Auto-generated method stub
+
+	}
 
 	@Override
 	public String getValue(int index) {
@@ -84,7 +127,11 @@ public class DwcaFieldMapper implements FieldMapper {
 		return null;
 	}
 
-
+	@Override
+	public String getValue(String fieldName) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 	@Override
 	public Date getValueDate(String fieldName) {
@@ -93,76 +140,13 @@ public class DwcaFieldMapper implements FieldMapper {
 	}
 
 	@Override
-	public boolean hasNext() {
-		return currentLine < lastLine;
-	}
-
-	@Override
-	public void getNextLine() {
-		if (hasNext()) {
-			currentLine++;
-		}
-	}
-
-	@Override
 	public String[] getHeaders() {
-		return null;
-	}
-
-	@Override
-	public int moveToLine(int lineNumber) {
-		return currentLine = lineNumber;
-	}
-
-	@Override
-	public String getFileName() {
 		// TODO Auto-generated method stub
 		return null;
-	}
-
-	@Override
-	public int getCurrentLineNumber() {
-		return currentLine;
 	}
 
 	@Override
 	public String getValueFormula(String fieldName) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public String getUserName() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public int getUserId() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	public String getSubmitterName() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public int getSubmitterId() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	public String getGroupName() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public int groupId() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public String getValue(String fieldName) {
 		// TODO Auto-generated method stub
 		return null;
 	}

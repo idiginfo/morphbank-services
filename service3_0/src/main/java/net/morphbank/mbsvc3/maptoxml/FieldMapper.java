@@ -12,10 +12,12 @@
 package net.morphbank.mbsvc3.maptoxml;
 
 import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
 
 import org.apache.poi.ss.usermodel.Cell;
 
-public interface FieldMapper {
+public interface FieldMapper extends Iterator<SourceObject> {
 	
 	//public void setValues(String line);
 	
@@ -27,18 +29,10 @@ public interface FieldMapper {
 	
 	public boolean hasNext();
 	
-	public void getNextLine();
-	
-	//public String strip(String value);
 
 	public String[] getHeaders() ;
 
-	public int moveToLine(int lineNumber);
-	
-	public String getFileName();
-	
-	public int getCurrentLineNumber();
-
 	public String getValueFormula(String fieldName);
+
 
 }

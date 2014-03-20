@@ -18,6 +18,8 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.poi.ss.usermodel.Cell;
@@ -71,6 +73,42 @@ public class MapSourceToXml {
 		// dateToPublish = this.dateToPublish();
 	}
 
+	public Request createRequestFromSource(FieldMapper source) {
+		// alternative FieldMapper implements Iterator<SourceObjectL>
+		request = new Request();
+		request.setSubmitter(this.submitter);
+		Insert insert = new Insert();
+		insert.setSubmitter(this.submitter);
+		request.getInsert().add(insert);
+		Set<String> specimenIds = new HashSet<String>();// keep track of
+		// specimen ids
+		int lineNumber = 0;
+
+		// iterate through objects
+		while (source.hasNext()) {
+			SourceObject sourceObj = source.next();
+			
+			XmlBaseObject xmlObject = new XmlBaseObject(sourceObj.getSourceType());
+			setFields(xmlObject, sourceObj);
+			insert.getXmlObjectList().add(xmlObject);
+		}
+
+		return request;
+
+	}
+
+	private void setFields(XmlBaseObject xmlObject, SourceObject sourceObj) {
+		while (sourceObj.hasNext()){
+			Field field = sourceObj.next();
+			// set the field of the xmlObject
+			boolean success = field.setXmlValue(xmlObject);
+			if(!success){
+				field.addUserProperty(xmlObject);
+			}
+		}
+		
+	}
+
 	private Date dateToPublish() {
 		// TODO fix this
 		// if (fieldMapper instanceof XlsFieldMapper) {
@@ -84,92 +122,6 @@ public class MapSourceToXml {
 		return nextYear.getTime();
 	}
 
-	public Request createRequestFromFile(String fileName,
-			Credentials submitter, Credentials owner, PrintWriter report) {
-		return createRequestFromFile(fileName, submitter, owner, report, -1, -1);
-	}
-
-	public Request createRequestFromFile(String fileName,
-			Credentials submitter, Credentials owner, PrintWriter report,
-			int numLines, int firstLine) {
-		String extension = fileName.substring(fileName.indexOf('.') + 1);
-		// TODO fix code below
-
-		// if ("xls".equals(extension)) {
-		// XlsFieldMapper xlsFieldMapper = new XlsFieldMapper(fileName);
-		// getCredentials(xlsFieldMapper);
-		// this.submitter = getSubmitter(submitter);
-		// this.contributor = getContributor(owner);
-		// fieldMapper = xlsFieldMapper;
-		// fields = new SpreadsheetFields();
-		// } else if ("csv".equals(extension)) {
-		// fieldMapper = new TextFieldMapper(fileName);
-		// } else { // dwc-Archive folder. filename is the actual folder, not
-		// the
-		// // zipped archive
-		// MapDwcaToXml mapDwca = new MapDwcaToXml();
-		// return mapDwca.createRequestFromFile(fileName, null, null, null);
-		// }
-		fieldMapper.moveToLine(firstLine - 1);
-		request = new Request();
-		request.setSubmitter(this.submitter);
-		Insert insert = new Insert();
-		insert.setSubmitter(this.submitter);
-		request.getInsert().add(insert);
-		Set<String> specimenIds = new HashSet<String>();// keep track of
-		// specimen ids
-		int lineNumber = 0;
-		while (fieldMapper.hasNext()) {
-			int spreadSheetLineNumber = firstLine + lineNumber + 1;
-			fieldMapper.getNextLine();
-			String origFileName = fieldMapper.getValue("Original File Name");
-			if (origFileName.length() > 0) {
-				if (fieldMapper.getValue(VIEW_MORPHBANK_ID_FIELD)
-						.equalsIgnoreCase("")) {
-					XmlBaseObject xmlView;
-					// TODO fix below
-					// if (fieldMapper instanceof XlsFieldMapper)
-					// xmlView = createXmlView(spreadSheetLineNumber);
-					// else
-					xmlView = createXmlView(spreadSheetLineNumber);
-					if (xmlView != null) {
-						xmlView.setOwner(this.contributor);
-						insert.getXmlObjectList().add(xmlView);
-					}
-				}
-				// switched image and specimen order
-				XmlBaseObject xmlImage;
-				// TODO fix below
-				// if (fieldMapper instanceof XlsFieldMapper) {
-				// xmlImage = createXmlImage(spreadSheetLineNumber);
-				// } else {
-				xmlImage = createXmlImage(spreadSheetLineNumber);
-				// }
-				xmlImage.setOwner(this.contributor);
-				insert.getXmlObjectList().add(xmlImage);
-				XmlBaseObject xmlSpecimen;
-				// TODO fix below
-				// if (fieldMapper instanceof XlsFieldMapper) {
-				// xmlSpecimen = createXmlSpecimen(spreadSheetLineNumber);
-				// } else {
-				xmlSpecimen = createXmlSpecimen(spreadSheetLineNumber);
-				// }
-				xmlSpecimen.setOwner(this.contributor);
-				insert.getXmlObjectList().add(xmlSpecimen);
-
-			}
-			lineNumber++;
-			if (numLines >= 1 && lineNumber >= numLines)
-				break;
-		}
-		if (0 == lineNumber) {
-			// no lines!
-			return null;
-		}
-		System.out.println("Lines: " + firstLine + " to line "
-				+ (firstLine + lineNumber - 1) + " processed");
-		return request;
-	}
 
 	private Credentials getContributor(Credentials owner) {
 		if (userId > 0 && groupId > 0)
@@ -219,14 +171,14 @@ public class MapSourceToXml {
 	// .getCell(1).getStringCellValue());
 	// }
 
-	private void getCredentials(DwcaFieldMapper fieldMapper) {
-		userName = fieldMapper.getUserName();
-		userId = fieldMapper.getUserId();
-		submitterName = fieldMapper.getSubmitterName();
-		submitterId = fieldMapper.getSubmitterId();
-		groupName = fieldMapper.getGroupName();
-		groupId = fieldMapper.groupId();
-	}
+//	private void getCredentials(DwcaFieldMapper fieldMapper) {
+//		userName = fieldMapper.getUserName();
+//		userId = fieldMapper.getUserId();
+//		submitterName = fieldMapper.getSubmitterName();
+//		submitterId = fieldMapper.getSubmitterId();
+//		groupName = fieldMapper.getGroupName();
+//		groupId = fieldMapper.groupId();
+//	}
 
 	/**
 	 * Keep track of local id within spreadsheet
@@ -271,7 +223,6 @@ public class MapSourceToXml {
 		addLocalId(xmlView);
 		return xmlView;
 	}
-
 
 	// constants used to create GUIDs for the fsuherb ATOL objects
 	// note: duplicated in MorphbankConfig

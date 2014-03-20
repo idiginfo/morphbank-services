@@ -96,89 +96,7 @@ public class MapDwcaToXml {
 		return nextYear.getTime();
 	}
 
-	public Request createRequestFromFile(String fileName,
-			Credentials submitter, Credentials owner, PrintWriter report) {
-		return createRequestFromFile(fileName, submitter, owner, report, -1, -1);
-	}
-
-	public Request createRequestFromFile(String zipDirName,
-			Credentials submitter, Credentials owner, PrintWriter report,
-			int numLines, int firstLine) {
-		// String extension = zipDirName.substring(zipDirName.indexOf('.') + 1);
-		// zipped archive
-		// DwcaFieldMapper dwcaFieldMapper = new DwcaFieldMapper(fileName);
-
-		try {
-			dwcArchive = ArchiveFactory.openArchive(new File(zipDirName));
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		specimenMapper = new DwcaFieldMapper(zipDirName + "/occurrence.txt");
-		mediaMapper = new DwcaFieldMapper(zipDirName + "/media.txt");
-		relationshipMapper = new DwcaFieldMapper(zipDirName
-				+ "/resourcerelationship.txt");
-		measurementMapper = new DwcaFieldMapper(zipDirName
-				+ "/.measurement.txt");
-
-		// getCredentials(dwcaFieldMapper);
-		// this.submitter = getSubmitter(submitter);
-		// this.contributor = getContributor(owner);
-		// fieldMapper = dwcaFieldMapper;
-		// fields = new DwcaFields();
-		// TODO Process occurrence, then relationships and measurements, then
-		// media,
-		// specimenMapper.moveToLine(firstLine - 1);
-		// request = new Request();
-		// request.setSubmitter(this.submitter);
-		Insert insert = new Insert();
-		insert.setSubmitter(this.submitter);
-		request.getInsert().add(insert);
-		int lineNumber = 0;
-		// iterate though specimens
-		while (specimenMapper.hasNext()) {
-			int spreadSheetLineNumber = firstLine + lineNumber + 1;
-			// fieldMapper.getNextLine();
-			// String origFileName = fieldMapper.getValue("Original File Name");
-			// if (origFileName.length() > 0) {
-			// if (fieldMapper.getValue(VIEW_MORPHBANK_ID_FIELD)
-			// .equalsIgnoreCase("")) {
-			// XmlBaseObject xmlView;
-			// if (fieldMapper instanceof XlsFieldMapper)
-			// xmlView = createXmlView(spreadSheetLineNumber);
-			// else
-			// xmlView = createXmlView(spreadSheetLineNumber);
-			// if (xmlView != null) {
-			// xmlView.setOwner(this.contributor);
-			// insert.getXmlObjectList().add(xmlView);
-			// }
-			// }
-			// }
-		}
-		// iterate through media
-		while (mediaMapper.hasNext()) {
-			XmlBaseObject xmlImage = new XmlBaseObject("image");
-			xmlImage.setOwner(this.contributor);
-			insert.getXmlObjectList().add(xmlImage);
-			XmlBaseObject xmlSpecimen;
-			// TODO fix these lines xmlSpecimen.setOwner(this.contributor);
-			// insert.getXmlObjectList().add(xmlSpecimen);
-
-		}
-		lineNumber++;
-		if (numLines >= 1 && lineNumber >= numLines)
-			// TODO what is this line?
-			// break;
-
-			if (0 == lineNumber) {
-				// no lines!
-				return null;
-			}
-		System.out.println("Lines: " + firstLine + " to line "
-				+ (firstLine + lineNumber - 1) + " processed");
-		return request;
-	}
+	
 
 	private Credentials getContributor(Credentials owner) {
 		if (userId > 0 && groupId > 0)
@@ -228,14 +146,14 @@ public class MapDwcaToXml {
 				.getCell(1).getStringCellValue());
 	}
 
-	private void getCredentials(DwcaFieldMapper fieldMapper) {
-		userName = fieldMapper.getUserName();
-		userId = fieldMapper.getUserId();
-		submitterName = fieldMapper.getSubmitterName();
-		submitterId = fieldMapper.getSubmitterId();
-		groupName = fieldMapper.getGroupName();
-		groupId = fieldMapper.groupId();
-	}
+//	private void getCredentials(DwcaFieldMapper fieldMapper) {
+//		userName = fieldMapper.getUserName();
+//		userId = fieldMapper.getUserId();
+//		submitterName = fieldMapper.getSubmitterName();
+//		submitterId = fieldMapper.getSubmitterId();
+//		groupName = fieldMapper.getGroupName();
+//		groupId = fieldMapper.groupId();
+//	}
 
 	/**
 	 * Keep track of local id within spreadsheet
