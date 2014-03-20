@@ -24,8 +24,8 @@ public abstract class MapSpecimen {
 	public abstract boolean addUserProperty(XmlBaseObject xmlSpecimen,
 			String fieldName, String value);
 
-	public abstract boolean setSpecimenField(XmlBaseObject xmlSpecimen,
-			String value);
+	public abstract boolean setXmlField(XmlBaseObject xmlSpecimen,
+			String value, String value2);
 
 	public abstract String[][] getUserProperties();
 
@@ -41,8 +41,8 @@ public abstract class MapSpecimen {
 		String[] headers = source.getHeaders();
 		for (String fieldName : headers) {
 			String value = source.getValue(fieldName);
-			boolean isSpecimenField = setSpecimenField(xmlSpecimen, value);
-			if (isSpecimenField)
+			boolean isXmlField = setXmlField(xmlSpecimen, fieldName, value);
+			if (isXmlField)
 				continue;
 			boolean isUserProperty = addUserProperty(xmlSpecimen, fieldName,
 					value);
