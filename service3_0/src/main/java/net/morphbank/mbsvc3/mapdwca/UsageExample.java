@@ -6,9 +6,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import org.apache.log4j.PropertyConfigurator;
 import org.apache.log4j.BasicConfigurator;
-
 import org.gbif.dwc.record.DarwinCoreRecord;
 import org.gbif.dwc.record.Record;
 import org.gbif.dwc.terms.ConceptTerm;
@@ -29,7 +29,14 @@ public class UsageExample {
 		// opens csv files with headers or dwc-a direcotries with a meta.xml
 		// descriptor
 		Archive arch = ArchiveFactory.openArchive(new File(INPUT_FILE));
+		String coreRowType = arch.getCore().getRowType();
+		System.out.println("Core type: "+coreRowType);
 		
+		// is this the correct core type?
+		if (!coreRowType.equals("http://rs.tdwg.org/dwc/terms/Occurrence")){
+			System.out.println("Core type is not occurrence: "+coreRowType);
+			
+		}
 
 		// does scientific name exist?
 		if (!arch.getCore().hasTerm(DwcTerm.scientificName)) {
