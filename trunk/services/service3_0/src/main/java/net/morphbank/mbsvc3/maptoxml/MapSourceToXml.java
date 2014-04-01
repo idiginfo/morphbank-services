@@ -11,24 +11,13 @@
  ******************************************************************************/
 package net.morphbank.mbsvc3.maptoxml;
 
-import java.io.PrintWriter;
 import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Sheet;
-
-import net.morphbank.MorphbankConfig;
-import net.morphbank.mbsvc3.mapdwca.DwcaSourceIterator;
-import net.morphbank.mbsvc3.mapdwca.DwcaFields;
-import net.morphbank.mbsvc3.mapdwca.MapDwcaToXml;
 import net.morphbank.mbsvc3.xml.Credentials;
 import net.morphbank.mbsvc3.xml.Extref;
 import net.morphbank.mbsvc3.xml.Insert;
