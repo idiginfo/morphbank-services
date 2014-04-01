@@ -17,7 +17,7 @@ import java.util.List;
 
 import org.apache.poi.ss.usermodel.Cell;
 
-public interface FieldMapper extends Iterator<SourceObject> {
+public interface SourceIterator extends Iterator<SourceObject> {
 	
 	//public void setValues(String line);
 	
