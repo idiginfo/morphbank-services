@@ -21,11 +21,11 @@ import net.morphbank.mbsvc3.xml.XmlBaseObject;
 public class MapView {
 
 	protected XmlBaseObject xmlView;
-	FieldMapper view;
+	SourceIterator view;
 	private String[][] userProperties = null;
 	Fields fields;
 
-	public MapView(FieldMapper fieldMapper, Fields fields) {
+	public MapView(SourceIterator fieldMapper, Fields fields) {
 		this.view = fieldMapper;
 		this.userProperties = this.getUserProperties();
 		this.fields = fields;

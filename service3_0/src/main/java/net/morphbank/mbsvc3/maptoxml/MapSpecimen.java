@@ -15,7 +15,7 @@ import net.morphbank.mbsvc3.xml.XmlBaseObject;
 
 public abstract class MapSpecimen {
 
-	FieldMapper specimen;
+	SourceIterator specimen;
 	Fields fields;
 
 	public abstract boolean addRelationshipProperty(XmlBaseObject xmlSpecimen,
@@ -30,13 +30,13 @@ public abstract class MapSpecimen {
 	public abstract String[][] getUserProperties();
 
 
-	public MapSpecimen(FieldMapper specimen, Fields fields) {
+	public MapSpecimen(SourceIterator specimen, Fields fields) {
 		this.specimen = specimen;
 		this.fields = fields;
 	}
 
 	public void setXmlSpecimenFields(XmlBaseObject xmlSpecimen,
-			FieldMapper source) {
+			SourceIterator source) {
 		// iterate through fields of source
 		String[] headers = source.getHeaders();
 		for (String fieldName : headers) {

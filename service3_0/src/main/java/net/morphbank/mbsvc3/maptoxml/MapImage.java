@@ -19,11 +19,11 @@ public class MapImage {
 	// protected MapFishSpreadsheetToXml objMapper;
 	static ObjectFactory objectFactory = new ObjectFactory();
 	protected XmlBaseObject xmlImage;
-	FieldMapper image;
+	SourceIterator image;
 	private String[][] userProperties = null;
 	Fields fields;
 
-	public MapImage(FieldMapper fieldMapper, Fields fields) {
+	public MapImage(SourceIterator fieldMapper, Fields fields) {
 		this.image = fieldMapper;
 		this.userProperties = this.getUserProperties();
 		this.fields = fields;

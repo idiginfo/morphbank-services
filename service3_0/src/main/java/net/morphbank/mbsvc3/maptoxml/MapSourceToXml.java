@@ -26,7 +26,7 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Sheet;
 
 import net.morphbank.MorphbankConfig;
-import net.morphbank.mbsvc3.mapdwca.DwcaFieldMapper;
+import net.morphbank.mbsvc3.mapdwca.DwcaSourceIterator;
 import net.morphbank.mbsvc3.mapdwca.DwcaFields;
 import net.morphbank.mbsvc3.mapdwca.MapDwcaToXml;
 import net.morphbank.mbsvc3.xml.Credentials;
@@ -43,7 +43,7 @@ public class MapSourceToXml {
 	protected Credentials submitter;
 	protected Credentials contributor;
 	protected Request request;
-	FieldMapper fieldMapper;
+	SourceIterator fieldMapper;
 	Fields fields;
 	int localId = 0;
 	public static final String SPECIMEN_ID_FIELD = "Specimen External id";
@@ -73,7 +73,7 @@ public class MapSourceToXml {
 		// dateToPublish = this.dateToPublish();
 	}
 
-	public Request createRequestFromSource(FieldMapper source) {
+	public Request createRequestFromSource(SourceIterator source) {
 		// alternative FieldMapper implements Iterator<SourceObjectL>
 		request = new Request();
 		request.setSubmitter(this.submitter);
@@ -257,7 +257,7 @@ public class MapSourceToXml {
 		return VIEW_PREFIX + numString(id);
 	}
 
-	public static String getSpecimenIdString(FieldMapper specimen) {
+	public static String getSpecimenIdString(SourceIterator specimen) {
 		String idStr = specimen.getValue(SPECIMEN_ID_PREFIX_FIELD) + ":"
 				+ specimen.getValue(SPECIMEN_ID_FIELD);
 		if (idStr.toLowerCase().indexOf("n/a") > -1) {
@@ -266,7 +266,7 @@ public class MapSourceToXml {
 		return idStr;
 	}
 
-	public static String getImageIdString(FieldMapper image) {
+	public static String getImageIdString(SourceIterator image) {
 		String idStr = image.getValue(IMAGE_ID_PREFIX_FIELD) + ":"
 				+ image.getValue(IMAGE_ID_FIELD);
 		return idStr;
@@ -279,7 +279,7 @@ public class MapSourceToXml {
 	// specimenPart/ViewAngle/imagingTechnique/ImagingPreparationTechnique
 	// DevelopmentalStage/Sex/Form
 
-	public static String getViewIdStr(FieldMapper view) {
+	public static String getViewIdStr(SourceIterator view) {
 		StringBuffer viewId = new StringBuffer();
 		String separator = "";
 		for (int i = 0; i < viewIdFields.length; i++) {
@@ -291,7 +291,7 @@ public class MapSourceToXml {
 		return viewId.toString();
 	}
 
-	public static String getViewIdString(FieldMapper view) {
+	public static String getViewIdString(SourceIterator view) {
 		String idStr = view.getValue(VIEW_ID_PREFIX_FIELD) + ":"
 				+ view.getValue(VIEW_ID_FIELD);
 		if (!idStr.equalsIgnoreCase(":")) {
@@ -315,12 +315,12 @@ public class MapSourceToXml {
 		return null;
 	}
 
-	public static XmlId getSpecimenId(FieldMapper specimen) {
+	public static XmlId getSpecimenId(SourceIterator specimen) {
 		String idStr = getSpecimenIdString(specimen);
 		return getXmlExternalId(idStr);
 	}
 
-	public static XmlId getImageId(FieldMapper image) {
+	public static XmlId getImageId(SourceIterator image) {
 		String idStr = getImageIdString(image);
 		if (idStr == null || idStr.length() == 0)
 			return null;
@@ -331,7 +331,7 @@ public class MapSourceToXml {
 	 * 3 possibilities : there is a morphbank id for the view there is an
 	 * external id there is a local id
 	 */
-	public static XmlId getViewId(FieldMapper view) {
+	public static XmlId getViewId(SourceIterator view) {
 		String idStr;
 		if (!(idStr = view.getValue(VIEW_MORPHBANK_ID_FIELD))
 				.equalsIgnoreCase("")) {
@@ -348,7 +348,7 @@ public class MapSourceToXml {
 		return null;
 	}
 
-	public static XmlId getTaxonId(FieldMapper specimen) {
+	public static XmlId getTaxonId(SourceIterator specimen) {
 		String tsn = specimen.getValue("Determination TSN");
 		XmlId taxonId = new XmlId();
 		if (tsn != null && tsn.length() > 0)
@@ -422,7 +422,7 @@ public class MapSourceToXml {
 		submitter = new Credentials();
 	}
 
-	public static Extref getExternalLink(FieldMapper mapper, String objectType) {
+	public static Extref getExternalLink(SourceIterator mapper, String objectType) {
 		String urlData = mapper.getValue(objectType + " External Link URL");
 		String label = mapper.getValue(objectType + " External Link Label");
 		String type = mapper.getValue(objectType + " External Link Type");
@@ -451,7 +451,7 @@ public class MapSourceToXml {
 		return columnId;
 	}
 
-	public static XmlId getStandarImageId(FieldMapper specimen) {
+	public static XmlId getStandarImageId(SourceIterator specimen) {
 		if (specimen.getValue(SPECIMEN_STANDARD_IMAGE_ID_FIELD) != null
 				&& specimen.getValue(SPECIMEN_STANDARD_IMAGE_ID_FIELD)
 						.equalsIgnoreCase("yes")) {
