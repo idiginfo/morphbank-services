@@ -28,9 +28,9 @@ public class QueryTest {
 	 */
 	public static void main(String[] args) throws Exception {
 		MorphbankConfig
-		 .setPersistenceUnit(MorphbankConfig.PERSISTENCE_MBPROD);
+		// .setPersistenceUnit(MorphbankConfig.PERSISTENCE_MBPROD);
 //				 .setPersistenceUnit(MorphbankConfig.PERSISTENCE_MBDEV);
-//				 .setPersistenceUnit(MorphbankConfig.PERSISTENCE_LOCALHOST);
+				 .setPersistenceUnit(MorphbankConfig.PERSISTENCE_LOCALHOST);
 				//.setPersistenceUnit(MorphbankConfig.PERSISTENCE_LOCALHOST);
 		MorphbankConfig.init();
 
@@ -192,7 +192,7 @@ public class QueryTest {
 		RequestParams params = null;
 //		params = getImageRequest("alaska");
 		params = getTaxonRequest("Lycopodiella alopecuroides");
-		params = getMorphster(579700);
+		//params = getMorphster(579700);
 		// params = getRemoteRequest("ramirez");
 		// params = getRemoteShowRequest(514513);
 		// params = getImageRequest("");

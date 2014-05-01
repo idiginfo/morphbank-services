@@ -70,6 +70,8 @@ class NamespacePrefixMapperImpl extends NamespacePrefixMapper {
         // and the curatorial namespace will use "dwc".
         if( "http://rs.tdwg.org/dwc/dwelement".equals(namespaceUri) )
             return "dwce";
+        if ("http://digir.net/schema/conceptual/darwin/2003/1.0/".equals(namespaceUri))
+        	return "dgr";
         // otherwise I don't care. Just use the default suggestion, whatever it may be.
         return suggestion;
     }
