@@ -11,6 +11,34 @@
 
 	<persistence-unit name="morphbank">
 		<provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
+		<class>net.morphbank.object.BaseObject</class>
+		<class>net.morphbank.object.Specimen</class>
+		<class>net.morphbank.object.Image</class>
+		<class>net.morphbank.object.View</class>
+		<class>net.morphbank.object.Locality</class>
+		<class>net.morphbank.object.Taxon</class>
+		<class>net.morphbank.object.TaxonAuthor</class>
+		<class>net.morphbank.object.TaxonConcept</class>
+		<class>net.morphbank.object.TaxonBranchNode</class>
+		<class>net.morphbank.object.User</class>
+		<class>net.morphbank.object.Group</class>
+		<class>net.morphbank.object.Collection</class>
+		<class>net.morphbank.object.CollectionObject</class>
+		<class>net.morphbank.object.Annotation</class>
+		<class>net.morphbank.object.DeterminationAnnotation</class>
+		<class>net.morphbank.object.BasisOfRecord</class>
+		<class>net.morphbank.object.Publication</class>
+		<class>net.morphbank.object.News</class>
+		<class>net.morphbank.object.Otu</class>
+		<class>net.morphbank.object.Matrix</class>
+		<class>net.morphbank.object.MatrixCell</class>
+		<class>net.morphbank.object.MatrixCellValue</class>
+		<class>net.morphbank.object.CharacterState</class>
+		<class>net.morphbank.object.MbCharacter</class>
+		<class>net.morphbank.object.ExternalLinkObject</class>
+		<class>net.morphbank.object.ExternalLinkType</class>
+		<class>net.morphbank.object.UserProperty</class>
+		<class>net.morphbank.object.UserGroupKey</class>
 		<exclude-unlisted-classes>false</exclude-unlisted-classes>
 		<properties>
 			<!-- Provider-specific connection properties -->

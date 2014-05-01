@@ -3,6 +3,9 @@
  */
 package net.morphbank.object;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.persistence.*;
 
 import net.morphbank.MorphbankConfig;
@@ -51,6 +54,12 @@ public class ExternalLinkObject { // implements IdObject {
 		setExtLinkTypeId(linkType);
 	}
 
+	public ExternalLinkObject(BaseObject obj, String externalId, String string,
+			String description) {
+		this(obj, externalId, string);
+		setDescription(description);
+	}
+
 	/**
 	 * Find the id of the object that matches the external Id
 	 * 
@@ -85,12 +94,82 @@ public class ExternalLinkObject { // implements IdObject {
 				return obj;
 			}
 		} catch (PersistenceException e) {
-			//no object with this id. 
+			// no object with this id.
 			return null;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return null;
+	}
+
+	/**
+	 * Get the first external identifier with description DCTERMS_IDENTIFIER
+	 * 
+	 * @param obj
+	 * @return
+	 */
+	public static List<String> getIdentifiers(BaseObject obj) {
+		try {
+			EntityManager em = MorphbankConfig.getEntityManager();
+			String queryStr = "select e from ExternalLinkObject e where e.object=:object"
+					+ " and e.description = '"
+					+ MorphbankConfig.DCTERMS_IDENTIFIER + "'";
+			Query query = em.createQuery(queryStr);
+			query.setParameter("object", obj);
+
+			@SuppressWarnings("unchecked")
+			List<ExternalLinkObject> links = query.getResultList();
+			if (links.size() != 0) {
+				List<String> ids = new ArrayList<>();
+				for (ExternalLinkObject link : links) {
+					ids.add(link.getExternalId());
+				}
+				return ids;
+			}
+		} catch (PersistenceException e) {
+			// no object with this id.
+			return null;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	public static boolean addDctermsIdentifier(BaseObject obj) {
+		EntityTransaction tx = null;
+		boolean localTransaction = false;
+		ExternalLinkObject link = null;
+		String externalId = null;
+		try {
+			EntityManager em = MorphbankConfig.getEntityManager();
+
+			tx = em.getTransaction();
+			if (!tx.isActive()) {
+				tx.begin();
+				localTransaction = true;
+			}
+			// no identifiers: add identifier
+			externalId = "urn:uuid:" + obj.getUuidString();
+			if (obj.getUuidString() == null){
+				System.out.println("Object: "+obj.getId()+" has null uuid");
+				return false;
+			}
+			link = new ExternalLinkObject(obj, externalId,
+					"External Unique Reference",
+					MorphbankConfig.DCTERMS_IDENTIFIER);
+			if (link != null) {
+				System.out.println("Object: "+obj.getId()+" has " + MorphbankConfig.DCTERMS_IDENTIFIER
+						+ " with uuid: " + externalId);
+			}
+			return true;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		} finally {
+			if (localTransaction && tx.isActive()) {
+				tx.commit();
+			}
+		}
 	}
 
 	public boolean validate() {
@@ -147,7 +226,8 @@ public class ExternalLinkObject { // implements IdObject {
 
 	public void setExtLinkTypeId(String linkType) {
 		extLinkTypeId = ExternalLinkType.getExternalTypeId(linkType);
-		if (extLinkTypeId < 0) extLinkTypeId = OTHER_LINK_TYPE;
+		if (extLinkTypeId < 0)
+			extLinkTypeId = OTHER_LINK_TYPE;
 	}
 
 	public String getLabel() {
