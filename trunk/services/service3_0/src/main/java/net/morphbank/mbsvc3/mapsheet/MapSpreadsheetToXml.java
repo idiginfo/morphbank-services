@@ -13,20 +13,12 @@ package net.morphbank.mbsvc3.mapsheet;
 
 import java.io.PrintWriter;
 import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Sheet;
-
-import net.morphbank.MorphbankConfig;
-import net.morphbank.mbsvc3.mapdwca.DwcaFieldMapper;
-import net.morphbank.mbsvc3.mapdwca.DwcaFields;
-import net.morphbank.mbsvc3.mapdwca.MapDwcaToXml;
 import net.morphbank.mbsvc3.xml.Credentials;
 import net.morphbank.mbsvc3.xml.Extref;
 import net.morphbank.mbsvc3.xml.Insert;
@@ -34,6 +26,8 @@ import net.morphbank.mbsvc3.xml.Request;
 import net.morphbank.mbsvc3.xml.XmlBaseObject;
 import net.morphbank.mbsvc3.xml.XmlId;
 import net.morphbank.mbsvc3.xml.XmlTaxonNameUtilities;
+
+import org.apache.poi.ss.usermodel.Sheet;
 
 public class MapSpreadsheetToXml {
 
@@ -103,8 +97,8 @@ public class MapSpreadsheetToXml {
 			fieldMapper = new TextFieldMapper(fileName);
 		} else { // dwc-Archive folder. filename is the actual folder, not the
 					// zipped archive
-			MapDwcaToXml mapDwca = new MapDwcaToXml();
-			return mapDwca.createRequestFromFile(fileName, null, null, null);
+					// MapDwcaToXml mapDwca = new MapDwcaToXml();
+			// return mapDwca.createRequestFromFile(fileName, null, null, null);
 		}
 		fieldMapper.moveToLine(firstLine - 1);
 		request = new Request();
@@ -212,14 +206,14 @@ public class MapSpreadsheetToXml {
 				.getCell(1).getStringCellValue());
 	}
 
-	private void getCredentials(DwcaFieldMapper fieldMapper) {
-		userName = fieldMapper.getUserName();
-		userId = fieldMapper.getUserId();
-		submitterName = fieldMapper.getSubmitterName();
-		submitterId = fieldMapper.getSubmitterId();
-		groupName = fieldMapper.getGroupName();
-		groupId = fieldMapper.groupId();
-	}
+//	private void getCredentials(DwcaFieldMapper fieldMapper) {
+//		userName = fieldMapper.getUserName();
+//		userId = fieldMapper.getUserId();
+//		submitterName = fieldMapper.getSubmitterName();
+//		submitterId = fieldMapper.getSubmitterId();
+//		groupName = fieldMapper.getGroupName();
+//		groupId = fieldMapper.groupId();
+//	}
 
 	/**
 	 * Keep track of local id within spreadsheet
