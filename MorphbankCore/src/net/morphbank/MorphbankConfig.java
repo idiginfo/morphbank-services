@@ -89,6 +89,9 @@ public class MorphbankConfig {
 
 	public static Proxy PROXY = Proxy.NO_PROXY;
 	public static String FILEPATH = "/data/log/tomcat6/mb3/xmlfiles/";
+	
+	public static final String DCTERMS_IDENTIFIER = "dcterms:identifier";
+
 
 	// logging objects
 	private static final String SYSTEM_LOGGER_NAME = "ServicesLogger";

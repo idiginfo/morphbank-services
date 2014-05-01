@@ -90,6 +90,7 @@ public class BaseObject implements IdObject, java.io.Serializable {
 	private String imageAltText;
 	private String xmlKeywords;
 	private String hostServer;
+	private String uuidString;
 
 	// Constructors
 	public BaseObject() {
@@ -881,5 +882,13 @@ public class BaseObject implements IdObject, java.io.Serializable {
 
 	public void setHostServer(String hostServer) {
 		this.hostServer = hostServer;
+	}
+
+	public String getUuidString() {
+		return uuidString;
+	}
+
+	public void setUuidString(String uuidString) {
+		this.uuidString = uuidString;
 	}
 }
