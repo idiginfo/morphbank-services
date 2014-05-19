@@ -39,6 +39,7 @@ import javax.persistence.Query;
 public class MorphbankConfig {
 	
 	protected static ThreadLocal<EntityManager> entityManager = new ThreadLocal<EntityManager>();
+	protected static ThreadLocal<EntityManagerContainer> entityManagerContainer = new ThreadLocal<EntityManagerContainer>();
 	protected static EntityManagerFactory emf;
 
 	public static final String PERSISTENCE_LOCALHOST = "localhost";
@@ -88,7 +89,8 @@ public class MorphbankConfig {
 	public static String MB_DETAILS_REQUEST = "/request?method=id&format=xml&id=";
 
 	public static Proxy PROXY = Proxy.NO_PROXY;
-	public static String FILEPATH = "/data/log/tomcat6/mb3/xmlfiles/";
+	public final static String FILEPATH = "xmlfiles/";
+	public static String filepath = FILEPATH;
 	
 	public static final String DCTERMS_IDENTIFIER = "dcterms:identifier";
 
@@ -126,6 +128,12 @@ public class MorphbankConfig {
 	}
 
 	public static EntityManager getEntityManager() {
+		
+		// EntityManagerContainer container = entityManagerContainer.get();
+		// if (container==null) entityManagerContainer.set(new
+		// EntityManagerContainer());
+		// return entityManagerContainer.get().getEm();
+		
 		EntityManager em = entityManager.get();
 		if (em == null || !em.isOpen()) {
 			em = emf.createEntityManager();
@@ -385,11 +393,11 @@ public class MorphbankConfig {
 	}
 
 	public static String getFilepath() {
-		return FILEPATH;
+		return filepath;
 	}
 
 	public static void setFILEPATH(String fILEPATH) {
-		FILEPATH = fILEPATH;
+		filepath = fILEPATH;
 	}
 
 	public static String getIpAllowed() {
