@@ -29,6 +29,10 @@
       <param-name>remoteserver</param-name>
       <param-value>http://services.dev.biospex.org/mbsvc3/request?</param-value>
     </init-param>
+    <init-param>
+      <param-name>imageserver</param-name>
+      <param-value>http://images.dev.biospex.org/</param-value>
+    </init-param>
   </servlet>
   <servlet>
     <servlet-name>flickr</servlet-name>
