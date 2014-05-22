@@ -6,10 +6,10 @@ import javax.persistence.PersistenceContext;
 public class EntityManagerContainer {
 	
 	@PersistenceContext
-	EntityManager em;
+	EntityManager entityManager;
 
-	public EntityManager getEm() {
-		return em;
+	public EntityManager getEntityManager() {
+		return entityManager;
 	}
 
 
