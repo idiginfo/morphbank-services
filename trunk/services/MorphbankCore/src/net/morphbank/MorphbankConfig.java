@@ -37,12 +37,8 @@ import javax.persistence.Query;
  * @author riccardi
  */
 public class MorphbankConfig {
-
-	protected static EntityManagerContainer entityManagerContainer = null;
-
+	
 	protected static ThreadLocal<EntityManager> entityManager = new ThreadLocal<EntityManager>();
-	// protected static ThreadLocal<EntityManagerContainer>
-	// entityManagerContainer = new ThreadLocal<EntityManagerContainer>();
 	protected static EntityManagerFactory emf;
 
 	public static final String PERSISTENCE_LOCALHOST = "localhost";
@@ -69,19 +65,13 @@ public class MorphbankConfig {
 	public static String RDF_SCHEMA_SERVER = "http://www.morphbank.net/schema/";
 	public static String SERVICES = "http://services.morphbank.net/mb/request?";
 	public static String servicePrefix = SERVICES;
-	public static String DARWIN_CORE_SCHEMA_URL = RDF_SCHEMA_SERVER
-			+ "darwin_2005_2.0.rdfs";
-	public static String MORPHBANK_SCHEMA_URL = RDF_SCHEMA_SERVER
-			+ "schema/rdf-schema.n3";
-	// public static String DARWIN_CORE_SCHEMA_URI =
-	// "http://digir2.ecoforge.net/rdf-schema/darwin/2005/2.0#";
-	// public static String DARWIN_CORE_SCHEMA_URI =
-	// "http://rs.tdwg.org/dwc/terms/";
-	public static String MORPHBANK_SCHEMA_URI = RDF_SCHEMA_SERVER
-			+ "rdf-schema#";
+	public static String DARWIN_CORE_SCHEMA_URL = RDF_SCHEMA_SERVER + "darwin_2005_2.0.rdfs";
+	public static String MORPHBANK_SCHEMA_URL = RDF_SCHEMA_SERVER + "schema/rdf-schema.n3";
+	//public static String DARWIN_CORE_SCHEMA_URI = "http://digir2.ecoforge.net/rdf-schema/darwin/2005/2.0#";
+	//public static String DARWIN_CORE_SCHEMA_URI = "http://rs.tdwg.org/dwc/terms/";
+	public static String MORPHBANK_SCHEMA_URI = RDF_SCHEMA_SERVER + "rdf-schema#";
 	// constants
-	// public static String DARWIN_URI =
-	// "http://digir2.ecoforge.net/rdf-schema/darwin/2005/2.0#";
+	//public static String DARWIN_URI = "http://digir2.ecoforge.net/rdf-schema/darwin/2005/2.0#";
 	public static String DARWIN_URI = "http://rs.tdwg.org/dwc/terms/";
 	public static String DUBLIN_CORE_URI = "http://purl.org/dc/terms/";
 	public static String FOAF_URI = "http://xmlns.com/foaf/spec/";
@@ -91,22 +81,21 @@ public class MorphbankConfig {
 	public static String WEB_SERVER = "http://www.morphbank.net/";
 	public static String MORPHBANK_ID_SERVER = WEB_SERVER + "?id=";
 	public static String IMAGE_SERVER = "http://images.morphbank.net/";
-	// public static String REMOTE_SERVER =
-	// "http://services.morphbank.net/mb3/";
+//	 public static String REMOTE_SERVER =
+//	 "http://services.morphbank.net/mb3/";
 	public static String REMOTE_SERVER = "http://localhost:8080/mbd/";
 	public static String MB_CHANGES_REQUEST = "/request?method=changes&format=id&numChangeDays=";
 	public static String MB_DETAILS_REQUEST = "/request?method=id&format=xml&id=";
 
 	public static Proxy PROXY = Proxy.NO_PROXY;
-	public final static String FILEPATH = "xmlfiles/";
-	public static String filepath = FILEPATH;
-
+	public static String FILEPATH = "/data/log/tomcat6/mb3/xmlfiles/";
+	
 	public static final String DCTERMS_IDENTIFIER = "dcterms:identifier";
+
 
 	// logging objects
 	private static final String SYSTEM_LOGGER_NAME = "ServicesLogger";
-	public static final Logger SYSTEM_LOGGER = Logger
-			.getLogger(SYSTEM_LOGGER_NAME);
+	public static final Logger SYSTEM_LOGGER = Logger.getLogger(SYSTEM_LOGGER_NAME);
 	public static String SYSTEM_LOG_FILE_NAME = "/data/log/tomcat6/service.log";
 
 	static {
@@ -128,7 +117,7 @@ public class MorphbankConfig {
 
 	public static void init() {
 		try {
-			getEntityManager();
+			renewEntityManagerFactory();
 			// renewEntityManager(); // Retrieve an application managed
 			// entity manager
 		} catch (Throwable e) {
@@ -137,11 +126,12 @@ public class MorphbankConfig {
 	}
 
 	public static EntityManager getEntityManager() {
-		// Use the Spring PersistenceContext to get the entity manager
-		if (entityManagerContainer == null) {
-			entityManagerContainer = new EntityManagerContainer();
+		EntityManager em = entityManager.get();
+		if (em == null || !em.isOpen()) {
+			em = emf.createEntityManager();
+			entityManager.set(em);
 		}
-		return entityManagerContainer.getEntityManager();
+		return em;
 	}
 
 	public static void closeEntityManager() {
@@ -167,8 +157,7 @@ public class MorphbankConfig {
 
 	public static boolean ensureWorkingConnection() {
 		boolean working = testConnection();
-		if (working)
-			return true;
+		if (working) return true;
 		closeEntityManager();
 		getEntityManager();
 		return testConnection();
@@ -193,20 +182,17 @@ public class MorphbankConfig {
 	 * @param keyValue
 	 * @return
 	 */
-	public static boolean secondaryTableKeyInsert(String tableName,
-			String keyValue) {
+	public static boolean secondaryTableKeyInsert(String tableName, String keyValue) {
 		if (keyValue == null || keyValue.length() == 0) {
 			return false;
 		}
 		EntityManager em = getEntityManager();
-		String selectStr = "select count(*) from " + tableName
-				+ " where name = ?";
+		String selectStr = "select count(*) from " + tableName + " where name = ?";
 		Query selectQuery = em.createNativeQuery(selectStr);
 		selectQuery.setParameter(1, keyValue);
 		Object result = selectQuery.getSingleResult();
 		int count = getIntFromQuery(result);
-		if (count > 0)
-			return false;
+		if (count > 0) return false;
 		boolean createTransaction = false;
 		String insertQuery = "insert into " + tableName + " (name) values (?)";
 		// attempt insert into table
@@ -254,17 +240,15 @@ public class MorphbankConfig {
 	}
 
 	public static boolean setupProxy(String proxyServer, String proxyPort) {
-		if (proxyServer == null)
-			return false;
+		if (proxyServer==null) return false;
 		try {
 			int port = Integer.parseInt(proxyPort);
 			MorphbankConfig.setProxy(proxyServer, port);
-			MorphbankConfig.SYSTEM_LOGGER.info("Proxy configuration: "
-					+ proxyServer + " port '" + proxyPort + "' enabled ");
+			MorphbankConfig.SYSTEM_LOGGER.info("Proxy configuration: " + proxyServer + " port '"
+					+ proxyPort + "' enabled ");
 			return true;
 		} catch (Exception e) {
-			MorphbankConfig.SYSTEM_LOGGER.info("Proxy port '" + proxyPort
-					+ "' is not integer ");
+			MorphbankConfig.SYSTEM_LOGGER.info("Proxy port '" + proxyPort + "' is not integer ");
 			return false;
 		}
 
@@ -301,8 +285,7 @@ public class MorphbankConfig {
 	}
 
 	public static String getImageLink(int localId) {
-		return "Reference this image at <a href=\"" + getURL(localId)
-				+ "\">MorphBank</a>";
+		return "Reference this image at <a href=\"" + getURL(localId) + "\">MorphBank</a>";
 	}
 
 	public static final String AUTHORITY = "services.morphbank.net";
@@ -317,7 +300,7 @@ public class MorphbankConfig {
 	 * @return an LSID of the object
 	 */
 	public static String makeURI(int localId) {
-		// TODO add reference to hostServer?
+		//TODO add reference to hostServer?
 		return makeUrlId(localId);
 	}
 
@@ -332,16 +315,16 @@ public class MorphbankConfig {
 	public static String getNamespace() {
 		return NAMESPACE;
 	}
-
-	public static String makeUrlId(int localId) {
-		String out = WEB_SERVER + localId;
+	
+	public static String makeUrlId(int localId){
+		String out = WEB_SERVER+localId;
 		return out;
 	}
 
 	public static String makeLSID(int localId) {
 		StringBuffer out = new StringBuffer();
-		out.append("urn:lsid:").append(getAuthority()).append(":")
-				.append(getNamespace()).append(":").append(localId);
+		out.append("urn:lsid:").append(getAuthority()).append(":").append(getNamespace()).append(
+				":").append(localId);
 		return out.toString();
 	}
 
@@ -389,26 +372,24 @@ public class MorphbankConfig {
 	}
 
 	public static void setProxy(String proxyServer, int port) {
-		PROXY = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyServer,
-				port));
+		PROXY = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyServer, port));
 	}
 
 	/**
 	 * Return a string to be used in Dublin Core publisher term
-	 * 
 	 * @return
 	 */
 	public static String getPublisher() {
-
+		
 		return "Morphbank Image Repository http://www.morphbank.net";
 	}
 
 	public static String getFilepath() {
-		return filepath;
+		return FILEPATH;
 	}
 
 	public static void setFILEPATH(String fILEPATH) {
-		filepath = fILEPATH;
+		FILEPATH = fILEPATH;
 	}
 
 	public static String getIpAllowed() {
