@@ -393,7 +393,6 @@ public class MorphbankConfig {
 	}
 
 	public static String getIpAllowed() {
-		// TODO Auto-generated method stub
-		return null;
+		return "listIPs.properties";
 	}
 }
