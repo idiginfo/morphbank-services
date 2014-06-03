@@ -333,7 +333,7 @@ public class MapSpecimen extends MapObjectBase {
 		if (related == null) {
 			// no specimen in database
 			xmlObject
-			.setStatus("specimen id not found in database, info stored in MissingLink table ");
+			.setStatus("standard image not found in database, info stored in MissingLink table ");
 			xmlMapper.recordMissingLink(specimen, standardImageId, MissingLink.SPECIMEN);
 		}
 		else {
