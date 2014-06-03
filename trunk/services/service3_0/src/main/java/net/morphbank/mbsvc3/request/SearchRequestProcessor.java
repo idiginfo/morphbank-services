@@ -73,8 +73,9 @@ public class SearchRequestProcessor {
 	HttpServletResponse resp = null;
 
 	// TODO add parameter for central service
-	public SearchRequestProcessor(HttpServletRequest req, HttpServletResponse resp,
-			RequestParams params, PrintWriter out, MorphbankPage page) {
+	public SearchRequestProcessor(HttpServletRequest req,
+			HttpServletResponse resp, RequestParams params, PrintWriter out,
+			MorphbankPage page) {
 		this.req = req;
 		this.resp = resp;
 		this.params = params;
@@ -106,41 +107,47 @@ public class SearchRequestProcessor {
 		return doXmlMBIdResponse(params.getIds(), params, out);
 	}
 
-	public Object doXmlMBIdResponse(int id, RequestParams params, PrintWriter out) {
+	public Object doXmlMBIdResponse(int id, RequestParams params,
+			PrintWriter out) {
 		List<Integer> ids = new Vector<Integer>();
 		ids.add(id);
 		return doXmlMBIdResponse(ids, params, out);
 	}
 
-	public Object doXmlMBIdResponse(List<Integer> ids, RequestParams params, PrintWriter out) {
+	public Object doXmlMBIdResponse(List<Integer> ids, RequestParams params,
+			PrintWriter out) {
 		boolean addRelatedObjs = params.getLimit() > 1;
 		StringBuffer descBuffer = new StringBuffer("Request for id(s) ");
 		for (int i = 0; i < ids.size(); i++) {
 			int id = ids.get(i);
-			descBuffer.append(id).append(" ").append(addRelatedObjs ? " and related objects" : "");
+			descBuffer.append(id).append(" ")
+					.append(addRelatedObjs ? " and related objects" : "");
 		}
 		String desc = descBuffer.toString();
 		return doXmlIdResponse(desc, ids, params, out);
 	}
 
-	public Object doXmlIdResponse(String desc, List<Integer> ids, RequestParams params,
-			PrintWriter out) {
+	public Object doXmlIdResponse(String desc, List<Integer> ids,
+			RequestParams params, PrintWriter out) {
 		// TODO manage multiple ids
 		this.params = params;
 		int id;
-		Response response = null;
-		MapObjectToResponse mapper = new MapObjectToResponse("id", desc);
+		// Response response = null;
+		// MapObjectToResponse mapper = new MapObjectToResponse("id", desc);
 		BaseObject obj = null;
 		boolean addRelatedObjs = params.getLimit() > 1;
-		List objectIds = new Vector();
+		List<Integer> objectIds = new Vector<Integer>();
 		for (int i = 0; i < ids.size(); i++) {
 			id = ids.get(i);
 			objectIds.add(id);
-			obj = BaseObject.getEJB3Object(id);
-			List relatedObjects = obj.getRelatedIdList();
-			objectIds.addAll(relatedObjects);
+			if (addRelatedObjs) {// add related if requested
+				obj = BaseObject.getEJB3Object(id);
+				List<Integer> relatedObjects = obj.getRelatedIdList();
+				objectIds.addAll(relatedObjects);
+			}
 		}
-		return produceOutput(resp, out, desc, desc, objectIds.size(), 1, objectIds);
+		return produceOutput(resp, out, desc, desc, objectIds.size(), 1,
+				objectIds);
 	}
 
 	public void doOcr(RequestParams params, PrintWriter out) {
@@ -156,7 +163,8 @@ public class SearchRequestProcessor {
 		if (ocr == null) {// no Ocr in database, analyze image
 			ocr = ocrSvc.getNewOcrFromObjectId(ocrId);
 			if (ocr == null) {
-				page.printErrorPage(out, "No ocr returned for specimen " + sId, null);
+				page.printErrorPage(out, "No ocr returned for specimen " + sId,
+						null);
 				return;
 			}
 			ocrSvc.updateSpecimen(ocrId, ocr);
@@ -178,26 +186,27 @@ public class SearchRequestProcessor {
 		// objectIds);
 		if (params.getKeywords() != null && params.getKeywords().length() > 0) {
 			title = "Keyword query";
-			subtitle = getSearchSubtitle("keyword search for ", params.getKeywords(), numResults,
-					objectIds.size(), params.isGeolocated(), params.isPublic());
+			subtitle = getSearchSubtitle("keyword search for ",
+					params.getKeywords(), numResults, objectIds.size(),
+					params.isGeolocated(), params.isPublic());
 		} else { // no .getKeywords()
 			title = "Search";
-			subtitle = getSearchSubtitle(null, null, numResults, objectIds.size(), params
-					.isGeolocated(), params.isPublic());
+			subtitle = getSearchSubtitle(null, null, numResults,
+					objectIds.size(), params.isGeolocated(), params.isPublic());
 		}
 		// adjust title and subtitle as required for format
 		if (RequestParams.FORMAT_SVC.equals(params.format)) {// user
 			// mbsvc.xsd
-			System.err
-					.println("<!-- persistence: " + MorphbankConfig.getPersistenceUnit() + " -->");
+			System.err.println("<!-- persistence: "
+					+ MorphbankConfig.getPersistenceUnit() + " -->");
 			title = "query";
 		} else if (RequestParams.FORMAT_THUMB.equals(params.format)) {
 			title = "Morphbank: Results from Keyword Search";
 			subtitle += "': Click for Details";
 		}
 
-		return produceOutput(resp, out, title, subtitle, numResults, params.getFirstResult(),
-				objectIds);
+		return produceOutput(resp, out, title, subtitle, numResults,
+				params.getFirstResult(), objectIds);
 	}
 
 	public Object doTaxonSearch(PrintWriter out) {
@@ -208,33 +217,36 @@ public class SearchRequestProcessor {
 		String title;
 		String subtitle;
 		String taxonName = params.getTaxonName();
-		if (params.getObjectTypes() != null && params.getObjectTypes().length > 0
+		if (params.getObjectTypes() != null
+				&& params.getObjectTypes().length > 0
 				&& params.getObjectTypes()[0].equals("Image")) {
 			numResults = taxonSearch.getNumImages(taxonName);
-			objectIds = taxonSearch
-					.getImages(taxonName, params.getLimit(), params.getFirstResult());
+			objectIds = taxonSearch.getImages(taxonName, params.getLimit(),
+					params.getFirstResult());
 		} else { // "Specimen"
 			numResults = taxonSearch.getNumSpecimens(taxonName);
-			objectIds = taxonSearch.getSpecimens(taxonName, params.getLimit(), params
-					.getFirstResult());
+			objectIds = taxonSearch.getSpecimens(taxonName, params.getLimit(),
+					params.getFirstResult());
 		}
 		title = "query";
-		subtitle = getSearchSubtitle("taxon", taxonName, numResults, objectIds.size(), params
-				.isGeolocated(), params.isPublic());
+		subtitle = getSearchSubtitle("taxon", taxonName, numResults,
+				objectIds.size(), params.isGeolocated(), params.isPublic());
 		// adjust title and subtitle as appropriate
 		if (RequestParams.FORMAT_THUMB.equals(params.format)) {
 			title = "Morphbank: Results from Taxon Search";
 			subtitle += "': Click for Details";
 		}
-		return produceOutput(resp, out, title, subtitle, numResults, params.getFirstResult(),
-				objectIds);
+		return produceOutput(resp, out, title, subtitle, numResults,
+				params.getFirstResult(), objectIds);
 	}
 
-	public void doThumbnailResponse(MorphbankPage page, RequestParams params, String title,
-			String subtitle, int numResults, int firstResult, List objectIds) {
+	public void doThumbnailResponse(MorphbankPage page, RequestParams params,
+			String title, String subtitle, int numResults, int firstResult,
+			List objectIds) {
 		// based on .getKeywords(), objectTypes and limit
 		String rssFeed = RssServices.getRssUrl(params);
-		page.printThumbHeader(title, subtitle, numResults, objectIds.size(), firstResult, rssFeed);
+		page.printThumbHeader(title, subtitle, numResults, objectIds.size(),
+				firstResult, rssFeed);
 		Iterator iter = objectIds.iterator();
 		while (iter.hasNext()) {
 			Object obj = iter.next();
@@ -260,10 +272,12 @@ public class SearchRequestProcessor {
 		// getSearchParams(req);
 		String extId = params.getKeywords();
 		List<Integer> ids = new Vector<Integer>();
-		MorphbankConfig.SYSTEM_LOGGER.info("Ext search extid: " + params.getKeywords());
+		MorphbankConfig.SYSTEM_LOGGER.info("Ext search extid: "
+				+ params.getKeywords());
 		BaseObject obj = BaseObject.getObjectByExternalId(extId);
 		if (obj == null) {
-			return doXmlIdResponse("externalid not found: " + extId, ids, params, out);
+			return doXmlIdResponse("externalid not found: " + extId, ids,
+					params, out);
 		}
 		boolean addRelatedObjs = params.getLimit() > 1;
 		String desc = "Request for external id " + extId
@@ -278,29 +292,33 @@ public class SearchRequestProcessor {
 
 		String extId = params.getKeywords();
 		List<Integer> ids = new Vector<Integer>();
-		MorphbankConfig.SYSTEM_LOGGER.info("Ext search extid: " + params.getKeywords());
+		MorphbankConfig.SYSTEM_LOGGER.info("Ext search extid: "
+				+ params.getKeywords());
 		int numResults = extRefSearch.getNumResults();
 		List objectIds = extRefSearch.getResultIds();
 		String title = "Search by external reference";
-		String description = "Objects with external reference to "+params.getKeywords();
-		return produceOutput(resp, out, title, description, numResults, params.getFirstResult(),
-				objectIds);
+		String description = "Objects with external reference to "
+				+ params.getKeywords();
+		return produceOutput(resp, out, title, description, numResults,
+				params.getFirstResult(), objectIds);
 	}
 
 	public Object eolSearch(PrintWriter out) {
 		EolSearch eolSearcher = new EolSearch();
 		int numResults = eolSearcher.getNumEolIds();
-		List objectIds = eolSearcher.getEolIds(params.getLimit(), params.getFirstResult());
+		List objectIds = eolSearcher.getEolIds(params.getLimit(),
+				params.getFirstResult());
 		String title = "EOL id query";
 		if (params.getNumChangeDays() > 0) {
-			title = getChangeTitle(params.getNumChangeDays(), numResults, objectIds.size());
+			title = getChangeTitle(params.getNumChangeDays(), numResults,
+					objectIds.size());
 		}
 		String description = "List of image IDs that are included in the EOL site";
 		// if (RequestParams.FORMAT_THUMB.equals(format)) {
 		// title = "Morphbank: Changes";
 		// }
-		return produceOutput(resp, out, title, description, numResults, params.getFirstResult(),
-				objectIds);
+		return produceOutput(resp, out, title, description, numResults,
+				params.getFirstResult(), objectIds);
 	}
 
 	String getChangeTitle(int numChanges, int numReturned) {
@@ -308,22 +326,25 @@ public class SearchRequestProcessor {
 		title.append(RequestParams.DATE_FORMATTER.format(params.getChangeDate()));
 		if (params.getLastChangeDate() != null) {
 			title.append(" and before ").append(
-					RequestParams.DATE_FORMATTER.format(params.getLastChangeDate()));
+					RequestParams.DATE_FORMATTER.format(params
+							.getLastChangeDate()));
 		}
 		if (params.getUser() != null) {
 			title.append(" for user ").append(params.getUser().getUin());
 		}
 		if (params.getGroup() != null) {
-			title.append(" for group ").append(params.getGroup().getGroupName());
+			title.append(" for group ")
+					.append(params.getGroup().getGroupName());
 		}
-		if (params.getObjectTypes() != null && params.getObjectTypes().length > 0) {
+		if (params.getObjectTypes() != null
+				&& params.getObjectTypes().length > 0) {
 			title.append(" for object types");
 			for (int i = 0; i < params.getObjectTypes().length; i++) {
 				title.append(" ").append(params.getObjectTypes()[i]);
 			}
 		}
-		title.append(" number changed ").append(numChanges).append(" number returned ").append(
-				numReturned);
+		title.append(" number changed ").append(numChanges)
+				.append(" number returned ").append(numReturned);
 		return title.toString();
 	}
 
@@ -334,9 +355,11 @@ public class SearchRequestProcessor {
 			title.append(" for user ").append(params.getUser().getUin());
 		}
 		if (params.getGroup() != null) {
-			title.append(" for group ").append(params.getGroup().getGroupName());
+			title.append(" for group ")
+					.append(params.getGroup().getGroupName());
 		}
-		if (params.getObjectTypes() != null && params.getObjectTypes().length > 0) {
+		if (params.getObjectTypes() != null
+				&& params.getObjectTypes().length > 0) {
 			title.append(" for object types");
 			for (int i = 0; i < params.getObjectTypes().length; i++) {
 				title.append(" ").append(params.getObjectTypes()[i]);
@@ -366,42 +389,46 @@ public class SearchRequestProcessor {
 		return today;
 	}
 
-	public Object doChangeSearch(ChangeSearch search, PrintWriter out, boolean isPublic) {
+	public Object doChangeSearch(ChangeSearch search, PrintWriter out,
+			boolean isPublic) {
 		getChangeDate(params.getNumChangeDays());
 		// get number of results and object ids for search
 		int numResults = search.getNumResults();
 		List objectIds = search.getResultIds();
 		String title = "query";
 		if (params.getNumChangeDays() > 0) {
-			title = getChangeTitle(params.getNumChangeDays(), numResults, objectIds.size());
+			title = getChangeTitle(params.getNumChangeDays(), numResults,
+					objectIds.size());
 		}
 		String description = getChangeTitle(numResults, objectIds.size());
 		// if (RequestParams.FORMAT_THUMB.equals(format)) {
 		// title = "Morphbank: Changes";
 		// }
-		return produceOutput(resp, out, title, description, numResults, params.getFirstResult(),
-				objectIds);
+		return produceOutput(resp, out, title, description, numResults,
+				params.getFirstResult(), objectIds);
 	}
 
-	String getSearchSubtitle(String topic, String parameterDescription, int numIds,
-			int numReturned, boolean geolocated, boolean published) {
+	String getSearchSubtitle(String topic, String parameterDescription,
+			int numIds, int numReturned, boolean geolocated, boolean published) {
 		StringBuffer sub = new StringBuffer();
 		sub.append("Search Results");
 		if (topic != null) {
-			sub.append(" for ").append(topic).append(" '").append(parameterDescription.trim())
-					.append("'");
+			sub.append(" for ").append(topic).append(" '")
+					.append(parameterDescription.trim()).append("'");
 		}
 		if (params.getGroup() != null)
 			sub.append(" for Group ").append(params.getGroup().getGroupName());
-		if (params.getUser() != null) sub.append(" for User ").append(params.getUser().getUin());
-		if (params.getObjectTypes() != null && params.getObjectTypes().length > 0) {
+		if (params.getUser() != null)
+			sub.append(" for User ").append(params.getUser().getUin());
+		if (params.getObjectTypes() != null
+				&& params.getObjectTypes().length > 0) {
 			sub.append(" object types");
 			for (int i = 0; i < params.getObjectTypes().length; i++) {
 				sub.append(" ").append(params.getObjectTypes()[i]);
 			}
 		}
-		sub.append(" number of matches ").append(numIds).append(" number returned ").append(
-				numReturned);
+		sub.append(" number of matches ").append(numIds)
+				.append(" number returned ").append(numReturned);
 		if (published) {
 			sub.append(" including only public objects");
 		}
@@ -411,25 +438,29 @@ public class SearchRequestProcessor {
 		return sub.toString();
 	}
 
-	public Object produceOutput(HttpServletResponse resp, PrintWriter out, String title,
-			String subtitle, int numResults, int firstResult, List objectIds) {
+	public Object produceOutput(HttpServletResponse resp, PrintWriter out,
+			String title, String subtitle, int numResults, int firstResult,
+			List objectIds) {
 		// formats svc, rss and thumb use title and subtitle, others do not
-		if (resp != null) resp.setContentType(params.getHttpResponseType());
+		if (resp != null)
+			resp.setContentType(params.getHttpResponseType());
 		if (RequestParams.FORMAT_XML.equals(params.format)
 				|| RequestParams.FORMAT_SVC.equals(params.format)) {// user
 			// mbsvc.xsd
 			// System.err.println("<!-- persistence: "
 			// + MorphbankConfig.getPersistenceUnit() + " -->");
-			Response xmlResp = XmlServices.createResponse(title, subtitle, numResults, objectIds
-					.size(), firstResult, objectIds);
-			if (out != null) XmlUtils.printXml(out, xmlResp);
+			Response xmlResp = XmlServices.createResponse(title, subtitle,
+					numResults, objectIds.size(), firstResult, objectIds);
+			if (out != null)
+				XmlUtils.printXml(out, xmlResp);
 			return xmlResp;
-		} else if (params.format == null || RequestParams.FORMAT_ID.equals(params.format)) {
+		} else if (params.format == null
+				|| RequestParams.FORMAT_ID.equals(params.format)) {
 			if (out != null) {
-				xmlIds
-						.printHeader(out, params.getKeywords(), params.getLimit(), params
-								.getObjectTypes(), params.getChangeDate(), params
-								.getNumChangeDays(), false);
+				xmlIds.printHeader(out, params.getKeywords(),
+						params.getLimit(), params.getObjectTypes(),
+						params.getChangeDate(), params.getNumChangeDays(),
+						false);
 				xmlIds.getXmlIds(out, numResults, firstResult, objectIds);
 				xmlIds.printFooter(out);
 			}
@@ -437,21 +468,23 @@ public class SearchRequestProcessor {
 		} else if (RequestParams.FORMAT_RDF.equals(params.format)) {
 			if (out != null) {
 				RdfUtils rdfUtils = new RdfUtils(params);
-				rdfUtils.getRdfObjects(numResults, firstResult, objectIds, DEPTH, out);
+				rdfUtils.getRdfObjects(numResults, firstResult, objectIds,
+						DEPTH, out);
 			}
 			return null;
 		} else if (RequestParams.FORMAT_THUMB.equals(params.format)) {
 			if (out != null) {
-				doThumbnailResponse(page, params, title, subtitle, numResults, firstResult,
-						objectIds);
+				doThumbnailResponse(page, params, title, subtitle, numResults,
+						firstResult, objectIds);
 			}
 			return null;
 		} else if (RequestParams.FORMAT_RSS.equals(params.format)) {
-			Object rss = RssServices.doRssResponse(out, title, subtitle, numResults, firstResult,
-					objectIds);
+			Object rss = RssServices.doRssResponse(out, title, subtitle,
+					numResults, firstResult, objectIds);
 			return rss;
 		} else {
-			if (out != null) out.println(BAD_FORMAT);
+			if (out != null)
+				out.println(BAD_FORMAT);
 			return BAD_FORMAT;
 		}
 	}
