@@ -139,13 +139,13 @@ public class ProcessRequest {
 	public Response finalizeResponse(Response response) {
 		// prepare status
 		if (mapper != null) {
-			StringBuffer status = new StringBuffer("All objects were ");
+			StringBuffer status = new StringBuffer("");
 			if (mapper.failure) {
 
 				status
-						.append("not saved because of failure. Please see individual objects for details");
+						.append("Some objects were not saved. Please see individual objects for details");
 			} else {
-				status.append("saved");
+				status.append("All objects were saved");
 			}
 			status.append("\nNumber of objects: ").append(mapper.numObjects);
 			status.append("\nNumber of objects with insert problems: ")
