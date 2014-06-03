@@ -152,7 +152,8 @@ public class CreateObjectsFromXml extends MapXmlToObject {
 		xmlObject.setMorphbankId(existingObj.getId());
 		xmlObject.addStatus("pre-existing object, no new object created");
 		setRelatedObject(xmlObject, existingObj);
-		responseMapper.createResponseObject(xmlObject, existingObj);
+		XmlBaseObject respObj = responseMapper.createResponseObject(xmlObject, existingObj);
+		setResponseObject(xmlObject, respObj);
 		String message = "Pre-existing " + existingObj.getObjectTypeIdStr();
 		if (xmlObject.getSourceId().getExternal().size() > 0) {
 			String extId = xmlObject.getSourceId().getExternal().get(0);
