@@ -1,10 +1,7 @@
 package org.idiginfo.ipt.acterms;
 
-import java.awt.HeadlessException;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -36,7 +33,8 @@ public class ACExtension {
 	static JAXBContext jc = null;
 	static Marshaller marshaller = null;
 	static Unmarshaller unmarshaller = null;
-	//private static String termFileName = "C:/dev/morphbank/audubon core IPT/acterms list.txt";
+	// private static String termFileName =
+	// "C:/dev/morphbank/audubon core IPT/acterms list.txt";
 	private static String termFileName = "C:/dev/morphbank/audubon core IPT/include list.txt";
 	public static final String REQ_PKG = "org.idiginfo.ipt.extension";
 	public static final String SCHEMA_LOCATION = "http://rs.gbif.org/extension/ http://rs.gbif.org/schema/extension.xsd";
@@ -98,7 +96,7 @@ public class ACExtension {
 		// for (ACTerm term : acTerms) {
 		// properties.add(term.createExtensionProperty());
 		// }
-		List<String> accessPointTermNames;
+		// List<String> accessPointTermNames;
 		try {
 			File termFile = new File(termFileName);
 			LineIterator lines;
@@ -176,7 +174,7 @@ public class ACExtension {
 				groupName = headerMatcher.group(1);
 				// check for Service Access Point terms, which are processed
 				// separately
-				//accessTerms = groupName.startsWith("Service Access");
+				// accessTerms = groupName.startsWith("Service Access");
 				continue;
 			}
 			Matcher termMatcher = termPattern.matcher(line);
@@ -202,7 +200,7 @@ public class ACExtension {
 		generateAccessTerms(properties, terms, groupName, accessTermNames);
 	}
 
-	private List<String> getAccessPointTermNames(LineIterator lines) {
+	List<String> getAccessPointTermNames(LineIterator lines) {
 
 		return null;
 	}

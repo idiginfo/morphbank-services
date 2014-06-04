@@ -1,6 +1,5 @@
 package org.idiginfo.ipt.acterms;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
