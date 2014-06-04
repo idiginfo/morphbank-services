@@ -79,8 +79,8 @@ public class ValidateXls {
 	 */
 	public boolean isViewTSNOk() {
 		boolean isValid = true;
-		Cell[] cells = sheetReader.getColumn(ExcelTools.VIEW_SHEET,ExcelTools.VIEW_APPLICABLE_TO_TAXON);
-		Cell[] viewNames = sheetReader.getColumn(ExcelTools.VIEW_SHEET,ExcelTools.COL_MY_VIEW_NAME);
+		Cell[] cells = sheetReader.getColumnCells(ExcelTools.VIEW_SHEET,ExcelTools.VIEW_APPLICABLE_TO_TAXON);
+		Cell[] viewNames = sheetReader.getColumnCells(ExcelTools.VIEW_SHEET,ExcelTools.COL_MY_VIEW_NAME);
 		int firstRow = findCustomView(cells) + 1;
 		if (firstRow == 0) return false;
 		for (int i = firstRow; i < viewNames.length; i++) {
@@ -148,8 +148,8 @@ public class ValidateXls {
 	private boolean checkDateFormat() {
 		String date;
 		boolean correctFormat = true;
-		Cell[] specimenDescription = sheetReader.getColumn(ExcelTools.SPECIMEN_SHEET,ExcelTools.COL_SPECIMEN_DESCRIPTION);
-		Cell[] dateCollected = sheetReader.getColumn(ExcelTools.SPECIMEN_SHEET,ExcelTools.COL_DATE_COLLECTED);
+		Cell[] specimenDescription = sheetReader.getColumnCells(ExcelTools.SPECIMEN_SHEET,ExcelTools.COL_SPECIMEN_DESCRIPTION);
+		Cell[] dateCollected = sheetReader.getColumnCells(ExcelTools.SPECIMEN_SHEET,ExcelTools.COL_DATE_COLLECTED);
 		 
 		//This section is a hack when getColumn does not return the whole column because cells are empty
 		if (dateCollected.length != specimenDescription.length) {
@@ -196,7 +196,7 @@ public class ValidateXls {
 	
 	
 	private boolean checkOriginalFileName() {
-		Cell[] cells = sheetReader.getColumn(ExcelTools.IMAGE_SHEET, ExcelTools.COL_IMAGE_FILE_NAME);
+		Cell[] cells = sheetReader.getColumnCells(ExcelTools.IMAGE_SHEET, ExcelTools.COL_IMAGE_FILE_NAME);
 		boolean isValid = true;
 		String error = "In column Image File Name, row ";
 		for (int i = 1; i < cells.length; i++) {
@@ -271,8 +271,8 @@ public class ValidateXls {
 	 * @return true is the format is correct
 	 */
 	private boolean checkLatLong() {
-		Cell[] latitude = sheetReader.getColumn(ExcelTools.LOCALITY_SHEET,ExcelTools.COL_LATITUDE);
-		Cell[] longitude = sheetReader.getColumn(ExcelTools.LOCALITY_SHEET, ExcelTools.COL_LONGITUDE);
+		Cell[] latitude = sheetReader.getColumnCells(ExcelTools.LOCALITY_SHEET,ExcelTools.COL_LATITUDE);
+		Cell[] longitude = sheetReader.getColumnCells(ExcelTools.LOCALITY_SHEET, ExcelTools.COL_LONGITUDE);
 		boolean formatting = true;
 		for (int i = 1; i < Math.min(latitude.length, longitude.length); i++) {
 			try {
@@ -306,7 +306,7 @@ public class ValidateXls {
 			Sheet sheet = sheetReader.getSheet(sheetName);
 			int maxRows = sheet.getLastRowNum();
 			for (int i = 1; i < maxRows; i++) {
-				String[] row = this.getMandatoryRow(sheetName, sheet.getRow(i));
+				String[] row = this.getMandatoryRow(sheetName, i);
 				isValid &= this.checkMandatoryRow(row, sheetName, i);
 			}
 		}
@@ -314,7 +314,7 @@ public class ValidateXls {
 		Sheet imagesSheet = sheetReader.getSheet(ExcelTools.IMAGE_SHEET);
 		int maxRows = imagesSheet.getLastRowNum();
 		for (int i = 1; i < maxRows; i++) {
-			String[] row = this.getMandatoryRow(ExcelTools.IMAGE_SHEET, imagesSheet.getRow(i));
+			String[] row = this.getMandatoryRow(ExcelTools.IMAGE_SHEET, i);
 			if (row==null) continue;
 			if(! this.checkMandatoryRow(row, ExcelTools.IMAGE_SHEET, i)){
 				isValid = false;
@@ -324,7 +324,7 @@ public class ValidateXls {
 		Sheet specimenSheet = sheetReader.getSheet(ExcelTools.SPECIMEN_SHEET);
 		maxRows = specimenSheet.getLastRowNum();
 		for (int i = 2; i < maxRows; i++) {
-			String[] row = this.getMandatoryRow(ExcelTools.SPECIMEN_SHEET, specimenSheet.getRow(i));
+			String[] row = this.getMandatoryRow(ExcelTools.SPECIMEN_SHEET, i);
 			if (row==null) continue;
 			isValid &= this.checkMandatoryRow(row, ExcelTools.SPECIMEN_SHEET, i);
 		}
@@ -404,89 +404,11 @@ public class ValidateXls {
 		
 		return null;
 	}
-	private Cell[] getAllCellsAtRow(Row entireRow)
-	{
-		Cell allCellsAtRow[] = new Cell[entireRow.getLastCellNum()];
-		for (Cell cell : entireRow) {
-			allCellsAtRow[cell.getColumnIndex()] = cell;
-		}
-		return allCellsAtRow;
-	}
-	private String[] getMandatoryRow(String type, Row entireRow){
-		String message = "Some columns are missing. Please use an updated spreadsheet from http://www.morphbank.net.";
-		Cell allCellsAtRow[] = getAllCellsAtRow(entireRow);
-		if (repeatErrorMessage) {
-			if ((allCellsAtRow == null || allCellsAtRow.length < 2)) {
-				System.out.println(message);
-				messageToOutput(message);
-				repeatErrorMessage = false;
-				return null;
-			}
-		}
-		if (type.equals(ExcelTools.IMAGE_SHEET)) {
-			int colISpecimenDescription= sheetReader.getColumnNumberByName(type, ExcelTools.COL_IMAGE_SPECIMEN_DESCRIPTION);
-			int colIMyViewName = sheetReader.getColumnNumberByName(type, ExcelTools.COL_MY_VIEW_NAME);
-			int colICopyright= sheetReader.getColumnNumberByName(type, ExcelTools.COL_COPYRIGHT_INFO);
-			int colIImageFileName = sheetReader.getColumnNumberByName(type, ExcelTools.COL_IMAGE_FILE_NAME);
-			int colICreativeCommons = sheetReader.getColumnNumberByName(type, ExcelTools.COL_CREATIVE_COMMONS);
-			if (colISpecimenDescription < 0 || colIMyViewName < 0 || colICopyright < 0 || colIImageFileName < 0 || colICreativeCommons < 0) {
-				if (repeatErrorMessage) {
-					System.out.println(message);
-					messageToOutput(message);
-					repeatErrorMessage = false;
-				}
-				return null;
-			}
-			int[] colNumbers = {colISpecimenDescription, colIMyViewName, colICopyright, colIImageFileName, colICreativeCommons};
-			if (getMaxFromTable(colNumbers) > (allCellsAtRow.length - 1)) return null;
-			String[] row = new String[5];
-			
-			row[0] = allCellsAtRow[colISpecimenDescription].getStringCellValue(); 
-			row[1] = allCellsAtRow[colIMyViewName].getStringCellValue(); 
-			row[2] = allCellsAtRow[colICopyright].getStringCellValue(); 
-			row[3] = allCellsAtRow[colIImageFileName].getStringCellValue();
- 			if (allCellsAtRow[colICreativeCommons].getCellType() == Cell.CELL_TYPE_FORMULA) {
-				row[4] = allCellsAtRow[colICreativeCommons].getStringCellValue();
-			}
-			else {
-				row[4] = allCellsAtRow[colICreativeCommons].getStringCellValue();
-			}
-			return row;
-		}
-		if (type.equals(ExcelTools.SPECIMEN_SHEET)) {
-			int colSScientificName = sheetReader.getColumnNumberByName(type, ExcelTools.COL_SCIENTIFIC_NAME);
-			int colSBasisOfRecord = sheetReader.getColumnNumberByName(type, ExcelTools.COL_BASIS_OF_RECORD);
-			int colSSex = sheetReader.getColumnNumberByName(type, ExcelTools.COL_SEX);
-			int colSDevelopmentalStage = sheetReader.getColumnNumberByName(type, ExcelTools.COL_DEVELOPMENTAL_STAGE);
-			int colSForm = sheetReader.getColumnNumberByName(type, ExcelTools.COL_FORM);
-			int colSTypeStatus = sheetReader.getColumnNumberByName(type, ExcelTools.COL_TYPE_STATUS);
-			int colSLocality = sheetReader.getColumnNumberByName(type, ExcelTools.COL_LOCALITY);
-			int[] colNumbers = {colSScientificName, colSBasisOfRecord, colSSex, colSDevelopmentalStage, colSForm, colSTypeStatus, colSLocality};
-			if (getMaxFromTable(colNumbers) > (allCellsAtRow.length - 1)) return null;
-			String[] row = new String[7];
-			row[0] = allCellsAtRow[colSScientificName].getStringCellValue(); 
-			row[1] = allCellsAtRow[colSBasisOfRecord].getStringCellValue(); 
-			row[2] = allCellsAtRow[colSSex].getStringCellValue(); 
-			row[3] = allCellsAtRow[colSDevelopmentalStage].getStringCellValue(); 
-			row[4] = allCellsAtRow[colSForm].getStringCellValue();
-			row[5] = allCellsAtRow[colSTypeStatus].getStringCellValue(); 
-			row[6] = allCellsAtRow[colSLocality].getStringCellValue();
-			return row;
-		}
-		
-		if (type.equals(ExcelTools.SPECIMEN_TAXON_DATA_SHEET)) {
-			int colTaxonFamily = sheetReader.getColumnNumberByName(type, ExcelTools.COL_FAMILY);
-			int colTaxonScNameString = sheetReader.getColumnNumberByName(type, ExcelTools.COL_SCIENTIFICNAMESTRING);
-			if (Math.max(colTaxonFamily, colTaxonScNameString) > (allCellsAtRow.length - 1)) return null;
-			String[] row = new String[2];
-			row[0] = allCellsAtRow[colTaxonFamily].getStringCellValue(); 
-			row[1] = allCellsAtRow[colTaxonScNameString].getStringCellValue(); 
-			return row;
-		}
-		
-		return null;
-	}
 	
+	private String[] getMandatoryRow(String sheetName, int rowNumber){
+	        return getMandatoryRow(sheetName, sheetReader.getRowCells(sheetName, rowNumber));
+	}
+		
 	private boolean checkMandatoryRow(String[] row, String sheetName, int rowNumber) {
 		if (row == null) return true;
 		boolean hasContent = true;
@@ -545,19 +467,19 @@ public class ValidateXls {
 		boolean noSpaceFound = true;
 		HashMap<String, Cell[]> columnsAndNames = new HashMap<String, Cell[]>();
 		
-		Cell[] allCellAtColImg = sheetReader.getColumn(ExcelTools.IMAGE_SHEET,ExcelTools.COL_COPYRIGHT_INFO);
+		Cell[] allCellAtColImg = sheetReader.getColumnCells(ExcelTools.IMAGE_SHEET,ExcelTools.COL_COPYRIGHT_INFO);
 		columnsAndNames.put(ExcelTools.COL_COPYRIGHT_INFO, allCellAtColImg);
 		allCellAtColImg = null;
 		
-		Cell[] allCellAtColSpcName = sheetReader.getColumn(ExcelTools.SPECIMEN_SHEET, ExcelTools.COL_COLLECTOR_NAME);
+		Cell[] allCellAtColSpcName = sheetReader.getColumnCells(ExcelTools.SPECIMEN_SHEET, ExcelTools.COL_COLLECTOR_NAME);
 		columnsAndNames.put(ExcelTools.COL_COLLECTOR_NAME, allCellAtColSpcName);
 		allCellAtColSpcName = null;
 		
-		Cell[] allCellAtColSpcNumber = sheetReader.getColumn(ExcelTools.SPECIMEN_SHEET, ExcelTools.COL_CATALOG_NUMBER);
+		Cell[] allCellAtColSpcNumber = sheetReader.getColumnCells(ExcelTools.SPECIMEN_SHEET, ExcelTools.COL_CATALOG_NUMBER);
 		columnsAndNames.put(ExcelTools.COL_CATALOG_NUMBER, allCellAtColSpcNumber);
 		allCellAtColSpcNumber = null;
 		
-		Cell[] allCellAtColLocDesc = sheetReader.getColumn(ExcelTools.LOCALITY_SHEET, ExcelTools.COL_LOCALITY_DESCRIPTION);
+		Cell[] allCellAtColLocDesc = sheetReader.getColumnCells(ExcelTools.LOCALITY_SHEET, ExcelTools.COL_LOCALITY_DESCRIPTION);
 		columnsAndNames.put(ExcelTools.COL_LOCALITY_DESCRIPTION, allCellAtColLocDesc);
 		allCellAtColLocDesc = null;
 		

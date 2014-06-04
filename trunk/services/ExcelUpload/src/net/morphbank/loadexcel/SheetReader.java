@@ -247,9 +247,11 @@ public class SheetReader {
 	public Cell[] getRowCells(String sheetName, int rowNum){
 		Sheet sheet = getSheet(sheetName);
 		Row row = sheet.getRow(rowNum);
-		//for ()
-		//TODO put code here
-		return null;
+		Cell allCellsAtRow[] = new Cell[row.getLastCellNum()];
+		for (Cell cell : row) {
+			allCellsAtRow[cell.getColumnIndex()] = cell;
+		}
+		return allCellsAtRow;
 	}
 
 	public Integer getColumnNumberByName(String sheet, String fieldName) {
