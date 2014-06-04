@@ -29,6 +29,8 @@ import net.morphbank.mbsvc3.xml.XmlTaxonNameUtilities;
 
 import org.apache.poi.ss.usermodel.Sheet;
 
+import com.hp.hpl.jena.util.FileUtils;
+
 public class MapSpreadsheetToXml {
 
 	// protected MapToResponse mapResponse;
@@ -85,7 +87,7 @@ public class MapSpreadsheetToXml {
 	public Request createRequestFromFile(String fileName,
 			Credentials submitter, Credentials owner, PrintWriter report,
 			int numLines, int firstLine) {
-		String extension = fileName.substring(fileName.indexOf('.') + 1);
+		String extension = FileUtils.getFilenameExt(fileName);
 		if ("xls".equals(extension)) {
 			XlsFieldMapper xlsFieldMapper = new XlsFieldMapper(fileName);
 			getCredentials(xlsFieldMapper);
