@@ -1,9 +1,5 @@
 package org.idiginfo.ipt.acterms;
 
-import java.util.Collection;
-
-import javax.xml.soap.SAAJResult;
-
 import com.sun.xml.bind.marshaller.NamespacePrefixMapper;
 
 class NamespacesPrefixMapperImpl extends NamespacePrefixMapper {

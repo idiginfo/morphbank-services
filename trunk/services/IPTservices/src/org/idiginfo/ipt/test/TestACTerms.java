@@ -4,22 +4,17 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.LineIterator;
 import org.idiginfo.ipt.acterms.ACExtension;
-import org.idiginfo.ipt.acterms.ACTerm;
 import org.idiginfo.ipt.acterms.ACTerms;
 import org.idiginfo.ipt.extension.Extension;
-import org.idiginfo.ipt.extension.Extension.Property;
 
 public class TestACTerms {
 
@@ -49,21 +44,7 @@ public class TestACTerms {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		// LineIterator lines = FileUtils.lineIterator(acTermsFile);
-		// FileWriter outFile = new FileWriter(ACTERMS_OUT);
-		// ACTerms terms = new ACTerms();
-		// while (lines.hasNext()) {
-		// Map<String, String> map = getItemMap(lines);
-		// if (map.size() == 0)
-		// break;
-		// ACTerm acTerm = new ACTerm(map, "");
-		// terms.put(acTerm.getSimpleName(), acTerm);
-		// System.out.println("label: " + acTerm.getLabel());
-		// Property property = acTerm.createExtensionProperty();
-		// System.out.println("qual name: " + property.getQualName()
-		// + " simple name: " + property.getName());
-		// }
-		// System.out.println("Number of terms: " + terms.size());
+		System.out.println("Number of terms: " + terms.size());
 
 	}
 
@@ -107,12 +88,6 @@ public class TestACTerms {
 		String key = termMatch.group(1).trim();
 		String value = termMatch.group(2).trim();
 
-		// int start = line.indexOf('|');
-		// String[] fields = line.substring(start + 1).split("=");
-		// if (fields.length < 2)
-		// return;
-		// String key = fields[0].trim();
-		// String value = fields[1].trim();
 		Matcher uri = uriPattern.matcher(value);
 		if (uri.matches()) {
 			String namespace = uri.group(1);
