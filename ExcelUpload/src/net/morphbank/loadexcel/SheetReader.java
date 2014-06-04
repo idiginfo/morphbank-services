@@ -27,7 +27,7 @@ package net.morphbank.loadexcel;
 //Modified by: Shantanu Gautam				           			//
 //date created:  November 05 2013                      			//
 ////////////////////////////////////////////////////////////////////////
- 
+
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.sql.PreparedStatement;
@@ -226,6 +226,21 @@ public class SheetReader {
 			}
 		}
 		return "";
+	}
+
+	public Cell[] getColumn(String sheetName, String fieldName) {
+		// Sheet sheet = getSheet(sheetName);
+		return getColumn(sheetName, getColumnNumberByName(sheetName, fieldName));
+	}
+
+	public Cell[] getColumn(String sheetName, int fieldNum) {
+		Sheet sheet = getSheet(sheetName);
+		int numRows = sheet.getLastRowNum() + 1;
+		Cell[] column = new Cell[numRows];
+		for (int index = 0; index < numRows; index++) {
+			column[index] = sheet.getRow(index).getCell(fieldNum);
+		}
+		return column;
 	}
 
 	public Integer getColumnNumberByName(String sheet, String fieldName) {
