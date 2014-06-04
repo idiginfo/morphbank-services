@@ -344,28 +344,8 @@ public class ValidateXls {
 	 * @return true is the format is correct
 	 */
 	private boolean checkLatLong() {
-		int latColNum = sheetReader.getColumnNumberByName(ExcelTools.LOCALITY_SHEET, ExcelTools.COL_LATITUDE);
-		int lonColNum = sheetReader.getColumnNumberByName(ExcelTools.LOCALITY_SHEET, ExcelTools.COL_LONGITUDE);
-		Sheet sheetLocality = sheetReader.getSheet(ExcelTools.LOCALITY_SHEET);
-		
-		int rowNum = sheetLocality.getLastRowNum()+1;
-		
-		Cell cellLat = null, cellLon = null;
-		Cell[] latitude = new Cell[rowNum];
-		Cell[] longitude = new Cell[rowNum];
-		int latIx=0, lonIx=0;
-		
-		for (Row row : sheetLocality) {
-			cellLat =  row.getCell(latColNum);
-			if(cellLat != null) {
-				latitude[latIx++] = cellLat;
-			}
-			
-			cellLon =  row.getCell(lonColNum);
-			if(cellLon != null) {
-				longitude[lonIx++] = cellLon;
-			}
-		}
+		Cell[] latitude = sheetReader.getColumn(ExcelTools.LOCALITY_SHEET,ExcelTools.COL_LATITUDE);
+		Cell[] longitude = sheetReader.getColumn(ExcelTools.LOCALITY_SHEET, ExcelTools.COL_LONGITUDE);
 		boolean formatting = true;
 		for (int i = 1; i < Math.min(latitude.length, longitude.length); i++) {
 			try {
