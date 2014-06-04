@@ -41,6 +41,7 @@ import java.text.SimpleDateFormat;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.DateUtil;
+import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
@@ -228,12 +229,12 @@ public class SheetReader {
 		return "";
 	}
 
-	public Cell[] getColumn(String sheetName, String fieldName) {
+	public Cell[] getColumnCells(String sheetName, String fieldName) {
 		// Sheet sheet = getSheet(sheetName);
-		return getColumn(sheetName, getColumnNumberByName(sheetName, fieldName));
+		return getColumnCells(sheetName, getColumnNumberByName(sheetName, fieldName));
 	}
 
-	public Cell[] getColumn(String sheetName, int fieldNum) {
+	public Cell[] getColumnCells(String sheetName, int fieldNum) {
 		Sheet sheet = getSheet(sheetName);
 		int numRows = sheet.getLastRowNum() + 1;
 		Cell[] column = new Cell[numRows];
@@ -241,6 +242,14 @@ public class SheetReader {
 			column[index] = sheet.getRow(index).getCell(fieldNum);
 		}
 		return column;
+	}
+	
+	public Cell[] getRowCells(String sheetName, int rowNum){
+		Sheet sheet = getSheet(sheetName);
+		Row row = sheet.getRow(rowNum);
+		//for ()
+		//TODO put code here
+		return null;
 	}
 
 	public Integer getColumnNumberByName(String sheet, String fieldName) {
