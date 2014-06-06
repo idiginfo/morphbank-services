@@ -115,7 +115,7 @@ public class Locality {
 							LoadData.log("Locality ref '" + localityRef + "' row " + row
 									+ " matches id " + localityId);
 						} else {// no match
-							String insertQuery = "{call CreateObject( 'Locality', ?, ?, ?, now(), ?, '')}";
+							String insertQuery = "{call CreateObject( 'Locality', ?, ?, ?, now(), ?, '','')}";
 							insertStmt = LoadData.getConnection().prepareCall(insertQuery);
 							int i = 1;
 							if (sheetReader.GetUserId() == -1) return false;

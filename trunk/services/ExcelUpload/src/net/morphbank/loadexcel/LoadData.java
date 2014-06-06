@@ -281,7 +281,7 @@ public class LoadData {
 	public static void setProperties() {
 		Properties prop = new Properties();
 		try {
-			prop.load(new FileInputStream(propertyFile));
+			prop.load(LoadData.class.getClassLoader().getResourceAsStream(propertyFile));
 			dbHost = prop.getProperty("dbhost");
 			dbName = prop.getProperty("dbname");
 			dbUserId = prop.getProperty("login");
@@ -298,7 +298,7 @@ public class LoadData {
 	public static void setProperties(String propertyFile) {
 		Properties prop = new Properties();
 		try {
-			prop.load(new FileInputStream(propertyFile));
+			prop.load(LoadData.class.getClassLoader().getResourceAsStream(propertyFile));
 			dbHost = prop.getProperty("dbhost");
 			dbName = prop.getProperty("dbname");
 			dbUserId = prop.getProperty("login");

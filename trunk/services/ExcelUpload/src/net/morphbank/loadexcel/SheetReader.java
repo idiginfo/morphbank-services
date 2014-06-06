@@ -38,6 +38,7 @@ import java.sql.Statement;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.DateUtil;
@@ -119,6 +120,8 @@ public class SheetReader {
 		if (sheet == null)
 			return "";
 
+		if(sheet.getRow(row).getCell(col) == null)
+			return "";
 		Cell cell = sheet.getRow(row).getCell(col);
 		if (cell.getCellType() != Cell.CELL_TYPE_NUMERIC) {
 			return cell.getStringCellValue();
@@ -302,11 +305,10 @@ public class SheetReader {
 	 * @return
 	 */
 	public String setReleaseDate() {
-		if (imageCollectionSheet.getRow(6).getCell(0)
-				.equals("Release date (yyyy-mm-dd):")
+		if (imageCollectionSheet.getRow(6).getCell(0).toString().equals("Release date (yyyy-mm-dd):")
 				&& !imageCollectionSheet.getRow(6).getCell(1).equals("")) {
-			releaseDate = imageCollectionSheet.getRow(6).getCell(1)
-					.getStringCellValue();
+			Date date = imageCollectionSheet.getRow(6).getCell(1).getDateCellValue();
+			releaseDate = new SimpleDateFormat("yyyy-MM-dd").format(date);
 		}
 		return releaseDate;
 	}

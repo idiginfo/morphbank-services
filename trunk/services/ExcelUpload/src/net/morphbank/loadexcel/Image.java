@@ -111,7 +111,7 @@ public class Image {
 
 	private int createImage(int row) {
 		try {
-			String insertQuery = "{call CreateObject( 'Image', ?, ?, ?, ?, ?, '')}";
+			String insertQuery = "{call CreateObject( 'Image', ?, ?, ?, ?, ?, '','')}";
 			insertStmt = LoadData.getConnection().prepareCall(insertQuery);
 			int i = 1;
 			insertStmt.setInt(i++, userId);

@@ -115,7 +115,7 @@ public class View {
 						continue;
 					}
 					try {
-						String insertQuery = "{call CreateObject( 'View', ?, ?, ?, ?, ?, '')}";
+						String insertQuery = "{call CreateObject( 'View', ?, ?, ?, ?, ?, '','')}";
 						insertStmt = LoadData.getConnection().prepareCall(insertQuery);
 						int i = 1;
 						if (sheetReader.GetUserId() == -1) return false;
