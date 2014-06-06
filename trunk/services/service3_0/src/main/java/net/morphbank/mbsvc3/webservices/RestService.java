@@ -80,7 +80,9 @@ public class RestService extends javax.servlet.http.HttpServlet implements javax
 		Properties properties = new Properties();
 		try {
 			//TODO add capability to handle ip list as properties. this is not it!
-			properties.load(new FileInputStream(MorphbankConfig.getIpAllowed()));
+			String propertyFile = MorphbankConfig.getIpAllowed(); 
+			InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream(propertyFile);  
+			properties.load(inputStream);
 			String[] ips = properties.getProperty("IP").replaceAll(" ", "").split(",");
 			ipAddresses = new ArrayList<String>();
 			for (String ip : ips) {
