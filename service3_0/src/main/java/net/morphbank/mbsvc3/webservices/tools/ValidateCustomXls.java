@@ -112,17 +112,17 @@ public class ValidateCustomXls {
 		int numFields = dropDownsSheet.getRow(0).getLastCellNum();
 		headersDropDowns = new String[numFields];
 		for (int i = 0; i < numFields; i++) {
-			headersDropDowns[i] = dropDownsSheet.getRow(0).getCell(i).getStringCellValue().toLowerCase().trim();
+			headersDropDowns[i] = getCellText(dropDownsSheet.getRow(0).getCell(i)).toLowerCase().trim();
 		}
 		numFields = dataSheet.getRow(0).getLastCellNum();
 		headersData = new String[numFields];
 		for (int i = 0; i < numFields; i++) {
-			headersData[i] = dataSheet.getRow(0).getCell(i).getStringCellValue().toLowerCase().trim();
+			headersData[i] = getCellText(dataSheet.getRow(0).getCell(i)).toLowerCase().trim();
 		}
 		numFields = userPropertiesSheet.getRow(0).getLastCellNum();
 		headersUserProp = new String[numFields];
 		for (int i = 0; i < numFields; i++) {
-			headersUserProp[i] = userPropertiesSheet.getRow(0).getCell(i).getStringCellValue().toLowerCase().trim();
+			headersUserProp[i] =getCellText(userPropertiesSheet.getRow(0).getCell(i)).toLowerCase().trim();
 		}
 		
 	}
@@ -214,7 +214,7 @@ public class ValidateCustomXls {
 		Cell[] cells = getColumn(dataSheet, this.getColumnNumberByName(DATA_SHEET_NAME, "Image External id"));
 		String[] columnValues = new String[cells.length];
 		for (int i = 0; i < cells.length -1; i++) {
-			columnValues[i] = cells[i+1].getStringCellValue();
+			columnValues[i] = getCellText(cells[i]);
 			for (int j = 0; j < i; j++) {
 				if (!columnValues[i].equalsIgnoreCase("") && columnValues[j].equalsIgnoreCase(columnValues[i])) duplicates.put(j + 2, i + 2);
 			}
@@ -314,21 +314,13 @@ public class ValidateCustomXls {
 	 * @return array of cell
 	 */
 	private Cell[] getColumn(Sheet sheet, int columnNum){
-		int numOfRows = sheet.getLastRowNum();
-		Cell cell = null;
-		Cell[] destCell = new Cell[numOfRows];
-		int locIx=0;
-		for (Row row : sheet) {
-			cell = null;
-			cell =  row.getCell(columnNum);
-			if(cell != null) {
-				if(locIx==numOfRows){
-					break;
-				}
-				destCell[locIx++] = cell;
-			}
+		
+		int numRows = sheet.getLastRowNum() + 1;
+		Cell[] column = new Cell[numRows];
+		for (int index = 0; index < numRows; index++) {
+			column[index] = sheet.getRow(index).getCell(columnNum);
 		}
-		return destCell;
+		return column;
 	}
 	
 	/**
@@ -446,21 +438,21 @@ public class ValidateCustomXls {
 		boolean credentialsOK = true;
 		boolean emptyCells = false;
 		
-		String cName = contributorSheet.getRow(1).getCell(1).getStringCellValue();
-		String cId = contributorSheet.getRow(2).getCell(1).getStringCellValue();
-		emptyCells |= areCellsBothEmpty(contributorSheet.getRow(1).getCell(0).getStringCellValue(), cName,
-				contributorSheet.getRow(2).getCell(0).getStringCellValue(), cId);
-		String sName = contributorSheet.getRow(3).getCell(1).getStringCellValue();
-		String sId = Integer.toString((int)contributorSheet.getRow(4).getCell(1).getNumericCellValue());
-		emptyCells |= areCellsBothEmpty(contributorSheet.getRow(3).getCell(0).getStringCellValue(), sName,
-				contributorSheet.getRow(4).getCell(0).getStringCellValue(), sId);
-		String gName = contributorSheet.getRow(5).getCell(1).getStringCellValue();
-		String gId = contributorSheet.getRow(6).getCell(1).getStringCellValue();
-		emptyCells |= areCellsBothEmpty(contributorSheet.getRow(5).getCell(0).getStringCellValue(), gName,
-				contributorSheet.getRow(6).getCell(0).getStringCellValue(), gId);
+		String cName = getCellText(contributorSheet.getRow(1).getCell(1));
+		String cId = getCellText(contributorSheet.getRow(2).getCell(1));
+		emptyCells |= areCellsBothEmpty(getCellText(contributorSheet.getRow(1).getCell(0)), cName,
+				getCellText(contributorSheet.getRow(2).getCell(0)), cId);
+		String sName = getCellText(contributorSheet.getRow(3).getCell(1));
+		String sId = getCellText(contributorSheet.getRow(4).getCell(1));
+		emptyCells |= areCellsBothEmpty(getCellText(contributorSheet.getRow(3).getCell(0)), sName,
+				getCellText(contributorSheet.getRow(4).getCell(0)), sId);
+		String gName = getCellText(contributorSheet.getRow(5).getCell(1));
+		String gId = getCellText(contributorSheet.getRow(6).getCell(1));
+		emptyCells |= areCellsBothEmpty(getCellText(contributorSheet.getRow(5).getCell(0)), gName,
+				getCellText(contributorSheet.getRow(6).getCell(0)), gId);
 
-		String date = Integer.toString((int)contributorSheet.getRow(7).getCell(1).getNumericCellValue()) ;
-		emptyCells |= isCellEmpty(contributorSheet.getRow(7).getCell(0).getStringCellValue(), date);
+		String date = getCellText(contributorSheet.getRow(7).getCell(1)) ;
+		emptyCells |= isCellEmpty(getCellText(contributorSheet.getRow(7).getCell(0)), date);
 		if(emptyCells) return false;
 		
 		String select = "select u.userName, u.id from User u where u.userName = :name";
@@ -490,6 +482,7 @@ public class ValidateCustomXls {
 		}
 		return false;
 	}
+	
 
 	/**
 	 * Check if both cells are empty.
@@ -544,8 +537,15 @@ public class ValidateCustomXls {
 			int uid = Integer.valueOf(String.valueOf(row[1]));
 			if (row[0].equals(name)) {
 				matchFound = true;
-				if (uid != Integer.valueOf(id)) {
-					String error = name + " and " + id + " do not match. One of them must be misstyped.";
+				try {
+					if (uid != Integer.parseInt(id.split("\\.")[0])) {
+						String error = name + " and " + id + " do not match. One of them must be misstyped.";
+						System.out.println(error);
+						this.messageToOutput(error);
+						matchFound = false;
+					}
+				}catch(NumberFormatException e){
+					String error = "Error: MB Contributor Id is non numeric: "+id;
 					System.out.println(error);
 					this.messageToOutput(error);
 					matchFound = false;
@@ -714,19 +714,53 @@ public class ValidateCustomXls {
 			}
 			
 			String[] row = new String[11];
-			row[0] = entireRow[colImgExtId].getStringCellValue(); 
-			row[1] = entireRow[colImgExtIdPrfx].getStringCellValue(); 
-			row[2] = entireRow[colOriglFileName].getStringCellValue(); 
-			row[3] = entireRow[colCreativeCommons].getStringCellValue(); 
-			row[4] = Integer.toString((int)entireRow[colSpExtId].getNumericCellValue());
-			row[5] = entireRow[colSpExtIdPrfx].getStringCellValue(); 
-			row[6] = entireRow[colDetScName].getStringCellValue(); 
-			row[7] = Integer.toString((int)entireRow[colDetTSN].getNumericCellValue()); 
-			row[8] = entireRow[colBasisOfRecord].getStringCellValue(); 
-			row[9] = entireRow[colTypeStatus].getStringCellValue();
-			row[10] = entireRow[colViewAppTaxon].getStringCellValue(); 
+			row[0] = getCellText(entireRow[colImgExtId]); 
+			row[1] = getCellText(entireRow[colImgExtIdPrfx]); 
+			row[2] = getCellText(entireRow[colOriglFileName]); 
+			row[3] = getCellText(entireRow[colCreativeCommons]); 
+			row[4] = getCellText(entireRow[colSpExtId]);
+			row[5] = getCellText(entireRow[colSpExtIdPrfx]); 
+			row[6] = getCellText(entireRow[colDetScName]); 
+			row[7] = getCellText(entireRow[colDetTSN]); 
+			row[8] = getCellText(entireRow[colBasisOfRecord]); 
+			row[9] = getCellText(entireRow[colTypeStatus]);
+			row[10] = getCellText(entireRow[colViewAppTaxon]); 
 			
 			return row;
+	}
+	private String getCellText(Cell cell)
+	{
+		String cellText = "";
+		if (cell!=null) {
+		    switch (cell.getCellType()) {
+		        case Cell.CELL_TYPE_BOOLEAN:
+		        	cellText = String.valueOf(cell.getBooleanCellValue());
+		            break;
+		        case Cell.CELL_TYPE_NUMERIC:
+		        	cellText = String.valueOf(cell.getNumericCellValue());
+		            break;
+		        case Cell.CELL_TYPE_STRING:
+		        	cellText = cell.getStringCellValue();
+		            break;
+		        case Cell.CELL_TYPE_BLANK:
+		        	cellText = "";
+		        	break;
+		        case Cell.CELL_TYPE_ERROR:
+					try {
+						throw new Exception("Error in reading cell value");
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+						cellText = "";
+					}
+		            break;
+
+		        // CELL_TYPE_FORMULA will never occur
+		        case Cell.CELL_TYPE_FORMULA: 
+		            break;
+		    }
+		}
+		return cellText;
 	}
 	
 	private boolean missingColumn(HashMap<String,Integer> columns) {
@@ -814,11 +848,11 @@ public class ValidateCustomXls {
 		Cell[] sciNames = getColumn(dataSheet, this.getColumnNumberByName(DATA_SHEET_NAME, "Determination Scientific Name"));
 		
 		for (int i = 1; i < specimenExtIds.length; i++) {
-			String sciName = sciNames[i].getStringCellValue();
-			String extId = Integer.toString((int)specimenExtIds[i].getNumericCellValue());
+			String sciName = getCellText(sciNames[i]);
+			String extId = getCellText(specimenExtIds[i]);
 			for (int j = i; j < specimenExtIds.length; j++) {
-				String sciNameDup = sciNames[j].getStringCellValue();
-				String extIdDup = Integer.toString((int)specimenExtIds[j].getNumericCellValue());
+				String sciNameDup = getCellText(sciNames[j]);
+				String extIdDup = getCellText(specimenExtIds[j]);
 				if (extId.equals(extIdDup)) {
 					if (!sciName.equals(sciNameDup)){
 						uniqueName = false;
