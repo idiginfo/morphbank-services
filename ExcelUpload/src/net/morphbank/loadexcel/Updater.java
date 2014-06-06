@@ -168,7 +168,7 @@ public class Updater {
 		}
 		if (columnValue.length() == 0) return false;
 		try {
-			Double colValue = Double.valueOf(columnValue);
+			Double colValue = Double.valueOf(columnValue.replaceAll(",", ""));
 			values.add(colValue);
 			columns.add(columnName);
 			return true;

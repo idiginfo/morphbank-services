@@ -397,8 +397,10 @@ public class ValidateXls {
 			int colTaxonScNameString = sheetReader.getColumnNumberByName(type, ExcelTools.COL_SCIENTIFICNAMESTRING);
 			if (Math.max(colTaxonFamily, colTaxonScNameString) > (entireRow.length - 1)) return null;
 			String[] row = new String[2];
-			row[0] = entireRow[colTaxonFamily].getStringCellValue(); 
-			row[1] = entireRow[colTaxonScNameString].getStringCellValue(); 
+			if(entireRow[colTaxonFamily] != null)
+				row[0] = entireRow[colTaxonFamily].getStringCellValue(); 
+			if(entireRow[colTaxonScNameString] != null)
+				row[1] = entireRow[colTaxonScNameString].getStringCellValue(); 
 			return row;
 		}
 		
@@ -414,7 +416,7 @@ public class ValidateXls {
 		boolean hasContent = true;
 		boolean isEmpty = true;
 		for (String cell:row) {
-			if (cell.length() > 0) {
+			if (cell != null && cell.length() > 0) {
 				hasContent &= true;
 				isEmpty = false;
 			}

@@ -145,7 +145,7 @@ public class Specimen {
 			// System.out.println("Specimen id is " + specimenId);
 			if (specimenId < 1) {
 				try {
-					String insertQuery = "{call CreateObject( 'Specimen', ?, ?, ?, ?, ?, '')}";
+					String insertQuery = "{call CreateObject( 'Specimen', ?, ?, ?, ?, ?, '','')}";
 					insertStmt = LoadData.getConnection().prepareCall(insertQuery);
 					int i = 1;
 					if (sheetReader.GetUserId() == -1) return false;
