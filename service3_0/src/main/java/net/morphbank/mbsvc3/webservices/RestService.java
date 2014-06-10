@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Properties;
 
 import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -151,9 +152,9 @@ public class RestService extends javax.servlet.http.HttpServlet implements javax
 
 		String parameter = request.getParameter("uploadxml");
 		if(parameter != null) {
-			String fileLocation = request.getRequestURL().toString().replaceFirst(request.getRequestURI(), request.getContextPath() + "/" + parameter);
-			URL fileURL = new URL(fileLocation);
-			processRequest(fileURL.openStream(), out, request.getParameter("fileName"));
+			ServletContext context = getServletContext();
+			InputStream fis = context.getResourceAsStream(parameter);
+			processRequest(fis, out, request.getParameter("fileName"));
 		}
 		else {
 			try {
