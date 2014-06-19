@@ -19,6 +19,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
+import net.morphbank.mbsvc3.webservices.tools.Tools;
 import net.morphbank.mbsvc3.xml.Credentials;
 import net.morphbank.mbsvc3.xml.Extref;
 import net.morphbank.mbsvc3.xml.Insert;
@@ -28,7 +29,6 @@ import net.morphbank.mbsvc3.xml.XmlId;
 import net.morphbank.mbsvc3.xml.XmlTaxonNameUtilities;
 
 import org.apache.poi.ss.usermodel.Sheet;
-
 import org.apache.commons.io.FilenameUtils;
 
 public class MapSpreadsheetToXml {
@@ -194,18 +194,12 @@ public class MapSpreadsheetToXml {
 
 	private void getCredentials(XlsFieldMapper fieldMapper) {
 
-		userName = fieldMapper.getCredentialSheet().getRow(1).getCell(1)
-				.getStringCellValue();
-		userId = getInteger(fieldMapper.getCredentialSheet().getRow(2)
-				.getCell(1).getStringCellValue());
-		submitterName = fieldMapper.getCredentialSheet().getRow(3).getCell(1)
-				.getStringCellValue();
-		submitterId = (int) fieldMapper.getCredentialSheet().getRow(4)
-				.getCell(1).getNumericCellValue();
-		groupName = fieldMapper.getCredentialSheet().getRow(5).getCell(1)
-				.getStringCellValue();
-		groupId = getInteger(fieldMapper.getCredentialSheet().getRow(6)
-				.getCell(1).getStringCellValue());
+		userName = Tools.getCellText(fieldMapper.getCredentialSheet().getRow(1).getCell(1));
+		userId = Integer.parseInt(Tools.getCellText(fieldMapper.getCredentialSheet().getRow(2).getCell(1)).split("\\.")[0]);
+		submitterName = Tools.getCellText(fieldMapper.getCredentialSheet().getRow(3).getCell(1));
+		submitterId = Integer.parseInt(Tools.getCellText(fieldMapper.getCredentialSheet().getRow(4).getCell(1)).split("\\.")[0]);
+		groupName = Tools.getCellText(fieldMapper.getCredentialSheet().getRow(5).getCell(1));
+		groupId = Integer.parseInt(Tools.getCellText(fieldMapper.getCredentialSheet().getRow(6).getCell(1)).split("\\.")[0]);
 	}
 
 //	private void getCredentials(DwcaFieldMapper fieldMapper) {

@@ -22,7 +22,7 @@ import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet; 
+import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 
@@ -38,7 +38,7 @@ public class ValidateCustomXls {
 	private boolean versionInfo;
 	private String fileName;
 	private Workbook workbook;
-	private Sheet dropDownsSheet; 
+	private Sheet dropDownsSheet;
 	private Sheet dataSheet;
 	private Sheet contributorSheet;
 	private Sheet userPropertiesSheet;
@@ -46,8 +46,9 @@ public class ValidateCustomXls {
 	private String[] headersData;
 	private String[] headersUserProp;
 	private EntityManager em;
-	
-	public ValidateCustomXls(String fileName, boolean versionInfo, String persistence) {
+
+	public ValidateCustomXls(String fileName, boolean versionInfo,
+			String persistence) {
 		this.fileName = fileName;
 		this.workbook = this.createWorkbook();
 		this.createSheets();
@@ -55,11 +56,11 @@ public class ValidateCustomXls {
 		this.versionInfo = versionInfo;
 		PERSISTENCE = persistence;
 	}
-	
+
 	private Workbook createWorkbook() {
 		try {
 			return WorkbookFactory.create(new File(fileName));
-		}  catch (IOException e) {
+		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (InvalidFormatException e) {
 			e.printStackTrace();
@@ -75,13 +76,13 @@ public class ValidateCustomXls {
 	}
 
 	/**
-	 * Entry point for all tests
-	 * Add more tests in this method
+	 * Entry point for all tests Add more tests in this method
+	 * 
 	 * @return
 	 */
 	public boolean checkEverything() {
 		if (versionInfo) {
-			String message = "Version Info: " + getVersionNumber(); 
+			String message = "Version Info: " + getVersionNumber();
 			System.out.println(message);
 			this.messageToOutput(message);
 		}
@@ -99,39 +100,44 @@ public class ValidateCustomXls {
 	}
 
 	private String getVersionNumber() {
-		Integer col = this.getColumnNumberByName(DROP_DOWNS_SHEET_NAME, "Version Info");
-		if (col == null) return "no version for this file (that's ok, this is not an error. It means there is a more recent version available online).";
+		Integer col = this.getColumnNumberByName(DROP_DOWNS_SHEET_NAME,
+				"Version Info");
+		if (col == null)
+			return "no version for this file (that's ok, this is not an error. It means there is a more recent version available online).";
 		return this.getEntry(DROP_DOWNS_SHEET_NAME, col, 1);
 	}
 
 	/**
-	 * Get headers for the following sheets:
-	 * Drop Downs, Data, UserProperties 
+	 * Get headers for the following sheets: Drop Downs, Data, UserProperties
 	 */
 	private void readHeaders() {
 		int numFields = dropDownsSheet.getRow(0).getLastCellNum();
 		headersDropDowns = new String[numFields];
 		for (int i = 0; i < numFields; i++) {
-			headersDropDowns[i] = getCellText(dropDownsSheet.getRow(0).getCell(i)).toLowerCase().trim();
+			headersDropDowns[i] = getCellText(
+					dropDownsSheet.getRow(0).getCell(i)).toLowerCase().trim();
 		}
 		numFields = dataSheet.getRow(0).getLastCellNum();
 		headersData = new String[numFields];
 		for (int i = 0; i < numFields; i++) {
-			headersData[i] = getCellText(dataSheet.getRow(0).getCell(i)).toLowerCase().trim();
+			headersData[i] = getCellText(dataSheet.getRow(0).getCell(i))
+					.toLowerCase().trim();
 		}
 		numFields = userPropertiesSheet.getRow(0).getLastCellNum();
 		headersUserProp = new String[numFields];
 		for (int i = 0; i < numFields; i++) {
-			headersUserProp[i] =getCellText(userPropertiesSheet.getRow(0).getCell(i)).toLowerCase().trim();
+			headersUserProp[i] = getCellText(
+					userPropertiesSheet.getRow(0).getCell(i)).toLowerCase()
+					.trim();
 		}
-		
+
 	}
 
 	private String getValue(String sheet, String fieldName, int row) {
 		fieldName = fieldName.toLowerCase().trim();
 		String[] headers = null;
 		headers = this.getHeaders(sheet);
-		
+
 		for (int i = 0; i < headers.length; i++) {
 			if (headers != null && fieldName.equals(headers[i])) {
 				return getEntry(sheet, i, row);
@@ -154,20 +160,24 @@ public class ValidateCustomXls {
 
 	/**
 	 * Get the appropriate header for the given sheet
+	 * 
 	 * @param sheet
-	 * @return 
+	 * @return
 	 */
 	private String[] getHeaders(String sheet) {
-		if (sheet.equalsIgnoreCase(DROP_DOWNS_SHEET_NAME)) return headersDropDowns;
-		if (sheet.equalsIgnoreCase(DATA_SHEET_NAME)) return headersData;
-		if (sheet.equalsIgnoreCase(USER_PROPERTIES_SHEET_NAME)) return headersUserProp;
+		if (sheet.equalsIgnoreCase(DROP_DOWNS_SHEET_NAME))
+			return headersDropDowns;
+		if (sheet.equalsIgnoreCase(DATA_SHEET_NAME))
+			return headersData;
+		if (sheet.equalsIgnoreCase(USER_PROPERTIES_SHEET_NAME))
+			return headersUserProp;
 		return null;
 	}
-	
+
 	static final NumberFormat INTEGER_FORMATTER = NumberFormat
 			.getIntegerInstance();
 	static final NumberFormat DOUBLE_FORMATTER = new DecimalFormat("0.0##");
-	
+
 	private String getEntry(String sheetName, int col, int row) {
 		Sheet sheet = getSheet(sheetName);
 		if (sheet == null)
@@ -195,7 +205,7 @@ public class ValidateCustomXls {
 	private Sheet getSheet(String sheetName) {
 		if (DROP_DOWNS_SHEET_NAME.equals(sheetName)) {
 			return dropDownsSheet;
-		} 
+		}
 		if (DATA_SHEET_NAME.equals(sheetName)) {
 			return dataSheet;
 		}
@@ -204,25 +214,30 @@ public class ValidateCustomXls {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * No duplicate in the ImageExternalId column
+	 * 
 	 * @return true if no duplicate have been found
 	 */
 	private boolean checkUniqueImageExtId() {
 		HashMap<Integer, Integer> duplicates = new HashMap<Integer, Integer>();
-		Cell[] cells = getColumn(dataSheet, this.getColumnNumberByName(DATA_SHEET_NAME, "Image External id"));
+		Cell[] cells = getColumn(dataSheet, this.getColumnNumberByName(
+				DATA_SHEET_NAME, "Image External id"));
 		String[] columnValues = new String[cells.length];
-		for (int i = 0; i < cells.length -1; i++) {
+		for (int i = 0; i < cells.length - 1; i++) {
 			columnValues[i] = getCellText(cells[i]);
 			for (int j = 0; j < i; j++) {
-				if (!columnValues[i].equalsIgnoreCase("") && columnValues[j].equalsIgnoreCase(columnValues[i])) duplicates.put(j + 2, i + 2);
+				if (!columnValues[i].equalsIgnoreCase("")
+						&& columnValues[j].equalsIgnoreCase(columnValues[i]))
+					duplicates.put(j + 2, i + 2);
 			}
 		}
 		if (!duplicates.isEmpty()) {
 			String error = "In column Image External id, rows ";
-			Iterator<Entry<Integer, Integer>> it = duplicates.entrySet().iterator();
-			
+			Iterator<Entry<Integer, Integer>> it = duplicates.entrySet()
+					.iterator();
+
 			StringBuffer list = new StringBuffer();
 			while (it.hasNext()) {
 				Entry<Integer, Integer> dups = it.next();
@@ -238,25 +253,28 @@ public class ValidateCustomXls {
 		}
 		return true;
 	}
-	
+
 	/**
-	 * Checks if the cell type for a date field is text
-	 * Excel interprets the date entered in various formats and is not
-	 * a reliable format to manipulate a date.
-	 * Also checks if the format is yyyy-mm-dd 
+	 * Checks if the cell type for a date field is text Excel interprets the
+	 * date entered in various formats and is not a reliable format to
+	 * manipulate a date. Also checks if the format is yyyy-mm-dd
+	 * 
 	 * @return
 	 */
 	private boolean checkFormatDateColumns() {
-		Integer columnNumber = this.getColumnNumberByName(DATA_SHEET_NAME, "Date Determined");
+		Integer columnNumber = this.getColumnNumberByName(DATA_SHEET_NAME,
+				"Date Determined");
 		if (columnNumber == null) {
-//			String error = "No Date Determined found. It could be due to an outdated spreadsheet. Check skipped on that.";
-//			System.out.println(error);
-//			this.messageToOuput(error);
+			// String error =
+			// "No Date Determined found. It could be due to an outdated spreadsheet. Check skipped on that.";
+			// System.out.println(error);
+			// this.messageToOuput(error);
 			return true;
 		}
 		boolean correctFormat = true;
-		String[] dateColumns = {"Date Determined", "Earliest Date Collected", "Latest Date Collected"};
-		for (String colName:dateColumns){
+		String[] dateColumns = { "Date Determined", "Earliest Date Collected",
+				"Latest Date Collected" };
+		for (String colName : dateColumns) {
 			Integer col = this.getColumnNumberByName(DATA_SHEET_NAME, colName);
 			if (col != null) {
 				Cell[] cells = getColumn(dataSheet, col);
@@ -265,24 +283,26 @@ public class ValidateCustomXls {
 		}
 		return correctFormat;
 	}
-	
-	private boolean checkFormatDate(Cell[] cells, String colName){
+
+	private boolean checkFormatDate(Cell[] cells, String colName) {
 		boolean isCorrectFormat = true;
 		boolean isRowCorrect = true;
 		for (int i = 1; i < cells.length; i++) {
-			if (Tools.isEmpty(cells[i])) continue;
-			if(cells[i].getCellType() != Cell.CELL_TYPE_STRING){
+			if (Tools.isEmpty(cells[i]))
+				continue;
+			if (cells[i].getCellType() != Cell.CELL_TYPE_STRING) {
 				isRowCorrect = false;
-				String error = "In column "+ colName +", row " + (i+1) + " should be formatted as text.";
+				String error = "In column " + colName + ", row " + (i + 1)
+						+ " should be formatted as text.";
 				System.out.println(error);
 				this.messageToOutput(error);
-			}
-			else {
+			} else {
 				isCorrectFormat = Tools.checkDateFormat(cells[i]);
 				if (!isCorrectFormat) {
 					isRowCorrect = false;
-					String error = "In column "+ colName +", row " + (i+1) +
-							" should be formatted as yyyy-mm-dd instead of " + cells[i].getStringCellValue() +".";
+					String error = "In column " + colName + ", row " + (i + 1)
+							+ " should be formatted as yyyy-mm-dd instead of "
+							+ cells[i].getStringCellValue() + ".";
 					System.out.println(error);
 					this.messageToOutput(error);
 				}
@@ -290,31 +310,33 @@ public class ValidateCustomXls {
 		}
 		return isRowCorrect;
 	}
-	
+
 	/**
 	 * Compare Taxon and Credentials to the database
+	 * 
 	 * @return true if the data is a match
 	 */
 	private boolean checkDBMatch() {
 		boolean matchDB = true;
 		MorphbankConfig.setPersistenceUnit(PERSISTENCE);
 		MorphbankConfig.init();
-		EntityManagerFactory emf = Persistence.createEntityManagerFactory(PERSISTENCE);
+		EntityManagerFactory emf = Persistence
+				.createEntityManagerFactory(PERSISTENCE);
 		em = emf.createEntityManager();
 		matchDB &= this.checkTSN();
 		matchDB &= this.checkCredentials();
-		
+
 		return matchDB;
 	}
-	
+
 	/**
-	 * Convenient method to get all cells of a particular 
-	 * 	column number from a specified sheet 
+	 * Convenient method to get all cells of a particular column number from a
+	 * specified sheet
 	 * 
 	 * @return array of cell
 	 */
-	private Cell[] getColumn(Sheet sheet, int columnNum){
-		
+	private Cell[] getColumn(Sheet sheet, int columnNum) {
+
 		int numRows = sheet.getLastRowNum() + 1;
 		Cell[] column = new Cell[numRows];
 		for (int index = 0; index < numRows; index++) {
@@ -322,21 +344,21 @@ public class ValidateCustomXls {
 		}
 		return column;
 	}
-	
+
 	/**
-	 * Convenient method to get all cells of a particular 
-	 * 	row number from a specified sheet 
+	 * Convenient method to get all cells of a particular row number from a
+	 * specified sheet
 	 * 
 	 * @return array of cell
 	 */
-	private Cell[] getRow(Sheet sheet, int rowNum){
+	private Cell[] getRow(Sheet sheet, int rowNum) {
 		int numOfRows = sheet.getLastRowNum();
 		Row row = sheet.getRow(rowNum);
 		Cell[] destCell = new Cell[numOfRows];
-		int locIx=0;
+		int locIx = 0;
 		for (Cell cell : row) {
-			if(cell != null) {
-				if(locIx==numOfRows){
+			if (cell != null) {
+				if (locIx == numOfRows) {
 					break;
 				}
 				destCell[locIx++] = cell;
@@ -345,81 +367,90 @@ public class ValidateCustomXls {
 		}
 		return destCell;
 	}
-	
+
 	/**
-	 * Compares the scientific name with the TSN to see
-	 * if they match in the database
+	 * Compares the scientific name with the TSN to see if they match in the
+	 * database
+	 * 
 	 * @return true is the whole column of scientific name found a TSN match
 	 */
 	private boolean checkTSN() {
 		boolean columnValid = true;
-		Cell[] cellsDetermination = getColumn(dataSheet, this.getColumnNumberByName(DATA_SHEET_NAME, "Determination Scientific Name"));
-		Cell[] cellsTSN = getColumn(dataSheet, this.getColumnNumberByName(DATA_SHEET_NAME, "Determination TSN"));
-		
+		Cell[] cellsDetermination = getColumn(dataSheet,
+				this.getColumnNumberByName(DATA_SHEET_NAME,
+						"Determination Scientific Name"));
+		Cell[] cellsTSN = getColumn(dataSheet, this.getColumnNumberByName(
+				DATA_SHEET_NAME, "Determination TSN"));
+
 		String select = "select t.tsn from Taxon t where t.scientificName = :scientificName";
 		Query query = em.createQuery(select);
-		//Query query = MorphbankConfig.getEntityManager().createQuery(select);
+		// Query query = MorphbankConfig.getEntityManager().createQuery(select);
 		for (int i = 1; i < cellsDetermination.length; i++) {
 			boolean matchFound = false;
-			if (Tools.isEmpty(cellsDetermination[i])) continue;
-			query.setParameter("scientificName", cellsDetermination[i].getStringCellValue());
+			if (Tools.isEmpty(cellsDetermination[i]))
+				continue;
+			query.setParameter("scientificName",
+					cellsDetermination[i].getStringCellValue());
 			List<Integer> tsns = query.getResultList();
 			if (tsns == null) {
-				String error = "Scientific name " + cellsDetermination[i] + " at row " + (i+1) + " is not in Morphbank.";
+				String error = "Scientific name " + cellsDetermination[i]
+						+ " at row " + (i + 1) + " is not in Morphbank.";
 				System.out.println(error);
 				this.messageToOutput(error);
 			}
-			if (Tools.isEmpty(cellsTSN[i])) continue;
+			if (Tools.isEmpty(cellsTSN[i]))
+				continue;
 			else {
 				Iterator<Integer> it = tsns.iterator();
 				while (it.hasNext()) {
-					int tsn=0;
+					int tsn = 0;
 					int next = it.next();
 					if (cellsTSN[i].getCellType() == Cell.CELL_TYPE_STRING) {
 						tsn = Integer.valueOf(this.safeCast(
 								cellsTSN[i].getStringCellValue(), i + 1));
 					}
 					if (cellsTSN[i].getCellType() == Cell.CELL_TYPE_NUMERIC) {
-						tsn = (int)cellsTSN[i].getNumericCellValue();
+						tsn = (int) cellsTSN[i].getNumericCellValue();
 
 					}
-						if (tsn == next)
-							matchFound |= true;
-						else
-							matchFound |= false;
-					
+					if (tsn == next)
+						matchFound |= true;
+					else
+						matchFound |= false;
+
 				}
 				if (!matchFound) {
 					String cellTsnContent = "";
 					if (cellsTSN[i].getCellType() == Cell.CELL_TYPE_NUMERIC) {
-						cellTsnContent = Integer.toString((int)cellsTSN[i].getNumericCellValue());
+						cellTsnContent = Integer.toString((int) cellsTSN[i]
+								.getNumericCellValue());
 					}
-					
+
 					String error = "Error : Scientific name "
 							+ cellsDetermination[i].getStringCellValue()
-							+ " does not match TSN "
-							+ cellTsnContent + " at row "
-							+ " at row "
-							+ (i + 1) + ".";
+							+ " does not match TSN " + cellTsnContent
+							+ " at row " + " at row " + (i + 1) + ".";
 					System.out.println(error);
 					this.messageToOutput(error);
 				}
 				columnValid &= matchFound;
 			}
-			
+
 		}
 		return columnValid;
 	}
-	
+
 	/**
 	 * No extra space should be found in the TSN fields
+	 * 
 	 * @param content
-	 * @param row 
+	 * @param row
 	 * @return TSN trimmed
 	 */
 	private String safeCast(String content, int row) {
 		if (content.indexOf(' ') != -1) {
-			String error = "Extra space found for TSN " + content.trim() + " at row " + row + ".<br />";
+			String error = "Extra space found for TSN " + content.trim()
+					+ " at row " + row + ".<br />";
 			System.out.println(error);
 			this.messageToOutput(error);
 			return content.trim();
@@ -428,51 +459,65 @@ public class ValidateCustomXls {
 	}
 
 	/**
-	 * Verifies that the data in the Contributor sheet
-	 * matches the database.
-	 * name and id cells cannot be both empty
-	 * Checks userName /UserId, groupName/ groupId, user belongs to the group
+	 * Verifies that the data in the Contributor sheet matches the database.
+	 * name and id cells cannot be both empty Checks userName /UserId,
+	 * groupName/ groupId, user belongs to the group
+	 * 
 	 * @return true if all the above is true
 	 */
 	private boolean checkCredentials() {
 		boolean credentialsOK = true;
 		boolean emptyCells = false;
-		
+
 		String cName = getCellText(contributorSheet.getRow(1).getCell(1));
 		String cId = getCellText(contributorSheet.getRow(2).getCell(1));
-		emptyCells |= areCellsBothEmpty(getCellText(contributorSheet.getRow(1).getCell(0)), cName,
-				getCellText(contributorSheet.getRow(2).getCell(0)), cId);
+		try{
+			cId = String.valueOf((int)Double.parseDouble(cId));
+		}
+		catch(NumberFormatException e)
+		{
+			String error = "Error: Contributor Id: shoud be a number. "+cId+" is not a valid id.";
+			this.messageToOutput(error);
+		}
+		emptyCells |= areCellsBothEmpty(getCellText(contributorSheet.getRow(1)
+				.getCell(0)), cName, getCellText(contributorSheet.getRow(2)
+				.getCell(0)), cId);
 		String sName = getCellText(contributorSheet.getRow(3).getCell(1));
 		String sId = getCellText(contributorSheet.getRow(4).getCell(1));
-		emptyCells |= areCellsBothEmpty(getCellText(contributorSheet.getRow(3).getCell(0)), sName,
-				getCellText(contributorSheet.getRow(4).getCell(0)), sId);
+		emptyCells |= areCellsBothEmpty(getCellText(contributorSheet.getRow(3)
+				.getCell(0)), sName, getCellText(contributorSheet.getRow(4)
+				.getCell(0)), sId);
 		String gName = getCellText(contributorSheet.getRow(5).getCell(1));
 		String gId = getCellText(contributorSheet.getRow(6).getCell(1));
-		emptyCells |= areCellsBothEmpty(getCellText(contributorSheet.getRow(5).getCell(0)), gName,
-				getCellText(contributorSheet.getRow(6).getCell(0)), gId);
+		emptyCells |= areCellsBothEmpty(getCellText(contributorSheet.getRow(5)
+				.getCell(0)), gName, getCellText(contributorSheet.getRow(6)
+				.getCell(0)), gId);
 
-		String date = getCellText(contributorSheet.getRow(7).getCell(1)) ;
-		emptyCells |= isCellEmpty(getCellText(contributorSheet.getRow(7).getCell(0)), date);
-		if(emptyCells) return false;
-		
+		String date = getCellText(contributorSheet.getRow(7).getCell(1));
+		emptyCells |= isCellEmpty(getCellText(contributorSheet.getRow(7)
+				.getCell(0)), date);
+		if (emptyCells)
+			return false;
+
 		String select = "select u.userName, u.id from User u where u.userName = :name";
 		Query query = em.createQuery(select);
 		query.setParameter("name", cName);
-		credentialsOK &= this.compareNameId(query, cName, cId);
+		credentialsOK &= this.compareNameId(query, cName, cId,"Contributor");
 		query.setParameter("name", sName);
-		credentialsOK &= this.compareNameId(query, sName, sId);
+		credentialsOK &= this.compareNameId(query, sName, sId,"Submitter");
 		select = "select g.groupName, g.id from Group g where g.groupName = :name";
 		query = em.createQuery(select);
 		query.setParameter("name", gName);
-		credentialsOK &= this.compareNameId(query, gName, gId);
-		
-		String selectTest = "select g.user from UserGroup g where g.groups = " + gId;
+		credentialsOK &= this.compareNameId(query, gName, gId, "Group");
+
+		String selectTest = "select g.user from UserGroup g where g.groups = "
+				+ gId;
 		query = em.createNativeQuery(selectTest);
 		credentialsOK &= this.compareUserGroup(query, cId, gName);
-		
+
 		return credentialsOK;
 	}
-	
+
 	private boolean isCellEmpty(String label, String cell) {
 		if (cell.length() < 1) {
 			String error = label.replaceFirst(":", "") + " cannot be empty.";
@@ -482,47 +527,56 @@ public class ValidateCustomXls {
 		}
 		return false;
 	}
-	
 
 	/**
-	 * Check if both cells are empty.
-	 * Output a warning if id is empty. It should not stop the conversion to XML
-	 * but Morphbank admin should add the id manually before upload.
-	 * @param label1 title of Cell Name (ex: MB Contributor Name)
-	 * @param cell1 value of cell
-	 * @param label2 title of Cell ID (ex:MB Contributor id)
-	 * @param cell2 value of cell
+	 * Check if both cells are empty. Output a warning if id is empty. It should
+	 * not stop the conversion to XML but Morphbank admin should add the id
+	 * manually before upload.
+	 * 
+	 * @param label1
+	 *            title of Cell Name (ex: MB Contributor Name)
+	 * @param cell1
+	 *            value of cell
+	 * @param label2
+	 *            title of Cell ID (ex:MB Contributor id)
+	 * @param cell2
+	 *            value of cell
 	 * @return true if either cell has content
 	 */
-	private boolean areCellsBothEmpty(String label1, String cell1, String label2, String cell2) {
+	private boolean areCellsBothEmpty(String label1, String cell1,
+			String label2, String cell2) {
 		String label1Short = label1.replaceFirst(":", "");
 		String label2Short = label2.replaceFirst(":", "");
 		int size1 = cell1.length();
 		int size2 = cell2.length();
 		if (size2 < 1) {
-			String warning = label2Short + " is empty. If you don't know the " + label2Short + " that's ok, but contact Morphbank to let them know.";
+			String warning = label2Short + " is empty. If you don't know the "
+					+ label2Short
+					+ " that's ok, but contact Morphbank to let them know.";
 			System.out.println(warning);
 			this.messageToOutput(warning);
 		}
 		if (size1 < 1 && size2 < 1) {
-			String error = label1Short + " cannot be empty if " +
-					label2Short + " is also empty.";
+			String error = label1Short + " cannot be empty if " + label2Short
+					+ " is also empty.";
 			System.out.println(error);
 			this.messageToOutput(error);
 			return true;
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Checks that the name given matches the morphbank id
+	 * 
 	 * @param query
 	 * @param name
 	 * @param id
 	 * @return
 	 */
-	private boolean compareNameId(Query query, String name, String id) {
-		if(name == null || name.equals("") || id == null || id.equals("")) return true;
+	private boolean compareNameId(Query query, String name, String id, String field) {
+		if (name == null || name.equals("") || id == null || id.equals(""))
+			return true;
 		List names = query.getResultList();
 		if (names.isEmpty()) {
 			String error = name + " is not in Morphbank.";
@@ -539,13 +593,17 @@ public class ValidateCustomXls {
 				matchFound = true;
 				try {
 					if (uid != Integer.parseInt(id.split("\\.")[0])) {
-						String error = name + " and " + id + " do not match. One of them must be misstyped.";
+						String error = name
+								+ " and "
+								+ id
+								+ " do not match. One of them must be misstyped.";
 						System.out.println(error);
 						this.messageToOutput(error);
 						matchFound = false;
 					}
-				}catch(NumberFormatException e){
-					String error = "Error: MB Contributor Id is non numeric: "+id;
+				} catch (NumberFormatException e) {
+					String error = "Error: "+field+" Id is non numeric: "
+							+ id;
 					System.out.println(error);
 					this.messageToOutput(error);
 					matchFound = false;
@@ -557,16 +615,20 @@ public class ValidateCustomXls {
 
 	/**
 	 * Checks if the user belongs to the given group
+	 * 
 	 * @param query
 	 * @param id
 	 * @param groupName
 	 * @return
 	 */
 	private boolean compareUserGroup(Query query, String id, String groupName) {
-		if(groupName == null || groupName.equals("") || id == null || id.equals("")) return true;
+		if (groupName == null || groupName.equals("") || id == null
+				|| id.equals(""))
+			return true;
 		List<Integer> names = query.getResultList();
 		if (names.isEmpty()) {
-			String error = "Id:" + id + " is not in the group " + groupName + ".";
+			String error = "Id:" + id + " is not in the group " + groupName
+					+ ".";
 			System.out.println(error);
 			this.messageToOutput(error);
 			return false;
@@ -576,16 +638,22 @@ public class ValidateCustomXls {
 		Integer user;
 		while (it.hasNext()) {
 			user = (Integer) it.next();
-			if (user.intValue() == Integer.parseInt(id)) {
-				matchFound = true;
-				break;
-			}
-			else {
+			try {
+				if (user.intValue() == Integer.parseInt(id)) {
+					matchFound = true;
+					break;
+				} else {
+					matchFound = false;
+				}
+			} catch (NumberFormatException e) {
+				String error = "Id: shoud be a number. "+id+" is not a valid id.";
+				this.messageToOutput(error);
 				matchFound = false;
 			}
 		}
 		if (!matchFound) {
-			String error = "Id:" + id + " is not in the group " + groupName + ".";
+			String error = "Id:" + id + " is not in the group " + groupName
+					+ ".";
 			System.out.println();
 			this.messageToOutput(error);
 		}
@@ -595,67 +663,76 @@ public class ValidateCustomXls {
 	public StringBuffer getOutput() {
 		return output;
 	}
-	
+
 	/**
-	 * The file name should have the correct extension
-	 * and not space or more than one '.'
+	 * The file name should have the correct extension and not space or more
+	 * than one '.'
+	 * 
 	 * @return
 	 */
 	private boolean checkOriginalFileName() {
-		Cell[] cells = getColumn(dataSheet, this.getColumnNumberByName(DATA_SHEET_NAME, "Original File Name"));
+		Cell[] cells = getColumn(dataSheet, this.getColumnNumberByName(
+				DATA_SHEET_NAME, "Original File Name"));
 		boolean isValid = true;
 		String error = "In column Original File Name, row ";
 		for (int i = 1; i < cells.length; i++) {
-			if (Tools.isEmpty(cells[i])) continue;
+			if (Tools.isEmpty(cells[i]))
+				continue;
 			if (cells[i].getStringCellValue().indexOf(" ") > 0) {
 				isValid = false;
-				String message = error + (i+1) + " should not contain spaces.";
+				String message = error + (i + 1)
+						+ " should not contain spaces.";
 				System.out.println(message);
 				this.messageToOutput(message);
 			}
 			if (!Tools.fileExtensionOk(cells[i].getStringCellValue())) {
 				isValid = false;
-				String message = error + (i+1) 
-				+ " file extension should be " + Tools.outputListOfExtensions();
+				String message = error + (i + 1) + " file extension should be "
+						+ Tools.outputListOfExtensions();
 				System.out.println(message);
 				this.messageToOutput(message);
 			}
-			if (!Tools.fileNameFormattedOk(cells[i].getStringCellValue())) {
+			/*if (!Tools.fileNameFormattedOk(cells[i].getStringCellValue())) {
 				isValid = false;
-				String message = error + (i+1) + " cannot use '.' in the file name.";
+				String message = error + (i + 1)
+						+ " cannot use '.' in the file name.";
 				System.out.println(message);
 				this.messageToOutput(message);
-			}
+			}*/
 		}
 		return isValid;
 	}
 
 	/**
-	 * Append messages to a StringBuffer that can be used to
-	 * display messages on a webpage.
+	 * Append messages to a StringBuffer that can be used to display messages on
+	 * a webpage.
+	 * 
 	 * @param message
-	 */ 
+	 */
 	private void messageToOutput(String message) {
 		output.append(message);
 		output.append("<br />");
 	}
-	
-	/** check if a row with mandatory cells is either all filled or all empty
+
+	/**
+	 * check if a row with mandatory cells is either all filled or all empty
+	 * 
 	 * @return true is test passed
 	 */
 	private boolean checkMandatoryCellsNotEmpty() {
 		boolean isValid = true;
-		//either all cells empty or all full
+		// either all cells empty or all full
 		int maxRows = dataSheet.getLastRowNum();
 		for (int i = 1; i < maxRows; i++) {
-			//get all the cells on the specified row
+			// get all the cells on the specified row
 			String[] row = this.getMandatoryRow(getRow(dataSheet, i));
-			if (row == null) return printMandatoryRowsHelp(isValid);
+			if (row == null)
+				return printMandatoryRowsHelp(isValid);
 			isValid &= this.checkMandatoryRow(row, i);
 		}
 		return isValid;
 	}
-	
+
 	private boolean printMandatoryRowsHelp(boolean isValid) {
 		if (isValid)
 			return isValid;
@@ -667,103 +744,121 @@ public class ValidateCustomXls {
 		this.messageToOutput(listMandatoryCells);
 		return isValid;
 	}
-	
+
 	/**
-	 * All listed columns should have a value if one of the cell
-	 * is not empty
+	 * All listed columns should have a value if one of the cell is not empty
+	 * 
 	 * @param entireRow
 	 * @return entire row
 	 */
-	private String[] getMandatoryRow(Cell[] entireRow){
-			
-			Integer colImgExtId = this.getColumnNumberByName(DATA_SHEET_NAME, "Image External id");
-			Integer colImgExtIdPrfx = this.getColumnNumberByName(DATA_SHEET_NAME, "Image External id Prefix");
-			Integer colOriglFileName = this.getColumnNumberByName(DATA_SHEET_NAME, "Original File Name");
-			Integer colCreativeCommons = this.getColumnNumberByName(DATA_SHEET_NAME, "Creative Commons");
-			Integer colSpExtId = this.getColumnNumberByName(DATA_SHEET_NAME, "Specimen External id");
-			Integer colSpExtIdPrfx = this.getColumnNumberByName(DATA_SHEET_NAME, "Specimen External id Prefix");
-			Integer colDetScName = this.getColumnNumberByName(DATA_SHEET_NAME, "Determination Scientific Name");
-			Integer colDetTSN = this.getColumnNumberByName(DATA_SHEET_NAME, "Determination TSN");
-			Integer colBasisOfRecord = this.getColumnNumberByName(DATA_SHEET_NAME, "Basis of Record");
-			Integer colTypeStatus = this.getColumnNumberByName(DATA_SHEET_NAME, "Type Status");
-			Integer colViewAppTaxon = this.getColumnNumberByName(DATA_SHEET_NAME, "View Applicable to Taxon");
-			
-			HashMap<String, Integer> columns = new HashMap<String, Integer>();
-			columns.put("Image External id", colImgExtId);
-			columns.put("Image External id Prefix", colImgExtIdPrfx);
-			columns.put("Original File Name", colOriglFileName);
-			columns.put("Creative Commons", colCreativeCommons);
-			columns.put("Specimen External id", colSpExtId);
-			columns.put("Specimen External id Prefix", colSpExtIdPrfx);
-			columns.put("Determination Scientific Name", colDetScName);
-			columns.put("Determination TSN", colDetTSN);
-			columns.put("Basis of Record", colBasisOfRecord);
-			columns.put("Type Status", colTypeStatus);
-			columns.put("View Applicable to Taxon", colViewAppTaxon);
+	private String[] getMandatoryRow(Cell[] entireRow) {
 
-			
-			if(missingColumn(columns)) {
-				String message = "The spreadsheet is missing some columns. Please fix it or download a clean version.";
-				System.out.println(message);
-				this.messageToOutput(message);
-				return null;
-			}
-			
-			if (colViewAppTaxon > entireRow.length - 1) {
-				return null;
-			}
-			
-			String[] row = new String[11];
-			row[0] = getCellText(entireRow[colImgExtId]); 
-			row[1] = getCellText(entireRow[colImgExtIdPrfx]); 
-			row[2] = getCellText(entireRow[colOriglFileName]); 
-			row[3] = getCellText(entireRow[colCreativeCommons]); 
-			row[4] = getCellText(entireRow[colSpExtId]);
-			row[5] = getCellText(entireRow[colSpExtIdPrfx]); 
-			row[6] = getCellText(entireRow[colDetScName]); 
-			row[7] = getCellText(entireRow[colDetTSN]); 
-			row[8] = getCellText(entireRow[colBasisOfRecord]); 
-			row[9] = getCellText(entireRow[colTypeStatus]);
-			row[10] = getCellText(entireRow[colViewAppTaxon]); 
-			
-			return row;
+		Integer colImgExtId = this.getColumnNumberByName(DATA_SHEET_NAME,
+				"Image External id");
+		Integer colImgExtIdPrfx = this.getColumnNumberByName(DATA_SHEET_NAME,
+				"Image External id Prefix");
+		Integer colOriglFileName = this.getColumnNumberByName(DATA_SHEET_NAME,
+				"Original File Name");
+		Integer colCreativeCommons = this.getColumnNumberByName(
+				DATA_SHEET_NAME, "Creative Commons");
+		Integer colSpExtId = this.getColumnNumberByName(DATA_SHEET_NAME,
+				"Specimen External id");
+		Integer colSpExtIdPrfx = this.getColumnNumberByName(DATA_SHEET_NAME,
+				"Specimen External id Prefix");
+		Integer colDetScName = this.getColumnNumberByName(DATA_SHEET_NAME,
+				"Determination Scientific Name");
+		Integer colDetTSN = this.getColumnNumberByName(DATA_SHEET_NAME,
+				"Determination TSN");
+		Integer colBasisOfRecord = this.getColumnNumberByName(DATA_SHEET_NAME,
+				"Basis of Record");
+		Integer colTypeStatus = this.getColumnNumberByName(DATA_SHEET_NAME,
+				"Type Status");
+		Integer colViewAppTaxon = this.getColumnNumberByName(DATA_SHEET_NAME,
+				"View Applicable to Taxon");
+
+		HashMap<String, Integer> columns = new HashMap<String, Integer>();
+		columns.put("Image External id", colImgExtId);
+		columns.put("Image External id Prefix", colImgExtIdPrfx);
+		columns.put("Original File Name", colOriglFileName);
+		columns.put("Creative Commons", colCreativeCommons);
+		columns.put("Specimen External id", colSpExtId);
+		columns.put("Specimen External id Prefix", colSpExtIdPrfx);
+		columns.put("Determination Scientific Name", colDetScName);
+		columns.put("Determination TSN", colDetTSN);
+		columns.put("Basis of Record", colBasisOfRecord);
+		columns.put("Type Status", colTypeStatus);
+		columns.put("View Applicable to Taxon", colViewAppTaxon);
+
+		if (missingColumn(columns)) {
+			String message = "The spreadsheet is missing some columns. Please fix it or download a clean version.";
+			System.out.println(message);
+			this.messageToOutput(message);
+			return null;
+		}
+
+		if (colViewAppTaxon > entireRow.length - 1) {
+			return null;
+		}
+
+		String[] row = new String[11];
+		row[0] = getCellText(entireRow[colImgExtId]);
+		row[1] = getCellText(entireRow[colImgExtIdPrfx]);
+		row[2] = getCellText(entireRow[colOriglFileName]);
+		row[3] = getCellText(entireRow[colCreativeCommons]);
+		row[4] = getCellText(entireRow[colSpExtId]);
+		row[5] = getCellText(entireRow[colSpExtIdPrfx]);
+		row[6] = getCellText(entireRow[colDetScName]);
+		row[7] = getCellText(entireRow[colDetTSN]);
+		row[8] = getCellText(entireRow[colBasisOfRecord]);
+		row[9] = getCellText(entireRow[colTypeStatus]);
+		row[10] = getCellText(entireRow[colViewAppTaxon]);
+
+		return row;
 	}
-	private String getCellText(Cell cell)
-	{
-		String cellText = "";
-		if (cell!=null) {
-		    switch (cell.getCellType()) {
-		        case Cell.CELL_TYPE_BOOLEAN:
-		        	cellText = String.valueOf(cell.getBooleanCellValue());
-		            break;
-		        case Cell.CELL_TYPE_NUMERIC:
-		        	cellText = String.valueOf(cell.getNumericCellValue());
-		            break;
-		        case Cell.CELL_TYPE_STRING:
-		        	cellText = cell.getStringCellValue();
-		            break;
-		        case Cell.CELL_TYPE_BLANK:
-		        	cellText = "";
-		        	break;
-		        case Cell.CELL_TYPE_ERROR:
-					try {
-						throw new Exception("Error in reading cell value");
-					} catch (Exception e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-						cellText = "";
-					}
-		            break;
 
-		        // CELL_TYPE_FORMULA will never occur
-		        case Cell.CELL_TYPE_FORMULA: 
-		            break;
-		    }
+	private String getCellText(Cell cell) {
+		String cellText = "";
+		if (cell != null) {
+			switch (cell.getCellType()) {
+			case Cell.CELL_TYPE_BOOLEAN:
+				cellText = String.valueOf(cell.getBooleanCellValue());
+				break;
+			case Cell.CELL_TYPE_NUMERIC:
+				cellText = String.valueOf(cell.getNumericCellValue());
+				break;
+			case Cell.CELL_TYPE_STRING:
+				cellText = cell.getStringCellValue();
+				break;
+			case Cell.CELL_TYPE_BLANK:
+				cellText = "";
+				break;
+			case Cell.CELL_TYPE_ERROR:
+				try {
+					throw new Exception("Error in reading cell value");
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					cellText = "";
+				}
+				break;
+
+			// CELL_TYPE_FORMULA will never occur
+			case Cell.CELL_TYPE_FORMULA:
+				switch (cell.getCachedFormulaResultType()) {
+				case Cell.CELL_TYPE_NUMERIC:
+					cellText = String.valueOf(cell.getNumericCellValue());
+					break;
+				case Cell.CELL_TYPE_STRING:
+					cellText = String.valueOf(cell.getRichStringCellValue());
+					break;
+				}
+				break;
+			}
 		}
 		return cellText;
 	}
-	
-	private boolean missingColumn(HashMap<String,Integer> columns) {
+
+	private boolean missingColumn(HashMap<String, Integer> columns) {
 		boolean isMissing = false;
 		Set<String> headers = columns.keySet();
 		Iterator<String> it = headers.iterator();
@@ -779,56 +874,63 @@ public class ValidateCustomXls {
 		}
 		return isMissing;
 	}
-	
-	
+
 	private boolean checkMandatoryRow(String[] row, int rowNumber) {
 		boolean hasContent = true;
 		boolean isEmpty = true;
-		for (String cell:row) {
+		for (String cell : row) {
 			if (cell.length() > 0) {
 				hasContent &= true;
 				isEmpty = false;
-			}
-			else {
+			} else {
 				hasContent = false;
 				isEmpty &= true;
 			}
 		}
-		//either hasContent = false and isEmpty = true;
-		//or hasContent = true and isEmpty = false;
-		if (!(hasContent || isEmpty)) printMandatoryCellError(rowNumber);
+		// either hasContent = false and isEmpty = true;
+		// or hasContent = true and isEmpty = false;
+		if (!(hasContent || isEmpty))
+			printMandatoryCellError(rowNumber);
 		return hasContent || isEmpty;
 	}
-	
+
 	private void printMandatoryCellError(int row) {
-		String error = "In row " + (row + 1) + ", one or more mandatory cells are empty.";
+		String error = "In row " + (row + 1)
+				+ ", one or more mandatory cells are empty.";
 		System.out.println(error);
 		this.messageToOutput(error);
 	}
-	
+
 	/**
-	 * Check if all user properties are in
-	 * the Data sheet header.
-	 * Avoid common typos, extra spaces, etc.
+	 * Check if all user properties are in the Data sheet header. Avoid common
+	 * typos, extra spaces, etc.
+	 * 
 	 * @return true if check passed
 	 */
 	private boolean checkUserProperties() {
-		String errorMessagePart1 = "In " + USER_PROPERTIES_SHEET_NAME + " sheet, "; //insert userProperty here
-		String errorMessagePart2 = " does not match any column header in " + DATA_SHEET_NAME + " sheet. Please check for typos, extra spaces, etc.";
+		String errorMessagePart1 = "In " + USER_PROPERTIES_SHEET_NAME
+				+ " sheet, "; // insert userProperty here
+		String errorMessagePart2 = " does not match any column header in "
+				+ DATA_SHEET_NAME
+				+ " sheet. Please check for typos, extra spaces, etc.";
 		boolean matchAll = true;
 		boolean currentMatch = false;
 		String[] headers = getHeaders(DATA_SHEET_NAME);
-		Cell[] userProperties = getColumn(userPropertiesSheet, this.getColumnNumberByName(USER_PROPERTIES_SHEET_NAME, "<userProperty>"));
-		for (Cell userProp:userProperties) {
-			if (userProp.getStringCellValue().equals("<userProperty>")) continue;
-			for (String header:headers) {
+		Cell[] userProperties = getColumn(userPropertiesSheet,
+				this.getColumnNumberByName(USER_PROPERTIES_SHEET_NAME,
+						"<userProperty>"));
+		for (Cell userProp : userProperties) {
+			if (userProp.getStringCellValue().equals("<userProperty>"))
+				continue;
+			for (String header : headers) {
 				if (userProp.getStringCellValue().toLowerCase().equals(header)) {
 					currentMatch = true;
 					break;
 				}
 			}
 			if (!currentMatch) {
-				String message = errorMessagePart1 + userProp.getStringCellValue() + errorMessagePart2;
+				String message = errorMessagePart1
+						+ userProp.getStringCellValue() + errorMessagePart2;
 				System.out.println(message);
 				this.messageToOutput(message);
 				matchAll = false;
@@ -836,17 +938,21 @@ public class ValidateCustomXls {
 		}
 		return matchAll;
 	}
-	
+
 	/**
-	 * Check if a Specimen External id has only one Taxon name.
-	 * Morphbank should be aware of it.
+	 * Check if a Specimen External id has only one Taxon name. Morphbank should
+	 * be aware of it.
+	 * 
 	 * @return true if all Specimen ids have a unique name
 	 */
 	private boolean checkSpecimenIdHasUniqueName() {
 		boolean uniqueName = true;
-		Cell[] specimenExtIds = getColumn(dataSheet, this.getColumnNumberByName(DATA_SHEET_NAME, "Specimen External id"));
-		Cell[] sciNames = getColumn(dataSheet, this.getColumnNumberByName(DATA_SHEET_NAME, "Determination Scientific Name"));
-		
+		Cell[] specimenExtIds = getColumn(dataSheet,
+				this.getColumnNumberByName(DATA_SHEET_NAME,
+						"Specimen External id"));
+		Cell[] sciNames = getColumn(dataSheet, this.getColumnNumberByName(
+				DATA_SHEET_NAME, "Determination Scientific Name"));
+
 		for (int i = 1; i < specimenExtIds.length; i++) {
 			String sciName = getCellText(sciNames[i]);
 			String extId = getCellText(specimenExtIds[i]);
@@ -854,10 +960,11 @@ public class ValidateCustomXls {
 				String sciNameDup = getCellText(sciNames[j]);
 				String extIdDup = getCellText(specimenExtIds[j]);
 				if (extId.equals(extIdDup)) {
-					if (!sciName.equals(sciNameDup)){
+					if (!sciName.equals(sciNameDup)) {
 						uniqueName = false;
-						String error = "Row " + (i+1) + ": " + extId + " has name " + sciName
-								+ " but row " + (j+1) + " has name " + sciNameDup;
+						String error = "Row " + (i + 1) + ": " + extId
+								+ " has name " + sciName + " but row "
+								+ (j + 1) + " has name " + sciNameDup;
 						System.out.println(error);
 						this.messageToOutput(error);
 					}
@@ -871,5 +978,5 @@ public class ValidateCustomXls {
 		}
 		return uniqueName;
 	}
-	
+
 }

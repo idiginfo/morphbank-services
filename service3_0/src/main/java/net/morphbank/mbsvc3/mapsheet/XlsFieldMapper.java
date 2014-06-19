@@ -15,6 +15,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.text.DateFormat;
+import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -104,6 +105,8 @@ public class XlsFieldMapper implements FieldMapper {
 		}
 	}
 
+	static DecimalFormat doubleFormatter = new DecimalFormat("#.0####");
+
 	public String getValue(int index) {
 		String retValue = "";
 		Row row = views.getRow(currentLine);
@@ -115,12 +118,22 @@ public class XlsFieldMapper implements FieldMapper {
 			return retValue;
 		}
 
-		switch (row.getCell(index).getCellType()) {
+		int cellType = cell.getCellType();
+		// find cell type for formula
+		if (cellType == Cell.CELL_TYPE_FORMULA) {
+			cellType = cell.getCachedFormulaResultType();
+		}
+		switch (cellType) {
 		case Cell.CELL_TYPE_NUMERIC:
 			if (DateUtil.isCellDateFormatted(cell)) {
 				retValue = cell.getDateCellValue().toString();
 			} else {
-				retValue = Integer.toString((int) cell.getNumericCellValue());
+				double value = cell.getNumericCellValue();
+				if (Math.floor(value) == value) {
+					retValue = Integer.toString((int) value);
+				} else {
+					retValue = doubleFormatter.format(value);
+				}
 			}
 			break;
 
@@ -128,9 +141,6 @@ public class XlsFieldMapper implements FieldMapper {
 			retValue = cell.getStringCellValue();
 			break;
 
-		case Cell.CELL_TYPE_FORMULA:
-			retValue = cell.getCellFormula();
-			break;
 		}
 		return retValue;
 	}
