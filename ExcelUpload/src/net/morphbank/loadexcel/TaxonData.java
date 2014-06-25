@@ -119,6 +119,9 @@ public class TaxonData {
 			dateToPublish = sheetReader.getReleaseDate();
 			scientificName = sheetReader.getValue(MYTYPE,
 					ExcelTools.COL_SCIENTIFICNAMESTRING, j);
+			//subgenus should be surrounded by a parenthesis 
+			if(subgenus!=null && !subgenus.matches("[(].*[)]"))
+				subgenus = "("+subgenus.trim()+")";
 			if (scientificName.length() == 0) {
 				continue;
 			}
