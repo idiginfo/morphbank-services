@@ -352,18 +352,11 @@ public class ValidateCustomXls {
 	 * @return array of cell
 	 */
 	private Cell[] getRow(Sheet sheet, int rowNum) {
-		int numOfRows = sheet.getLastRowNum();
+		int numOfCells = sheet.getRow(rowNum).getLastCellNum();
 		Row row = sheet.getRow(rowNum);
-		Cell[] destCell = new Cell[numOfRows];
-		int locIx = 0;
-		for (Cell cell : row) {
-			if (cell != null) {
-				if (locIx == numOfRows) {
-					break;
-				}
-				destCell[locIx++] = cell;
-			}
-			cell = null;
+		Cell[] destCell = new Cell[numOfCells];
+		for (int i=0;i<numOfCells;i++) {
+			destCell[i] = row.getCell(i);
 		}
 		return destCell;
 	}
