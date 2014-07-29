@@ -71,6 +71,7 @@ public class RequestParams extends SearchParams{
 	public static final String METHOD_SHOW = "show";
 	public static final String METHOD_EXTREF = "extref";
 	public static final String METHOD_MORPHSTER = "morphster";
+	public static final String METHOD_FIX_UUID = "fixuuid";
 
 	public static final String[] METHODS = { METHOD_SEARCH, METHOD_ID, METHOD_TAXON,
 			METHOD_EXTERNALID, METHOD_CHANGES, METHOD_HERBIS, METHOD_OCR, METHOD_USERGROUP,
@@ -84,6 +85,7 @@ public class RequestParams extends SearchParams{
 	public static final String FORMAT_RDF = "rdf";
 	public static final String FORMAT_THUMB = "thumb";
 	public static final String FORMAT_REMOTE_THUMB = "remote";
+	public static final String FORMAT_JSON = "json";
 
 	public RequestParams() {
 
@@ -184,6 +186,7 @@ public class RequestParams extends SearchParams{
 	static final String HTML_CONTENTTYPE = "text/html";
 	static final String RSS_CONTENTTYPE = "application/rss+xml";
 	static final String RDF_CONTENTTYPE = "application/rdf+xml";
+	static final String JSON_CONTENTTYPE = "application/json";
 
 	public String getTaxonName() {
 		return taxonName;
@@ -301,6 +304,7 @@ public class RequestParams extends SearchParams{
 		if (format.equals(RequestParams.FORMAT_SVC)) return XML_CONTENTTYPE;
 		if (format.equals(RequestParams.FORMAT_THUMB)) return HTML_CONTENTTYPE;
 		if (format.equals(RequestParams.FORMAT_REMOTE_THUMB)) return HTML_CONTENTTYPE;
+		if (format.equals(RequestParams.FORMAT_JSON)) return JSON_CONTENTTYPE;
 
 		return HTML_CONTENTTYPE;
 	}
