@@ -109,6 +109,8 @@ public class RestService extends javax.servlet.http.HttpServlet implements javax
 		String method = request.getParameter(RequestParams.PARAM_METHOD);
 		if ("remoteupdate".equals(method)) {
 			UpdateRemote.update(request, response);
+		} else if (RequestParams.METHOD_FIX_UUID.equals(method)){
+			//TODO  call fix uuid and fix id
 		} else {
 			// TODO turn over to processrequest
 			response.setContentType("text/xml");
