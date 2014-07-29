@@ -37,6 +37,7 @@ import net.morphbank.MorphbankConfig;
 import net.morphbank.mbsvc3.mapping.ProcessRequest;
 import net.morphbank.mbsvc3.mapping.XmlServices;
 import net.morphbank.mbsvc3.request.RequestParams;
+import net.morphbank.mbsvc3.request.UUIDServices;
 import net.morphbank.mbsvc3.sharing.UpdateRemote;
 import net.morphbank.mbsvc3.xml.Request;
 import net.morphbank.mbsvc3.xml.Response;
@@ -107,10 +108,13 @@ public class RestService extends javax.servlet.http.HttpServlet implements javax
 			throws ServletException, IOException {
 		// 
 		String method = request.getParameter(RequestParams.PARAM_METHOD);
-		if ("remoteupdate".equals(method)) {
+		if (RequestParams.METHOD_REMOTE_UPDATE.equals(method)) {
 			UpdateRemote.update(request, response);
 		} else if (RequestParams.METHOD_FIX_UUID.equals(method)){
 			//TODO  call fix uuid and fix id
+			UUIDServices uuidServices = new UUIDServices();
+			uuidServices.fixAllMissingUUIDs();
+			uuidServices.fixAllMissingIds();
 		} else {
 			// TODO turn over to processrequest
 			response.setContentType("text/xml");

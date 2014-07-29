@@ -72,6 +72,7 @@ public class RequestParams extends SearchParams{
 	public static final String METHOD_EXTREF = "extref";
 	public static final String METHOD_MORPHSTER = "morphster";
 	public static final String METHOD_FIX_UUID = "fixuuid";
+	public static final String METHOD_REMOTE_UPDATE = "remoteupdate";
 
 	public static final String[] METHODS = { METHOD_SEARCH, METHOD_ID, METHOD_TAXON,
 			METHOD_EXTERNALID, METHOD_CHANGES, METHOD_HERBIS, METHOD_OCR, METHOD_USERGROUP,
