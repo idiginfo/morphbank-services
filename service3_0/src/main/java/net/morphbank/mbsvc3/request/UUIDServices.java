@@ -13,7 +13,7 @@ import net.morphbank.object.ExternalLinkObject;
 
 public class UUIDServices {
 
-	public void fixAllMissingUUIDs() {
+	public int fixAllMissingUUIDs() {
 		EntityTransaction tx = null;
 		boolean localTransaction = false;
 		int count = 0;
@@ -31,12 +31,13 @@ public class UUIDServices {
 			@SuppressWarnings("unchecked")
 			List<BaseObject> results = uuidNullQuery.getResultList();
 			System.out.println("Number to have UUIDs added: " + results.size());
-			count = 0;
+			boolean bfixed = false;
 			for (BaseObject obj : results) {
-				fixMissingUUID(obj);
-				count++;
-//				if (count > 10)
-//					break;
+				bfixed = fixMissingUUID(obj);
+				if (bfixed)
+					count++;
+				// if (count > 10)
+				// break;
 			}
 
 		} catch (Exception e) {
@@ -48,9 +49,10 @@ public class UUIDServices {
 
 			System.out.println("number with new UUIDs: " + count);
 		}
+		return count;
 	}
 
-	public void fixAllMissingIds() {
+	public int fixAllMissingIds() {
 		EntityTransaction tx = null;
 		boolean localTransaction = false;
 		int count = 0;
@@ -76,19 +78,18 @@ public class UUIDServices {
 				BaseObject obj = em.find(BaseObject.class, id);
 				boolean success = ExternalLinkObject.addDctermsIdentifier(obj);
 				if (success) count++;
-//				if (count > 10)
-//					break;
+				// if (count > 10)
+				// break;
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			return;
 		} finally {
 			if (localTransaction && tx.isActive()) {
 				tx.commit();
 			}
 			System.out.println("number with new ids: " + count);
-
 		}
+		return count;
 	}
 
 	public boolean fixMissingUUID(BaseObject obj) {

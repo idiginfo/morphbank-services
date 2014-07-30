@@ -108,18 +108,31 @@ public class RestService extends javax.servlet.http.HttpServlet implements javax
 			throws ServletException, IOException {
 		// 
 		String method = request.getParameter(RequestParams.PARAM_METHOD);
+		PrintStream out = new PrintStream(response.getOutputStream());
+		try{		
+		out.println("<html><body>");
 		if (RequestParams.METHOD_REMOTE_UPDATE.equals(method)) {
 			UpdateRemote.update(request, response);
 		} else if (RequestParams.METHOD_FIX_UUID.equals(method)){
 			//TODO  call fix uuid and fix id
+			response.setContentType("text/html");
 			UUIDServices uuidServices = new UUIDServices();
-			uuidServices.fixAllMissingUUIDs();
-			uuidServices.fixAllMissingIds();
+			int noUUIDFixed = uuidServices.fixAllMissingUUIDs();
+			out.println("<p>No of fixed MissingUUIDs: "+noUUIDFixed+"</p>");
+			int noIDFixed = uuidServices.fixAllMissingIds();
+			out.println("<p>No of fixed IDs: "+noIDFixed+"</p>");
 		} else {
 			// TODO turn over to processrequest
 			response.setContentType("text/xml");
-			PrintStream out = new PrintStream(response.getOutputStream());
-			out.println("<html><body>Here I am</body></html>");
+			out.println("<p>Here I am</p>");
+			
+		}
+		}
+		catch(Exception e){
+			e.printStackTrace();
+		}
+		finally{
+			out.println("</body></html>");
 			out.close();
 		}
 	}
