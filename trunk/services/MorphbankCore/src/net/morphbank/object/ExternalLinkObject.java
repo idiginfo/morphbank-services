@@ -3,6 +3,7 @@
  */
 package net.morphbank.object;
 
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,9 +31,12 @@ public class ExternalLinkObject { // implements IdObject {
 	private String urlData;
 	private String description;
 	private String externalId;
+	@Transient 
+	public static PrintStream out =null;
 
 	public ExternalLinkObject() {
 		this.extLinkTypeId = OTHER_LINK_TYPE;
+		//this.out = System.out;
 	}
 
 	static final int OTHER_LINK_TYPE = 5;
@@ -134,12 +138,19 @@ public class ExternalLinkObject { // implements IdObject {
 		}
 		return null;
 	}
-
+	public static boolean addDctermsIdentifier(BaseObject obj,PrintStream outPS) {
+		out = outPS;
+		return addDctermsIdentifier(obj);
+	}
 	public static boolean addDctermsIdentifier(BaseObject obj) {
 		EntityTransaction tx = null;
 		boolean localTransaction = false;
 		ExternalLinkObject link = null;
 		String externalId = null;
+		if(out == null)
+		{
+			out = System.out;
+		}
 		try {
 			EntityManager em = MorphbankConfig.getEntityManager();
 
@@ -149,17 +160,18 @@ public class ExternalLinkObject { // implements IdObject {
 				localTransaction = true;
 			}
 			// no identifiers: add identifier
-			externalId = "urn:uuid:" + obj.getUuidString();
-			if (obj.getUuidString() == null){
-				System.out.println("Object: "+obj.getId()+" has null uuid");
+			String uuidString = obj.getUuidString();
+			externalId = "urn:uuid:" + uuidString;
+			if (uuidString == null || uuidString==""){
+				out.println("Object: "+obj.getId()+" has null uuid<br>");
 				return false;
 			}
 			link = new ExternalLinkObject(obj, externalId,
 					"External Unique Reference",
 					MorphbankConfig.DCTERMS_IDENTIFIER);
 			if (link != null) {
-				System.out.println("Object: "+obj.getId()+" has " + MorphbankConfig.DCTERMS_IDENTIFIER
-						+ " with uuid: " + externalId);
+				out.println("Object: "+obj.getId()+" has " + MorphbankConfig.DCTERMS_IDENTIFIER
+						+ " with uuid: " + externalId+"<br>");
 			}
 			return true;
 		} catch (Exception e) {
@@ -167,6 +179,7 @@ public class ExternalLinkObject { // implements IdObject {
 			return false;
 		} finally {
 			if (localTransaction && tx.isActive()) {
+				//out = System.out;
 				tx.commit();
 			}
 		}

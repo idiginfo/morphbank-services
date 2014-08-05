@@ -116,7 +116,7 @@ public class RestService extends javax.servlet.http.HttpServlet implements javax
 		} else if (RequestParams.METHOD_FIX_UUID.equals(method)){
 			//TODO  call fix uuid and fix id
 			response.setContentType("text/html");
-			UUIDServices uuidServices = new UUIDServices();
+			UUIDServices uuidServices = new UUIDServices(out);
 			int noUUIDFixed = uuidServices.fixAllMissingUUIDs();
 			out.println("<p>No of fixed MissingUUIDs: "+noUUIDFixed+"</p>");
 			int noIDFixed = uuidServices.fixAllMissingIds();
