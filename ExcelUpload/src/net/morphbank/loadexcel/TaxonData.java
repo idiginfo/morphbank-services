@@ -120,7 +120,7 @@ public class TaxonData {
 			scientificName = sheetReader.getValue(MYTYPE,
 					ExcelTools.COL_SCIENTIFICNAMESTRING, j);
 			//subgenus should be surrounded by a parenthesis 
-			if(subgenus!=null && !subgenus.matches("[(].*[)]"))
+			if(subgenus!=null && !subgenus.equals("") && !subgenus.matches("[(].*[)]"))
 				subgenus = "("+subgenus.trim()+")";
 			if (scientificName.length() == 0) {
 				continue;
