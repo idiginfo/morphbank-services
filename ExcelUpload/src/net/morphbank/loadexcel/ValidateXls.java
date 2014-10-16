@@ -276,10 +276,12 @@ public class ValidateXls {
 		boolean formatting = true;
 		for (int i = 1; i < Math.min(latitude.length, longitude.length); i++) {
 			try {
-				if (latitude[i] != null && !latitude[i].getStringCellValue().equalsIgnoreCase(""))
-					Double.parseDouble(latitude[i].getStringCellValue());
-				if (longitude[i] != null && !longitude[i].getStringCellValue().equalsIgnoreCase(""))
-					Double.parseDouble(longitude[i].getStringCellValue());
+				String lat = ExcelTools.getCellText(latitude[i]);
+				String longt = ExcelTools.getCellText(longitude[i]);
+				if (latitude[i] != null && !lat.equalsIgnoreCase(""))
+					Double.parseDouble(lat);
+				if (longitude[i] != null && !longt.equalsIgnoreCase(""))
+					Double.parseDouble(longt);
 			} catch (Exception e) {
 				String error = "In Locality sheet, row " + (i+1) + " longitude and latitude have to be a decimal value.";
 				System.out.println(error);
