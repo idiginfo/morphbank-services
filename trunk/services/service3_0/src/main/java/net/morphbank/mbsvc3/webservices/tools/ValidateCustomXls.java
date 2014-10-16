@@ -671,14 +671,15 @@ public class ValidateCustomXls {
 		for (int i = 1; i < cells.length; i++) {
 			if (Tools.isEmpty(cells[i]))
 				continue;
-			if (cells[i].getStringCellValue().indexOf(" ") > 0) {
+			String cellText = Tools.getCellText(cells[i]);
+			if (cellText.indexOf(" ") > 0) {
 				isValid = false;
 				String message = error + (i + 1)
 						+ " should not contain spaces.";
 				System.out.println(message);
 				this.messageToOutput(message);
 			}
-			if (!Tools.fileExtensionOk(cells[i].getStringCellValue())) {
+			if (!Tools.fileExtensionOk(cellText)) {
 				isValid = false;
 				String message = error + (i + 1) + " file extension should be "
 						+ Tools.outputListOfExtensions();
