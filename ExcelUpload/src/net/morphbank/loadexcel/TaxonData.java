@@ -95,7 +95,7 @@ public class TaxonData {
 	public boolean processTaxa() {
 		int rows = sheetReader.GetRows(MYTYPE);
 
-		for (int j = 1; j < rows; j++) {
+		for (int j = 1; j <= rows; j++) {
 			queryParams = new QueryParams(statement, sheetReader, MYTYPE);
 
 			// for all initialized rows on the excel spreadsheet that are not

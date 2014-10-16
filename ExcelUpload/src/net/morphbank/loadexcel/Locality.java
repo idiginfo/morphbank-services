@@ -52,7 +52,7 @@ public class Locality {
 	public boolean processLocalities() {
 		ResultSet result;
 		rows = sheetReader.GetRows(MYTYPE);
-		for (int row = 1; row < rows; row++) {
+		for (int row = 1; row <= rows; row++) {
 			//			String localityRef = sheetReader.getEntry(MYTYPE, 11, row);
 			String localityRef = sheetReader.getValue(MYTYPE, ExcelTools.COL_LOCALITY_NAME, row);
 			updater = new Updater(sheetReader, MYTYPE);

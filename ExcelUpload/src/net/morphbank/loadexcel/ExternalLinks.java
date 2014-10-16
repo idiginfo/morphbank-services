@@ -107,7 +107,7 @@ public class ExternalLinks {
 	}
 
 	public boolean processLinks() {
-		for (int row = 1; row < rows; row++) {
+		for (int row = 1; row <= rows; row++) {
 			ExternalLink link = new ExternalLink(row);
 			if (link.id != 0) {
 				addLink(link);

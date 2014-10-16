@@ -53,7 +53,7 @@ public class Specimen {
 		int rows = sheetReader.GetRows(MYTYPE);
 		String scientificName = "";
 		int k = 0;
-		for (int row = 1; row < rows; row++) {
+		for (int row = 1; row <= rows; row++) {
 			//			String specimenRef = sheetReader.getEntry(MYTYPE, 23, row);
 			String specimenRef = sheetReader.getValue(MYTYPE, ExcelTools.COL_SPECIMEN_DESCRIPTION, row);
 			updater = new Updater(sheetReader, MYTYPE);

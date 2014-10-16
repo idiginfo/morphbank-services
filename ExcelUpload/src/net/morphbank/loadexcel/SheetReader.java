@@ -291,7 +291,7 @@ public class SheetReader {
 		Sheet sheet = getSheet(sheetName);
 		if (sheet == null)
 			return 0;
-		return sheet.getLastRowNum() - 1;
+		return sheet.getLastRowNum();
 	}
 
 	public String getReleaseDate() {
