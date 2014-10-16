@@ -1,5 +1,10 @@
 package net.morphbank.loadexcel;
 
+import java.text.DecimalFormat;
+
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.DateUtil;
+
 /**
  * All column names should be changed 
  * or added here. 
@@ -109,6 +114,50 @@ public class ExcelTools {
 	public static void messageToOutput(String message, StringBuffer output) {
 		output.append(message);
 		output.append("<br />");
+	}
+	static DecimalFormat doubleFormatter = new DecimalFormat("#.0####");
+	public static String getCellText(Cell cell) {
+		String cellText = "";
+		if (cell != null) {
+			int cellType = cell.getCellType();
+			// find cell type for formula
+			if (cellType == Cell.CELL_TYPE_FORMULA) {
+				cellType = cell.getCachedFormulaResultType();
+			}
+			switch (cellType) {
+			case Cell.CELL_TYPE_BOOLEAN:
+				cellText = String.valueOf(cell.getBooleanCellValue());
+				break;
+			case Cell.CELL_TYPE_NUMERIC:
+				if (DateUtil.isCellDateFormatted(cell)) {
+					cellText = cell.getDateCellValue().toString();
+				} else {
+					double value = cell.getNumericCellValue();
+					if (Math.floor(value) == value) {
+						cellText = Integer.toString((int) value);
+					} else {
+						cellText = doubleFormatter.format(value);
+					}
+				}
+				break;
+			case Cell.CELL_TYPE_STRING:
+				cellText = cell.getStringCellValue();
+				break;
+			case Cell.CELL_TYPE_BLANK:
+				cellText = "";
+				break;
+			case Cell.CELL_TYPE_ERROR:
+				try {
+					throw new Exception("Error in reading cell value");
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					cellText = "";
+				}
+				break;
+			}
+		}
+		return cellText;
 	}
 	
 }
