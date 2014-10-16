@@ -65,7 +65,7 @@ public class Image {
 
 	public boolean processImages() {
 		int rows = sheetReader.GetRows(MYTYPE);
-		for (int row = 1; row < rows; row++) {
+		for (int row = 1; row <= rows; row++) {
 //			originalFileName = sheetReader.getEntry(MYTYPE, 5, row);
 			originalFileName = sheetReader.getValue(MYTYPE, ExcelTools.COL_IMAGE_FILE_NAME, row);
 			if (originalFileName.equals("")) continue;

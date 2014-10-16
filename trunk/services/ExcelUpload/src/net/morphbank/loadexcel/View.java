@@ -61,7 +61,7 @@ public class View {
 		// System.out.println("MyView has " + columns + "columns and " + rows +
 		// "rows" );
 
-		for (int row = 1; row < rows; row++) {
+		for (int row = 1; row <= rows; row++) {
 			if (sheetReader.getEntry(MYTYPE, 9, row).equals(ExcelTools.COL_VIEW_APPLICABLE_TO_TAXON)) continue;
 			// if (!isValidView(row)) continue;
 
