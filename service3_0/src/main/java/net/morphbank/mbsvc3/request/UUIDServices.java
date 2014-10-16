@@ -1,5 +1,6 @@
 package net.morphbank.mbsvc3.request;
 
+import java.io.PrintStream;
 import java.util.List;
 import java.util.UUID;
 
@@ -12,7 +13,15 @@ import net.morphbank.object.BaseObject;
 import net.morphbank.object.ExternalLinkObject;
 
 public class UUIDServices {
-
+	PrintStream out = null;
+	public UUIDServices()
+	{
+		this.out = System.out; 
+	}
+	public UUIDServices(PrintStream out)
+	{
+		this.out = out; 
+	}
 	public int fixAllMissingUUIDs() {
 		EntityTransaction tx = null;
 		boolean localTransaction = false;
@@ -26,11 +35,11 @@ public class UUIDServices {
 			}
 
 			// find and fix all missing UUIDs
-			String uuidNullQuerySql = "select b from BaseObject b where b.uuidString is null";
+			String uuidNullQuerySql = "select b from BaseObject b where b.uuidString is null or b.uuidString=''";
 			Query uuidNullQuery = em.createQuery(uuidNullQuerySql);
 			@SuppressWarnings("unchecked")
 			List<BaseObject> results = uuidNullQuery.getResultList();
-			System.out.println("Number to have UUIDs added: " + results.size());
+			out.println("<div id=\"missingUUID\"><h3>Number to have UUIDs added: " + results.size()+"</h1>");
 			boolean bfixed = false;
 			for (BaseObject obj : results) {
 				bfixed = fixMissingUUID(obj);
@@ -47,10 +56,12 @@ public class UUIDServices {
 				tx.commit();
 			}
 
-			System.out.println("number with new UUIDs: " + count);
+			out.println("<h3>number with new UUIDs: " + count+"</h3></div>");
 		}
 		return count;
 	}
+	
+	
 
 	public int fixAllMissingIds() {
 		EntityTransaction tx = null;
@@ -71,12 +82,12 @@ public class UUIDServices {
 			Query noIdQuery = em.createNativeQuery(NoIdQuerySql);
 			@SuppressWarnings("unchecked")
 			List<Integer> ids = noIdQuery.getResultList();
-			System.out.println("Number to have ids added: " + ids.size());
+			out.println("<div id=\"missingID\"><h3>Number to have ids added: " + ids.size()+"</h3><p>");
 			count = 0;
 			for (Integer id : ids) {
 				// no identifiers: add identifier
 				BaseObject obj = em.find(BaseObject.class, id);
-				boolean success = ExternalLinkObject.addDctermsIdentifier(obj);
+				boolean success = ExternalLinkObject.addDctermsIdentifier(obj,out);
 				if (success) count++;
 				// if (count > 10)
 				// break;
@@ -87,7 +98,7 @@ public class UUIDServices {
 			if (localTransaction && tx.isActive()) {
 				tx.commit();
 			}
-			System.out.println("number with new ids: " + count);
+			out.println("</p><h3>number with new ids: " + count+"</h3></div>");
 		}
 		return count;
 	}
@@ -104,8 +115,8 @@ public class UUIDServices {
 				localTransaction = true;
 			}
 			obj.setUuidString(UUID.randomUUID().toString());
-			System.out.println("Object " + obj.getId() + " uuidString "
-					+ obj.getUuidString());
+			out.println("Object " + obj.getId() + " uuidString "
+					+ obj.getUuidString()+"<br>");
 			return true;
 		} catch (Exception e) {
 			e.printStackTrace();
