@@ -87,7 +87,7 @@ public class UUIDServices {
 			for (Integer id : ids) {
 				// no identifiers: add identifier
 				BaseObject obj = em.find(BaseObject.class, id);
-				boolean success = ExternalLinkObject.addDctermsIdentifier(obj,out);
+				boolean success = ExternalLinkObject.addDctermsIdentifier(obj);
 				if (success) count++;
 				// if (count > 10)
 				// break;
