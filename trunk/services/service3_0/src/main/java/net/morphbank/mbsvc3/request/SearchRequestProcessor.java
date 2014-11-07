@@ -22,6 +22,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import net.morphbank.MorphbankConfig;
+import net.morphbank.mbsvc3.json.JsonUtils;
 import net.morphbank.mbsvc3.mapping.MapObjectToResponse;
 import net.morphbank.mbsvc3.mapping.XmlServices;
 import net.morphbank.mbsvc3.ocr.HerbisAnalysis;
@@ -482,6 +483,10 @@ public class SearchRequestProcessor {
 			Object rss = RssServices.doRssResponse(out, title, subtitle,
 					numResults, firstResult, objectIds);
 			return rss;
+		} else if (RequestParams.FORMAT_JSON.equals(params.format)) {
+			String body = JsonUtils.doJsonResponse(out, title, subtitle,
+					numResults, objectIds.size(), firstResult, objectIds);
+			return body;
 		} else {
 			if (out != null)
 				out.println(BAD_FORMAT);
