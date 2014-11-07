@@ -15,6 +15,9 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.bind.annotation.*;
 import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.namespace.QName;
+
+import net.morphbank.mbsvc3.json.GsonTransient;
+
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.xerces.jaxp.datatype.DatatypeFactoryImpl;
 
@@ -89,7 +92,8 @@ import java.util.*;
 		"isbn",
 		"issn",
 		// specimen
-		"standardImage", "imagesCount",
+		"standardImage",
+		"imagesCount",
 		"locality",
 		"form",
 		// Taxon
@@ -97,24 +101,30 @@ import java.util.*;
 		"taxonStatus",
 		"taxonRank",
 		// view
-		"view", "viewAngle", "imagingTechnique", "imagingPreparationTechnique", "specimenPart",
-		"developmentalStage", "sex", "viewTSN", "viewRestrictedTo",
+		"view", "viewAngle", "imagingTechnique", "imagingPreparationTechnique",
+		"specimenPart", "developmentalStage",
+		"sex",
+		"viewTSN",
+		"viewRestrictedTo",
 		// user
 		"uin", "pin", "userName", "email", "affiliation", "address",
 		"lastName", "firstName", "suffix", "middleInit", "street1", "street2",
 		"city", "country", "state", "zipcode", "userStatus", "privilegeTSN",
 		"preferredServer", "preferredGroup", "userLogo", "logoUrl",
 		// group
-		"groupName", "groupManager", 
+		"groupName", "groupManager",
 		// darwin core
-		"any"
-})
+		"any" })
 public class XmlBaseObject {
 
+	@GsonTransient
 	public static final String DC_NAMESPACE = "http://rs.tdwg.org/dwc/dwcore/";
+	@GsonTransient
 	public static final String DC_GEO_NAMESPACE = "http://rs.tdwg.org/dwc/geospatial/";
+	@GsonTransient
 	public static final String DC_CUR_NAMESPACE = "http://rs.tdwg.org/dwc/curatorial/";
 
+	@GsonTransient
 	static javax.xml.datatype.DatatypeFactory factory;
 
 	static {
@@ -134,6 +144,7 @@ public class XmlBaseObject {
 		this.objectType = objectType;
 	}
 
+	@GsonTransient
 	@XmlAttribute(name = "type")
 	String objectType;
 	@XmlElement(required = true)
@@ -157,6 +168,7 @@ public class XmlBaseObject {
 	protected Boolean geolocated;
 	protected XmlId determination;
 	@XmlAnyElement(lax = true)
+//	@GsonTransient
 	protected List<Object> any;
 
 	// Annotation
@@ -292,22 +304,22 @@ public class XmlBaseObject {
 			return "";
 		StringBuffer out = new StringBuffer();
 		out.append("<b>").append(StringEscapeUtils.escapeHtml(field))
-		.append(":</b> ").append(StringEscapeUtils.escapeHtml(value))
-		.append("<br/>");
+				.append(":</b> ").append(StringEscapeUtils.escapeHtml(value))
+				.append("<br/>");
 		return out.toString();
 	}
 
 	private Object getHtmlItem(String field, Integer value) {
 		StringBuffer out = new StringBuffer();
 		out.append("<b>").append(StringEscapeUtils.escapeHtml(field))
-		.append(":</b> ").append(value).append("<br/>");
+				.append(":</b> ").append(value).append("<br/>");
 		return out.toString();
 	}
 
 	private Object getHtmlItem(String field, Double value) {
 		StringBuffer out = new StringBuffer();
 		out.append("<b>").append(StringEscapeUtils.escapeHtml(field))
-		.append(":</b> ").append(value).append("<br/>");
+				.append(":</b> ").append(value).append("<br/>");
 		return out.toString();
 	}
 
@@ -381,7 +393,8 @@ public class XmlBaseObject {
 	}
 
 	public String getHtmlId(XmlId xmlId, String label) {
-		if (xmlId == null) return "";
+		if (xmlId == null)
+			return "";
 		StringBuffer out = new StringBuffer();
 		// morphbank id
 		if (xmlId.getMorphbank() > 0) {
@@ -428,7 +441,9 @@ public class XmlBaseObject {
 
 	public int getMorphbankId() {
 		Integer morphbankId = getSourceId().getMorphbank();
-		if (morphbankId == null) { return 0; }
+		if (morphbankId == null) {
+			return 0;
+		}
 		return morphbankId.intValue();
 	}
 
@@ -590,13 +605,17 @@ public class XmlBaseObject {
 	}
 
 	public void addUserProperty(String name, String value) {
-		if (value == null || value.length() == 0) { return; }
+		if (value == null || value.length() == 0) {
+			return;
+		}
 		Userprop userProp = new Userprop(name, value);
 		getUserProperty().add(userProp);
 	}
 
 	public void addUserProperty(String name, String value, String namespaceURI) {
-		if (value == null || value.length() == 0) { return; }
+		if (value == null || value.length() == 0) {
+			return;
+		}
 		Userprop userProp = new Userprop(name, value, namespaceURI);
 		getUserProperty().add(userProp);
 	}
@@ -610,6 +629,7 @@ public class XmlBaseObject {
 
 	/**
 	 * add status message to the end of the status field
+	 * 
 	 * @param status
 	 */
 	public void addStatus(String status) {
@@ -626,6 +646,7 @@ public class XmlBaseObject {
 
 	/**
 	 * Add new status message to the front of the status field
+	 * 
 	 * @param status
 	 */
 	public void setStatus(String status) {
@@ -645,8 +666,10 @@ public class XmlBaseObject {
 	}
 
 	public String getObjectTypeId() {
-		if (objectTypeId != null) return objectTypeId;
-		if (objectType != null) return objectType;
+		if (objectTypeId != null)
+			return objectTypeId;
+		if (objectType != null)
+			return objectType;
 		return "";
 	}
 
@@ -657,11 +680,14 @@ public class XmlBaseObject {
 	 * @param element
 	 */
 	public void addDarwinTag(JAXBElement element) {
-		if (element == null) return;
+		if (element == null)
+			return;
 		Object value = element.getValue();
-		if (value == null) return;
+		if (value == null)
+			return;
 		if (value instanceof String) {
-			if (((String) value).length() == 0) return;
+			if (((String) value).length() == 0)
+				return;
 		}
 		getAny().add(element);
 	}
@@ -722,7 +748,7 @@ public class XmlBaseObject {
 			GregorianCalendar dateCal = new GregorianCalendar();
 			dateCal.setTime(value);
 			XMLGregorianCalendar date = factory
-			.newXMLGregorianCalendar(dateCal);
+					.newXMLGregorianCalendar(dateCal);
 			JAXBElement<XMLGregorianCalendar> node = new JAXBElement<XMLGregorianCalendar>(
 					tag, XMLGregorianCalendar.class, date);
 			getAny().add(node);
@@ -735,7 +761,9 @@ public class XmlBaseObject {
 			JAXBElement obj = (JAXBElement) tags.next();
 			QName qname = obj.getName();
 			String localPart = qname.getLocalPart();
-			if (localPart.equals(tagName)) { return obj; }
+			if (localPart.equals(tagName)) {
+				return obj;
+			}
 		}
 		return null;
 	}
@@ -757,7 +785,9 @@ public class XmlBaseObject {
 			QName qname = obj.getName();
 			if (qname.getLocalPart().equals(tagName)) {
 				Object value = obj.getValue();
-				if (value instanceof Date) { return (Date) value; }
+				if (value instanceof Date) {
+					return (Date) value;
+				}
 			}
 		}
 		return null;
@@ -1002,7 +1032,9 @@ public class XmlBaseObject {
 	}
 
 	public boolean setViewId(int index, int id) {
-		if (getView().size() < index + 1) { return false; }
+		if (getView().size() < index + 1) {
+			return false;
+		}
 		getView().get(index).setMorphbank(new Integer(id));
 		return true;
 	}
