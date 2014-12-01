@@ -166,7 +166,7 @@ public class ValidateXls {
 			date = specimenDescription[i].getStringCellValue();
 			
 			boolean datePresent = true;
-			if (dateCollected[i].getStringCellValue() == null || dateCollected[i].getStringCellValue().equalsIgnoreCase(""))
+			if (ExcelTools.getCellText(dateCollected[i]) == null || ExcelTools.getCellText(dateCollected[i]).equalsIgnoreCase(""))
 				datePresent = false;
 			if (date.equalsIgnoreCase("#VALUE!") || !this.dateOnSpecimenDescription(date, datePresent)) {
 				String error = "Date Collected row " + (i + 1)  + " does not have the format yyyy-mm-dd";
