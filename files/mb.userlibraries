@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<eclipse-userlibraries version="2">
+    <library name="Persistence" systemlibrary="false">
+        <archive path="/usr/share/tomcat6/lib/mysql-connector-java.jar"/>
+        <archive path="/usr/share/tomcat6/lib/eclipselink.jar"/>
+        <archive path="/usr/share/tomcat6/lib/javax.persistence.jar"/>
+    </library>
+    <library name="RdfTools" systemlibrary="false">
+        <archive path="/usr/share/tomcat6/lib/commons-logging.jar"/>
+        <archive path="/usr/share/tomcat6/lib/icu4j.jar"/>
+        <archive path="/usr/share/tomcat6/lib/iri.jar"/>
+        <archive path="/usr/share/tomcat6/lib/jena.jar"/>
+        <archive path="/usr/share/tomcat6/lib/log4j.jar"/>
+        <archive path="/usr/share/tomcat6/lib/slf4j-api.jar"/>
+        <archive path="/usr/share/tomcat6/lib/slf4j-log4j12.jar"/>
+        <archive path="/usr/share/extlib/xercesImpl-2.7.1.jar"/>
+    </library>
+    <library name="ServletTools" systemlibrary="false">
+        <archive path="/usr/share/tomcat6/lib/servlet-api.jar"/>
+    </library>
+    <library name="Tomcat6Libs" systemlibrary="false">
+        <archive path="/usr/share/tomcat6/lib/annotations-api.jar"/>
+        <archive path="/usr/share/tomcat6/lib/catalina.jar"/>
+        <archive path="/usr/share/tomcat6/lib/catalina-ant.jar"/>
+        <archive path="/usr/share/tomcat6/lib/catalina-ha.jar"/>
+        <archive path="/usr/share/tomcat6/lib/catalina-tribes.jar"/>
+        <archive path="/usr/share/tomcat6/lib/el-api.jar"/>
+        <archive path="/usr/share/tomcat6/lib/httpclient.jar"/>
+        <archive path="/usr/share/tomcat6/lib/httpmime.jar"/>
+        <archive path="/usr/share/tomcat6/lib/jasper.jar"/>
+        <archive path="/usr/share/tomcat6/lib/jasper-el.jar"/>
+        <archive path="/usr/share/tomcat6/lib/jasper-jdt.jar"/>
+        <archive path="/usr/share/tomcat6/lib/tomcat-coyote.jar"/>
+        <archive path="/usr/share/tomcat6/lib/tomcat-dbcp.jar"/>
+        <archive path="/usr/share/tomcat6/lib/tomcat-i18n-es.jar"/>
+        <archive path="/usr/share/tomcat6/lib/tomcat-i18n-fr.jar"/>
+        <archive path="/usr/share/tomcat6/lib/tomcat-i18n-ja.jar"/>
+        <archive path="/usr/share/tomcat6/lib/jsp-api.jar"/>
+    </library>
+    <library name="WebClientTools" systemlibrary="false">
+        <archive path="/usr/share/tomcat6/lib/commons-codec.jar"/>
+        <archive path="/usr/share/tomcat6/lib/commons-fileupload.jar"/>
+        <archive path="/usr/share/tomcat6/lib/commons-httpclient.jar"/>
+        <archive path="/usr/share/tomcat6/lib/commons-lang.jar"/>
+    </library>
+    <library name="WebTools" systemlibrary="false">
+        <archive path="/usr/share/tomcat6/lib/jai_codec.jar"/>
+        <archive path="/usr/share/tomcat6/lib/jai_core.jar"/>
+        <archive path="/usr/share/tomcat6/lib/jai_imageio_windows-i586.jar"/>
+        <archive path="/usr/share/tomcat6/lib/jai_imageio.jar"/>
+        <archive path="/usr/share/tomcat6/lib/jai_windows-i586.jar"/>
+        <archive path="/usr/share/tomcat6/lib/jaxrpc.jar"/>
+        <archive path="/usr/share/tomcat6/lib/axis.jar"/>
+    </library>
+    <library name="XmlTools" systemlibrary="false">
+        <archive path="/usr/share/tomcat6/lib/jaxb-impl.jar"/>
+        <archive path="/usr/share/tomcat6/lib/jaxb-xjc.jar"/>
+        <archive path="/usr/share/tomcat6/lib/xercesImpl.jar"/>
+    </library>
+</eclipse-userlibraries>
