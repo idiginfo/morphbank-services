@@ -2,4 +2,7 @@
 .idea
 .gitkeep
 .settings
-.csvignore
+.cvsignore
+.classpath
+.project
+
